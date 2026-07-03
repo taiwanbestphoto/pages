@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>taiwanbestphoto / pages</title>
+  <meta name="description" content="Joe 的一頁式公開內容 hub" />
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      display: grid; place-items: center;
+      background: #fafaf9; color: #1c1917;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { background: #0c0a09; color: #e7e5e4; }
+    }
+    main { max-width: 640px; padding: 48px 24px; text-align: center; }
+    h1 { font-size: 28px; margin: 0 0 12px; letter-spacing: -0.01em; }
+    p.tag { margin: 0 0 32px; color: #78716c; }
+    .pin { display: inline-block; padding: 6px 10px; border-radius: 999px;
+      background: #e7e5e4; color: #44403c; font-size: 13px; margin: 4px; }
+    @media (prefers-color-scheme: dark) {
+      .pin { background: #292524; color: #d6d3d1; }
+    }
+    footer { margin-top: 48px; font-size: 13px; color: #a8a29e; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>taiwanbestphoto / pages</h1>
+    <p class="tag">一頁式內容 hub · 歡迎隨時來看 · last updated <span id="d"></span></p>
+    <div>
+      <span class="pin">🪪 自我介紹</span>
+      <span class="pin">🛠 工具 / 學習筆記</span>
+      <span class="pin">📌 之後再加</span>
+    </div>
+    <footer>Hosted on GitHub Pages · source on GitHub</footer>
+  </main>
+  <script>
+    document.getElementById('d').textContent =
+      new Date().toISOString().slice(0, 10);
+  </script>
+</body>
+</html>
