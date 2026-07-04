@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新麥 (1580) 換股決策儀表板</title>
+<style>
+  /* ===== 淺色模式配色 ===== */
+  :root {
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-sidebar: #f1f5f9;
+    --bg-hover: #e2e8f0;
+    --bg-tab-active: #ffffff;
+    --bg-input: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --success: #10b981;
+    --success-bg: #d1fae5;
+    --warning: #f59e0b;
+    --warning-bg: #fef3c7;
+    --danger: #ef4444;
+    --danger-bg: #fee2e2;
+    --info: #06b6d4;
+    --info-bg: #cffafe;
+    --conservative: #6366f1;
+    --conservative-bg: #e0e7ff;
+    --growth: #f97316;
+    --growth-bg: #ffedd5;
+    --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 24px 32px;
+    box-shadow: var(--shadow);
+  }
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .header .subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  .header .data-date {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 4px;
+  }
+
+  /* ===== Layout ===== */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* ===== Tabs ===== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-sidebar);
+    padding: 6px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+  }
+  .tab:hover {
+    background: var(--bg-hover);
+  }
+  .tab.active {
+    background: var(--bg-tab-active);
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ===== Tab Content ===== */
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Cards ===== */
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--info-bg);
+    color: var(--info);
+    font-weight: 600;
+  }
+
+  /* ===== Status Box ===== */
+  .status-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .status-box.warning {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-left-color: var(--warning);
+  }
+  .status-box.danger {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-left-color: var(--danger);
+  }
+  .status-box.success {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-left-color: var(--success);
+  }
+
+  /* ===== Stats Grid ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .stat .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .stat .value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .stat .delta {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .delta.positive { color: var(--success); }
+  .delta.negative { color: var(--danger); }
+  .delta.neutral { color: var(--text-muted); }
+
+  /* ===== Tables ===== */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead {
+    background: var(--bg-sidebar);
+  }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--bg-primary); }
+
+  /* ===== Tags ===== */
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag-conservative {
+    background: var(--conservative-bg);
+    color: var(--conservative);
+  }
+  .tag-growth {
+    background: var(--growth-bg);
+    color: var(--growth);
+  }
+  .tag-buy {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+  .tag-hold {
+    background: var(--info-bg);
+    color: var(--info);
+  }
+  .tag-watch {
+    background: var(--warning-bg);
+    color: var(--warning);
+  }
+  .tag-avoid {
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+
+  /* ===== Buttons ===== */
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary {
+    background: var(--bg-sidebar);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  /* ===== Inputs ===== */
+  input[type="text"], input[type="number"], select, textarea {
+    padding: 8px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+  .form-group {
+    margin-bottom: 12px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  /* ===== Notes / Comments ===== */
+  .comment {
+    background: var(--bg-sidebar);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--accent);
+  }
+  .comment .meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .comment .content {
+    font-size: 14px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+  }
+
+  /* ===== Allocation Bar ===== */
+  .alloc-bar {
+    display: flex;
+    height: 32px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .alloc-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .alloc-segment:hover { opacity: 0.85; }
+
+  /* ===== Toolbar ===== */
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .toolbar input {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  /* ===== Action Bar ===== */
+  .action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .action-bar h2 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  /* ===== Modal ===== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-backdrop.active { display: flex; }
+  .modal {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  /* ===== Empty State ===== */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  /* ===== Discussion Timeline ===== */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg-card);
+  }
+
+  /* ===== Grid Layout for Allocation ===== */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .container { padding: 16px; }
+    .header { padding: 16px 20px; }
+    .header h1 { font-size: 20px; }
+    th, td { padding: 10px 12px; font-size: 13px; }
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  /* ===== Toggle Switch ===== */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+  .switch input { display: none; }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--border-strong);
+    border-radius: 24px;
+    transition: 0.3s;
+  }
+  .slider:before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  .switch input:checked + .slider {
+    background: var(--accent);
+  }
+  .switch input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="header">
+  <h1>📊 新麥 (1580) 換股決策儀表板</h1>
+  <div class="subtitle">持股成本 135 元 × 6 張｜總投入 81 萬｜目標年化 10-15%</div>
+  <div class="data-date">資料基準日：2026/07/03 ｜ 7/14 除息（8.5 元）｜ 8/17 發放</div>
+</header>
+
+<div class="container">
+
+  <!-- ===== Tabs ===== -->
+  <div class="tabs">
+    <button class="tab active" data-tab="overview">📋 總覽</button>
+    <button class="tab" data-tab="holding">💼 新麥現況</button>
+    <button class="tab" data-tab="candidates">🎯 候選股</button>
+    <button class="tab" data-tab="portfolio">📊 配置組合</button>
+    <button class="tab" data-tab="discussion">💬 討論記錄</button>
+    <button class="tab" data-tab="actions">✅ 行動清單</button>
+  </div>
+
+  <!-- ===== Tab: 總覽 ===== -->
+  <div id="overview" class="tab-content active">
+    <div class="status-box">
+      <strong>💡 核心結論：</strong> 你的還原成本只比現價高 2 元（135→126.5），實際虧損僅 1.58%。建議採取<strong>「領息後轉配置 B」</strong>策略。
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="label">總投入成本</div>
+        <div class="value">81 萬</div>
+        <div class="delta neutral">135 元 × 6 張</div>
+      </div>
+      <div class="stat">
+        <div class="label">目前市值</div>
+        <div class="value">74.7 萬</div>
+        <div class="delta negative">-7.78%（帳面）</div>
+      </div>
+      <div class="stat">
+        <div class="label">還原後成本</div>
+        <div class="value">126.5 元</div>
+        <div class="delta neutral">已扣除 8.5 元股息</div>
+      </div>
+      <div class="stat">
+        <div class="label">真實虧損</div>
+        <div class="value">-1.58%</div>
+        <div class="delta positive">僅 -1.28 萬元</div>
+      </div>
+      <div class="stat">
+        <div class="label">7/14 除息</div>
+        <div class="value">+5.1 萬</div>
+        <div class="delta positive">現金股息</div>
+      </div>
+      <div class="stat">
+        <div class="label">換股後預估</div>
+        <div class="value">+19.4%</div>
+        <div class="delta positive">配置 B 一年期望</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🟢 建議策略</div>
+        <p style="margin-bottom: 8px;"><strong>領息後賣出 + 配置 B（60/40）</strong></p>
+        <ol style="padding-left: 20px; color: var(--text-secondary); font-size: 14px;">
+          <li>7/14 自動除息 8.5 元</li>
+          <li>7/15 賣出 6 張（約 69.5 萬）</li>
+          <li>立即進場統一、卜蜂、南亞、0050（共 44.7 萬）</li>
+          <li>8/17 領股息 5 萬</li>
+          <li>8 月起分 3 次進場機器人 / AI 題材股</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔴 風險提醒</div>
+        <ul style="padding-left: 20px; color: var(--text-secondary); font-size: 14px;">
+          <li>除息後股價可能下跌</li>
+          <li>AI 題材波動大（年化波動 25-35%）</li>
+          <li>中國市場復甦不如預期仍是變數</li>
+          <li>新麥子公司 A 股上市時程不確定</li>
+          <li>需設定組合停損 -15%</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 重要時程</div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <strong>7/10</strong> — 新麥 6 月營收公布（關鍵轉折判斷）
+        </div>
+        <div class="timeline-item">
+          <strong>7/14</strong> — 新麥除息 8.5 元
+        </div>
+        <div class="timeline-item">
+          <strong>7/15-7/20</strong> — 賣出新麥 + 進場保守股（4 檔）
+        </div>
+        <div class="timeline-item">
+          <strong>8/17</strong> — 領取現金股息
+        </div>
+        <div class="timeline-item">
+          <strong>8 月起</strong> — 分批進場成長股（3 次）
+        </div>
+        <div class="timeline-item">
+          <strong>2027/1</strong> — 年度再平衡
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Tab: 新麥現況 ===== -->
+  <div id="holding" class="tab-content">
+    <div class="card">
+      <div class="card-title">📈 新麥 (1580) 即時資訊 <span class="badge">2026/07/03 收盤</span></div>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="label">收盤價</div>
+          <div class="value">124.5</div>
+          <div class="delta positive">+1.5 (+1.22%)</div>
+        </div>
+        <div class="stat">
+          <div class="label">成交量</div>
+          <div class="value">91 張</div>
+          <div class="delta neutral">昨日 35 張</div>
+        </div>
+        <div class="stat">
+          <div class="label">本益比</div>
+          <div class="value">9.76</div>
+          <div class="delta positive">估值偏低</div>
+        </div>
+        <div class="stat">
+          <div class="label">殖利率</div>
+          <div class="value">6.83%</div>
+          <div class="delta positive">2026 股息 8.5 元</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💼 損益試算</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>情境</th><th>賣出價</th><th>賣出淨額</th><th>+ 股息</th><th>總回收</th><th>vs 成本</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>立即賣（7/3）</strong></td>
+              <td>124.5</td>
+              <td>745,936</td>
+              <td>0</td>
+              <td>745,936</td>
+              <td class="delta negative">-7.91%</td>
+            </tr>
+            <tr>
+              <td><strong>除息當天賣（7/14）</strong></td>
+              <td>116.0</td>
+              <td>695,008</td>
+              <td>49,980</td>
+              <td>744,988</td>
+              <td class="delta negative">-8.03%</td>
+            </tr>
+            <tr>
+              <td>回到 120</td>
+              <td>120</td>
+              <td>718,974</td>
+              <td>49,980</td>
+              <td>768,954</td>
+              <td class="delta negative">-5.07%</td>
+            </tr>
+            <tr>
+              <td>回到 125</td>
+              <td>125</td>
+              <td>748,931</td>
+              <td>49,980</td>
+              <td>798,911</td>
+              <td class="delta negative">-1.37%</td>
+            </tr>
+            <tr>
+              <td>回到 130</td>
+              <td>130</td>
+              <td>778,888</td>
+              <td>49,980</td>
+              <td>828,868</td>
+              <td class="delta positive">+2.33%</td>
+            </tr>
+            <tr>
+              <td><strong>回到 135（損益兩平）</strong></td>
+              <td>135</td>
+              <td>808,846</td>
+              <td>49,980</td>
+              <td>858,826</td>
+              <td class="delta positive">+6.03%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 營收與獲利趨勢</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>月份</th><th>營收(億)</th><th>月增</th><th>年增</th><th>累計年增</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2026/05</td><td>3.59</td><td class="delta negative">-14.00%</td><td class="delta negative">-10.99%</td><td class="delta negative">-4.39%</td></tr>
+            <tr><td>2026/04</td><td>4.17</td><td class="delta positive">+18.77%</td><td class="delta negative">-10.13%</td><td class="delta negative">-2.68%</td></tr>
+            <tr><td>2026/03</td><td>3.51</td><td class="delta positive">+12.45%</td><td class="delta negative">-15.10%</td><td class="delta positive">+0.50%</td></tr>
+            <tr><td>2026/02</td><td>3.13</td><td class="delta negative">-27.38%</td><td class="delta positive">+6.49%</td><td class="delta positive">+10.06%</td></tr>
+            <tr><td>2026/01</td><td>4.30</td><td class="delta positive">+1.76%</td><td class="delta positive">+12.81%</td><td class="delta positive">+12.81%</td></tr>
+            <tr><td>2025/12</td><td>4.23</td><td class="delta positive">+5.49%</td><td class="delta negative">-19.92%</td><td class="delta positive">+1.87%</td></tr>
+            <tr><td>2025/11</td><td>4.01</td><td class="delta negative">-2.48%</td><td class="delta negative">-6.87%</td><td class="delta positive">+4.57%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="status-box warning">
+      <strong>⚠️ 注意：</strong> 2026 年起單月營收連 3 月年減 10-15%，是主要壓力來源。7/10 公布 6 月營收是關鍵轉折觀察點。
+    </div>
+  </div>
+
+  <!-- ===== Tab: 候選股 ===== -->
+  <div id="candidates" class="tab-content">
+    <div class="action-bar">
+      <h2>🎯 候選股研究清單</h2>
+      <button class="btn btn-primary" id="addStockBtn">➕ 新增候選股</button>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="stockFilter" placeholder="🔍 搜尋代號或名稱...">
+      <select id="categoryFilter">
+        <option value="all">全部類別</option>
+        <option value="conservative">保守型</option>
+        <option value="growth">成長型</option>
+      </select>
+      <select id="priceFilter">
+        <option value="all">全部價位</option>
+        <option value="60-120">60-120 元</option>
+        <option value="other">其他</option>
+      </select>
+      <button class="btn btn-secondary" id="exportBtn">📤 匯出清單</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💼 保守型候選股（高殖利率、穩健） <span class="badge">60% 配置</span></div>
+      <div class="table-wrap">
+        <table id="conservativeTable">
+          <thead>
+            <tr><th>代號</th><th>名稱</th><th>價位</th><th>產業</th><th>殖利率</th><th>預估年化</th><th>題材</th><th>評等</th><th>動作</th></tr>
+          </thead>
+          <tbody id="conservativeBody">
+            <!-- 由 JS 渲染 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚀 成長型候選股（題材、波動大） <span class="badge">40% 配置</span></div>
+      <div class="table-wrap">
+        <table id="growthTable">
+          <thead>
+            <tr><th>代號</th><th>名稱</th><th>價位</th><th>產業</th><th>殖利率</th><th>預估年化</th><th>題材</th><th>評等</th><th>動作</th></tr>
+          </thead>
+          <tbody id="growthBody">
+            <!-- 由 JS 渲染 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="status-box">
+      <strong>💡 篩選原則：</strong> 60-120 元整張可買、流動性佳、分散產業、符合「保守 60% + 成長 40%」邏輯
+    </div>
+  </div>
+
+  <!-- ===== Tab: 配置組合 ===== -->
+  <div id="portfolio" class="tab-content">
+    <div class="card">
+      <div class="card-title">🏆 推薦配置 B（60/40 標準版）</div>
+
+      <div class="alloc-bar" id="allocBar">
+        <!-- 由 JS 渲染 -->
+      </div>
+
+      <div class="table-wrap" style="margin-top: 16px;">
+        <table>
+          <thead>
+            <tr><th>標的</th><th>代號</th><th>類型</th><th>配置%</th><th>金額</th><th>張數</th><th>備註</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="tag tag-conservative">保守</span> 統一</td><td>1216</td><td>食品</td><td>25%</td><td>186,484</td><td>2 張</td><td>食品龍頭</td></tr>
+            <tr><td><span class="tag tag-conservative">保守</span> 卜蜂</td><td>1215</td><td>食品</td><td>15%</td><td>111,890</td><td>2 張</td><td>東南亞布局</td></tr>
+            <tr><td><span class="tag tag-conservative">保守</span> 南亞</td><td>1303</td><td>塑化</td><td>10%</td><td>74,594</td><td>1 張</td><td>PCB 上游</td></tr>
+            <tr><td><span class="tag tag-conservative">保守</span> 元大台灣50</td><td>0050</td><td>ETF</td><td>10%</td><td>74,594</td><td>1 張</td><td>大盤 Beta</td></tr>
+            <tr><td><span class="tag tag-growth">成長</span> 全球傳動</td><td>4540</td><td>機器人</td><td>15%</td><td>111,890</td><td>1 張</td><td>滾珠螺桿</td></tr>
+            <tr><td><span class="tag tag-growth">成長</span> 所羅門</td><td>2359</td><td>AI 視覺</td><td>15%</td><td>111,890</td><td>1 張</td><td>機器視覺</td></tr>
+            <tr><td><span class="tag tag-growth">成長</span> 精成科</td><td>6191</td><td>PCB</td><td>10%</td><td>74,594</td><td>1 張</td><td>AI 載板</td></tr>
+            <tr style="background: var(--bg-sidebar); font-weight: 700;"><td colspan="4">合計</td><td>745,936</td><td>9 張</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📊 期望報酬分析</div>
+        <table>
+          <tr><td>加權資本利得</td><td style="text-align: right; font-weight: 700;">15.00%</td></tr>
+          <tr><td>加權現金殖利率</td><td style="text-align: right; font-weight: 700;">4.42%</td></tr>
+          <tr><td>總期望報酬</td><td style="text-align: right; font-weight: 700; color: var(--success);">19.42%</td></tr>
+          <tr><td>組合波動度</td><td style="text-align: right; font-weight: 700;">22.4%</td></tr>
+          <tr><td>Sharpe 比率（簡化）</td><td style="text-align: right; font-weight: 700; color: var(--success);">0.78</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⚖️ 與新麥比較</div>
+        <table>
+          <tr><td>新麥繼續持有（中性）</td><td style="text-align: right;">+8.00%</td></tr>
+          <tr><td>新麥繼續持有（保守）</td><td style="text-align: right; color: var(--danger);">-9.00%</td></tr>
+          <tr><td>新麥繼續持有（樂觀）</td><td style="text-align: right; color: var(--success);">+24.90%</td></tr>
+          <tr style="border-top: 2px solid var(--border);"><td><strong>配置 B（推薦）</strong></td><td style="text-align: right; font-weight: 700; color: var(--success);">+19.42%</td></tr>
+          <tr><td>新麥 Sharpe</td><td style="text-align: right;">0.21</td></tr>
+          <tr><td>配置 B Sharpe</td><td style="text-align: right; color: var(--success); font-weight: 700;">0.78</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔄 簡化版配置（5 檔）</div>
+      <p style="color: var(--text-secondary); margin-bottom: 12px;">如果 7 檔太多，可精簡到 5 檔，管理更簡單：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>配置%</th><th>標的</th><th>金額</th><th>角色</th></tr></thead>
+          <tbody>
+            <tr><td>30%</td><td>統一 (1216)</td><td>22.4 萬</td><td>保守核心</td></tr>
+            <tr><td>15%</td><td>卜蜂 (1215)</td><td>11.2 萬</td><td>保守衛星</td></tr>
+            <tr><td>15%</td><td>0050</td><td>11.2 萬</td><td>大盤 Beta</td></tr>
+            <tr><td>25%</td><td>全球傳動 (4540)</td><td>18.7 萬</td><td>機器人題材</td></tr>
+            <tr><td>15%</td><td>所羅門 (2359)</td><td>11.2 萬</td><td>AI 視覺</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Tab: 討論記錄 ===== -->
+  <div id="discussion" class="tab-content">
+    <div class="action-bar">
+      <h2>💬 討論記錄</h2>
+      <button class="btn btn-primary" id="addCommentBtn">➕ 新增討論</button>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label>新增一筆討論 / 觀察 / 決策</label>
+        <textarea id="commentInput" rows="3" placeholder="例如：7/10 新麥 6 月營收出來年增 -8%，確認轉弱，決定 7/15 賣出..."></textarea>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary" id="submitCommentBtn">💾 儲存</button>
+        <button class="btn btn-secondary" id="clearCommentBtn">🗑️ 清空</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 歷史記錄</div>
+      <div id="commentList">
+        <!-- 由 JS 渲染 -->
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 待研究問題（持續累積）</div>
+      <div id="questionsList">
+        <!-- 由 JS 渲染 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Tab: 行動清單 ===== -->
+  <div id="actions" class="tab-content">
+    <div class="action-bar">
+      <h2>✅ 行動清單</h2>
+      <button class="btn btn-primary" id="addActionBtn">➕ 新增行動</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎯 待執行行動</div>
+      <div id="actionList">
+        <!-- 由 JS 渲染 -->
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✔️ 已完成行動</div>
+      <div id="completedActions">
+        <!-- 由 JS 渲染 -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== Footer ===== -->
+<div class="footer">
+  <div>📊 新麥換股決策儀表板 ｜ 資料基準日：2026/07/03</div>
+  <div style="margin-top: 4px;">⚠️ 本儀表板為投資研究整理，非具體買賣建議。投資決策請依自身風險屬性判斷。</div>
+  <div style="margin-top: 4px;">🔄 資料自動儲存於 localStorage，重新整理頁面不會遺失</div>
+</div>
+
+<!-- ===== Modal: 新增/編輯候選股 ===== -->
+<div id="stockModal" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="stockModalTitle">➕ 新增候選股</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>代號</label>
+        <input type="text" id="stockCode" placeholder="例如 1216">
+      </div>
+      <div class="form-group">
+        <label>名稱</label>
+        <input type="text" id="stockName" placeholder="例如 統一">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>價位</label>
+        <input type="text" id="stockPrice" placeholder="例如 85-95">
+      </div>
+      <div class="form-group">
+        <label>類型</label>
+        <select id="stockCategory">
+          <option value="conservative">保守型</option>
+          <option value="growth">成長型</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>產業</label>
+        <input type="text" id="stockIndustry" placeholder="例如 食品">
+      </div>
+      <div class="form-group">
+        <label>殖利率</label>
+        <input type="text" id="stockYield" placeholder="例如 4-5%">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>預估年化</label>
+        <input type="text" id="stockReturn" placeholder="例如 8-10%">
+      </div>
+      <div class="form-group">
+        <label>評等</label>
+        <select id="stockRating">
+          <option value="buy">買進</option>
+          <option value="hold">持有</option>
+          <option value="watch">觀察</option>
+          <option value="avoid">避開</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>題材 / 備註</label>
+      <textarea id="stockNotes" rows="2" placeholder="例如：食品龍頭，統一中控轉投資"></textarea>
+    </div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+      <button class="btn btn-secondary" onclick="closeModal('stockModal')">取消</button>
+      <button class="btn btn-primary" id="saveStockBtn">💾 儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: 新增行動 ===== -->
+<div id="actionModal" class="modal-backdrop">
+  <div class="modal">
+    <h3>➕ 新增行動</h3>
+    <div class="form-group">
+      <label>行動描述</label>
+      <input type="text" id="actionText" placeholder="例如：賣出新麥 6 張">
+    </div>
+    <div class="form-group">
+      <label>預定日期</label>
+      <input type="text" id="actionDate" placeholder="例如 2026/7/15">
+    </div>
+    <div class="form-group">
+      <label>備註</label>
+      <textarea id="actionNotes" rows="2" placeholder="例如：除息後立即賣出"></textarea>
+    </div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+      <button class="btn btn-secondary" onclick="closeModal('actionModal')">取消</button>
+      <button class="btn btn-primary" id="saveActionBtn">💾 儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// 資料儲存層（使用 localStorage 持久化）
+// =============================================
+
+const STORAGE_KEYS = {
+  stocks: 'sinmag_candidates_v1',
+  comments: 'sinmag_comments_v1',
+  actions: 'sinmag_actions_v1',
+  questions: 'sinmag_questions_v1'
+};
+
+// 預設候選股資料
+const DEFAULT_STOCKS = [
+  // 保守型
+  { id: 'stk_1', code: '1216', name: '統一', price: '85-95', category: 'conservative', industry: '食品', yield: '4-5%', return: '8-10%', rating: 'buy', notes: '食品龍頭，統一中控轉投資' },
+  { id: 'stk_2', code: '1215', name: '卜蜂', price: '60-65', category: 'conservative', industry: '食品', yield: '4-5%', return: '8-10%', rating: 'buy', notes: '食品股，東南亞布局' },
+  { id: 'stk_3', code: '1303', name: '南亞', price: '60-70', category: 'conservative', industry: '塑化', yield: '4-5%', return: '5-8%', rating: 'hold', notes: '塑化中游，PCB 上游連動' },
+  { id: 'stk_4', code: '0050', name: '元大台灣50', price: '55-65', category: 'conservative', industry: 'ETF', yield: '2-3%', return: '8-12%', rating: 'buy', notes: '市值型 ETF，大盤 Beta' },
+  { id: 'stk_5', code: '2884', name: '玉山金', price: '30-35', category: 'conservative', industry: '金融', yield: '5-6%', return: '8-10%', rating: 'buy', notes: '官股金控龍頭，2026 投信青睞' },
+  { id: 'stk_6', code: '1101', name: '台泥', price: '30-35', category: 'conservative', industry: '水泥', yield: '5-6%', return: '5-8%', rating: 'hold', notes: '高殖利率但產業成熟' },
+  // 成長型
+  { id: 'stk_7', code: '4540', name: '全球傳動', price: '75-85', category: 'growth', industry: '機器人', yield: '2-3%', return: '15-25%', rating: 'buy', notes: '滾珠螺桿，機器人概念' },
+  { id: 'stk_8', code: '1597', name: '直得', price: '70-80', category: 'growth', industry: '機器人', yield: '2-3%', return: '15-25%', rating: 'buy', notes: '線性傳動，機器人概念' },
+  { id: 'stk_9', code: '2359', name: '所羅門', price: '90-110', category: 'growth', industry: 'AI 視覺', yield: '2-3%', return: '15-25%', rating: 'buy', notes: 'AI 機器視覺，2026 強勢股' },
+  { id: 'stk_10', code: '6191', name: '精成科', price: '55-65', category: 'growth', industry: 'PCB', yield: '3-4%', return: '12-18%', rating: 'hold', notes: 'PCB 載板，AI 伺服器' },
+  { id: 'stk_11', code: '4938', name: '和碩', price: '85-95', category: 'growth', industry: '組裝', yield: '4-5%', return: '10-15%', rating: 'hold', notes: 'AI 伺服器組裝' },
+  { id: 'stk_12', code: '1609', name: '大亞', price: '50-60', category: 'growth', industry: '電纜', yield: '4-5%', return: '10-15%', rating: 'watch', notes: '綠能電纜題材' }
+];
+
+// 預設討論記錄
+const DEFAULT_COMMENTS = [
+  {
+    id: 'cmt_1',
+    date: '2026/07/03',
+    content: '完成初步研究：新麥(1580) 還原成本 126.5 元，實際虧損僅 1.58%。建議策略：領息後轉配置 B (60/40)。總資金 74.6 萬。'
+  }
+];
+
+// 預設待研究問題
+const DEFAULT_QUESTIONS = [
+  { id: 'q_1', text: '7/10 新麥 6 月營收年增是否改善？', status: 'open' },
+  { id: 'q_2', text: '統一 (1216) 即時本益比與法人動向？', status: 'open' },
+  { id: 'q_3', text: '全球傳動 (4540) 與所羅門 (2359) 近期股價是否過熱？', status: 'open' },
+  { id: 'q_4', text: 'AI 題材 7-8 月是否有法人獲利了結跡象？', status: 'open' },
+  { id: 'q_5', text: '0050 與 00878 哪個更適合作為大盤 Beta？', status: 'open' }
+];
+
+// 預設行動清單
+const DEFAULT_ACTIONS = [
+  { id: 'act_1', text: '觀察新麥 6 月營收（7/10 公布）', date: '2026/7/10', notes: '關鍵轉折判斷', done: false },
+  { id: 'act_2', text: '新麥除息', date: '2026/7/14', notes: '自動除息 8.5 元', done: false },
+  { id: 'act_3', text: '賣出新麥 6 張', date: '2026/7/15', notes: '除息當天或次日賣出', done: false },
+  { id: 'act_4', text: '進場統一 2 張 + 卜蜂 2 張 + 南亞 1 張 + 0050 1 張', date: '2026/7/15-7/20', notes: '保守部位 60%', done: false },
+  { id: 'act_5', text: '領取新麥現金股息', date: '2026/8/17', notes: '約 5 萬元', done: false },
+  { id: 'act_6', text: '分批進場全球傳動、所羅門、精成科', date: '2026/8-10月', notes: '分 3 次進場，成長部位 40%', done: false },
+  { id: 'act_7', text: '年度再平衡', date: '2027/1', notes: '回到 60/40 比例', done: false }
+];
+
+// 載入資料
+function loadData(key) {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS[key]);
+    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    console.error('載入失敗:', e);
+    return null;
+  }
+}
+
+// 儲存資料
+function saveData(key, data) {
+  try {
+    localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data));
+  } catch (e) {
+    console.error('儲存失敗:', e);
+  }
+}
+
+// 初始化資料
+let stocks = loadData('stocks') || DEFAULT_STOCKS;
+let comments = loadData('comments') || DEFAULT_COMMENTS;
+let questions = loadData('questions') || DEFAULT_QUESTIONS;
+let actions = loadData('actions') || DEFAULT_ACTIONS;
+
+saveData('stocks', stocks);
+saveData('comments', comments);
+saveData('questions', questions);
+saveData('actions', actions);
+
+// =============================================
+// UI 渲染
+// =============================================
+
+// Tabs 切換
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+// 評等中文
+const RATING_MAP = {
+  'buy': { label: '買進', tag: 'tag-buy' },
+  'hold': { label: '持有', tag: 'tag-hold' },
+  'watch': { label: '觀察', tag: 'tag-watch' },
+  'avoid': { label: '避開', tag: 'tag-avoid' }
+};
+
+// 渲染候選股表格
+function renderStocks() {
+  const filter = document.getElementById('stockFilter').value.toLowerCase();
+  const cat = document.getElementById('categoryFilter').value;
+  const priceF = document.getElementById('priceFilter').value;
+
+  const filtered = stocks.filter(s => {
+    if (filter && !s.code.toLowerCase().includes(filter) && !s.name.toLowerCase().includes(filter)) return false;
+    if (cat !== 'all' && s.category !== cat) return false;
+    if (priceF === '60-120') {
+      const p = s.price.replace(/[^\d-]/g, '');
+      const [lo, hi] = p.split('-').map(Number);
+      if (!(lo <= 120 && hi >= 60)) return false;
+    }
+    return true;
+  });
+
+  const consBody = document.getElementById('conservativeBody');
+  const growBody = document.getElementById('growthBody');
+  consBody.innerHTML = '';
+  growBody.innerHTML = '';
+
+  filtered.forEach(s => {
+    const r = RATING_MAP[s.rating];
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong>${s.code}</strong></td>
+      <td>${s.name}</td>
+      <td>${s.price}</td>
+      <td>${s.industry}</td>
+      <td>${s.yield}</td>
+      <td>${s.return}</td>
+      <td style="font-size: 12px; color: var(--text-secondary);">${s.notes || '-'}</td>
+      <td><span class="tag ${r.tag}">${r.label}</span></td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="editStock('${s.id}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteStock('${s.id}')">🗑️</button>
+      </td>
+    `;
+    if (s.category === 'conservative') consBody.appendChild(row);
+    else growBody.appendChild(row);
+  });
+
+  if (consBody.children.length === 0) consBody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">無符合條件的保守股</td></tr>';
+  if (growBody.children.length === 0) growBody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">無符合條件的成長股</td></tr>';
+}
+
+// 渲染配置 bar
+function renderAllocBar() {
+  const bar = document.getElementById('allocBar');
+  const segments = [
+    { pct: 25, color: '#6366f1', label: '統一 25%' },
+    { pct: 15, color: '#8b5cf6', label: '卜蜂 15%' },
+    { pct: 10, color: '#a78bfa', label: '南亞 10%' },
+    { pct: 10, color: '#c4b5fd', label: '0050 10%' },
+    { pct: 15, color: '#f97316', label: '全球傳動 15%' },
+    { pct: 15, color: '#fb923c', label: '所羅門 15%' },
+    { pct: 10, color: '#fdba74', label: '精成科 10%' }
+  ];
+  bar.innerHTML = segments.map(s =>
+    `<div class="alloc-segment" style="width:${s.pct}%; background:${s.color};" title="${s.label}">${s.pct}%</div>`
+  ).join('');
+}
+
+// 渲染討論記錄
+function renderComments() {
+  const list = document.getElementById('commentList');
+  if (comments.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">💬</div>還沒有任何討論記錄</div>';
+    return;
+  }
+  list.innerHTML = comments.slice().reverse().map(c => `
+    <div class="comment">
+      <div class="meta">
+        <span>📅 ${c.date}</span>
+        <button class="btn btn-sm btn-danger" onclick="deleteComment('${c.id}')">🗑️</button>
+      </div>
+      <div class="content">${escapeHtml(c.content)}</div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+}
+
+// 渲染待研究問題
+function renderQuestions() {
+  const list = document.getElementById('questionsList');
+  list.innerHTML = questions.map(q => `
+    <div class="comment">
+      <div class="meta">
+        <span>❓ ${q.text}</span>
+        <span>
+          <span class="tag ${q.status === 'done' ? 'tag-buy' : 'tag-watch'}">${q.status === 'done' ? '已解' : '研究中'}</span>
+          <button class="btn btn-sm btn-secondary" onclick="toggleQuestion('${q.id}')">🔄</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteQuestion('${q.id}')">🗑️</button>
+        </span>
+      </div>
+      <div style="margin-top: 8px; display: flex; gap: 8px;">
+        <input type="text" placeholder="補充說明或解答..." id="q_answer_${q.id}" style="flex: 1;">
+        <button class="btn btn-sm btn-primary" onclick="answerQuestion('${q.id}')">💾</button>
+      </div>
+      ${q.answer ? `<div style="margin-top: 8px; padding: 8px; background: var(--success-bg); border-radius: 6px; font-size: 13px;">💡 ${escapeHtml(q.answer)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// 渲染行動清單
+function renderActions() {
+  const pending = actions.filter(a => !a.done);
+  const completed = actions.filter(a => a.done);
+
+  const pendingDiv = document.getElementById('actionList');
+  pendingDiv.innerHTML = pending.length === 0
+    ? '<div class="empty-state"><div class="icon">🎉</div>所有行動都已完成！</div>'
+    : pending.map(a => `
+      <div class="comment">
+        <div class="meta">
+          <span>📅 ${a.date} ｜ <strong>${a.text}</strong></span>
+          <span>
+            <button class="btn btn-sm btn-primary" onclick="toggleAction('${a.id}')">✔️ 完成</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteAction('${a.id}')">🗑️</button>
+          </span>
+        </div>
+        ${a.notes ? `<div style="margin-top: 4px; font-size: 13px; color: var(--text-secondary);">📝 ${escapeHtml(a.notes)}</div>` : ''}
+      </div>
+    `).join('');
+
+  const completedDiv = document.getElementById('completedActions');
+  completedDiv.innerHTML = completed.length === 0
+    ? '<div class="empty-state"><div class="icon">⏳</div>還沒有完成的行動</div>'
+    : completed.map(a => `
+      <div class="comment" style="opacity: 0.7; border-left-color: var(--success);">
+        <div class="meta">
+          <span>✅ ${a.date} ｜ <s>${a.text}</s></span>
+          <span>
+            <button class="btn btn-sm btn-secondary" onclick="toggleAction('${a.id}')">↩️ 復原</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteAction('${a.id}')">🗑️</button>
+          </span>
+        </div>
+      </div>
+    `).join('');
+}
+
+// =============================================
+// 互動邏輯
+// =============================================
+
+// 候選股 CRUD
+let editingStockId = null;
+
+document.getElementById('addStockBtn').addEventListener('click', () => {
+  editingStockId = null;
+  document.getElementById('stockModalTitle').textContent = '➕ 新增候選股';
+  document.getElementById('stockCode').value = '';
+  document.getElementById('stockName').value = '';
+  document.getElementById('stockPrice').value = '';
+  document.getElementById('stockCategory').value = 'conservative';
+  document.getElementById('stockIndustry').value = '';
+  document.getElementById('stockYield').value = '';
+  document.getElementById('stockReturn').value = '';
+  document.getElementById('stockRating').value = 'watch';
+  document.getElementById('stockNotes').value = '';
+  document.getElementById('stockModal').classList.add('active');
+});
+
+window.editStock = function(id) {
+  const s = stocks.find(x => x.id === id);
+  if (!s) return;
+  editingStockId = id;
+  document.getElementById('stockModalTitle').textContent = '✏️ 編輯候選股';
+  document.getElementById('stockCode').value = s.code;
+  document.getElementById('stockName').value = s.name;
+  document.getElementById('stockPrice').value = s.price;
+  document.getElementById('stockCategory').value = s.category;
+  document.getElementById('stockIndustry').value = s.industry;
+  document.getElementById('stockYield').value = s.yield;
+  document.getElementById('stockReturn').value = s.return;
+  document.getElementById('stockRating').value = s.rating;
+  document.getElementById('stockNotes').value = s.notes || '';
+  document.getElementById('stockModal').classList.add('active');
+};
+
+window.deleteStock = function(id) {
+  if (!confirm('確定要刪除這檔候選股？')) return;
+  stocks = stocks.filter(x => x.id !== id);
+  saveData('stocks', stocks);
+  renderStocks();
+};
+
+document.getElementById('saveStockBtn').addEventListener('click', () => {
+  const data = {
+    code: document.getElementById('stockCode').value.trim(),
+    name: document.getElementById('stockName').value.trim(),
+    price: document.getElementById('stockPrice').value.trim(),
+    category: document.getElementById('stockCategory').value,
+    industry: document.getElementById('stockIndustry').value.trim(),
+    yield: document.getElementById('stockYield').value.trim(),
+    return: document.getElementById('stockReturn').value.trim(),
+    rating: document.getElementById('stockRating').value,
+    notes: document.getElementById('stockNotes').value.trim()
+  };
+  if (!data.code || !data.name) {
+    alert('代號和名稱為必填');
+    return;
+  }
+  if (editingStockId) {
+    stocks = stocks.map(s => s.id === editingStockId ? { ...s, ...data } : s);
+  } else {
+    stocks.push({ id: 'stk_' + Date.now(), ...data });
+  }
+  saveData('stocks', stocks);
+  closeModal('stockModal');
+  renderStocks();
+});
+
+// 討論記錄
+document.getElementById('submitCommentBtn').addEventListener('click', () => {
+  const content = document.getElementById('commentInput').value.trim();
+  if (!content) return alert('請輸入內容');
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '/');
+  comments.push({ id: 'cmt_' + Date.now(), date: today, content });
+  saveData('comments', comments);
+  document.getElementById('commentInput').value = '';
+  renderComments();
+});
+
+document.getElementById('clearCommentBtn').addEventListener('click', () => {
+  document.getElementById('commentInput').value = '';
+});
+
+window.deleteComment = function(id) {
+  comments = comments.filter(c => c.id !== id);
+  saveData('comments', comments);
+  renderComments();
+};
+
+// 問題管理
+window.toggleQuestion = function(id) {
+  questions = questions.map(q => q.id === id ? { ...q, status: q.status === 'open' ? 'done' : 'open' } : q);
+  saveData('questions', questions);
+  renderQuestions();
+};
+
+window.deleteQuestion = function(id) {
+  questions = questions.filter(q => q.id !== id);
+  saveData('questions', questions);
+  renderQuestions();
+};
+
+window.answerQuestion = function(id) {
+  const input = document.getElementById(`q_answer_${id}`);
+  const answer = input.value.trim();
+  if (!answer) return;
+  questions = questions.map(q => q.id === id ? { ...q, answer, status: 'done' } : q);
+  saveData('questions', questions);
+  renderQuestions();
+};
+
+// 行動清單
+document.getElementById('addActionBtn').addEventListener('click', () => {
+  document.getElementById('actionText').value = '';
+  document.getElementById('actionDate').value = '';
+  document.getElementById('actionNotes').value = '';
+  document.getElementById('actionModal').classList.add('active');
+});
+
+document.getElementById('saveActionBtn').addEventListener('click', () => {
+  const text = document.getElementById('actionText').value.trim();
+  const date = document.getElementById('actionDate').value.trim();
+  if (!text || !date) return alert('請填寫行動和日期');
+  actions.push({
+    id: 'act_' + Date.now(),
+    text,
+    date,
+    notes: document.getElementById('actionNotes').value.trim(),
+    done: false
+  });
+  saveData('actions', actions);
+  closeModal('actionModal');
+  renderActions();
+});
+
+window.toggleAction = function(id) {
+  actions = actions.map(a => a.id === id ? { ...a, done: !a.done } : a);
+  saveData('actions', actions);
+  renderActions();
+};
+
+window.deleteAction = function(id) {
+  actions = actions.filter(a => a.id !== id);
+  saveData('actions', actions);
+  renderActions();
+};
+
+// Modal 控制
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('active');
+};
+
+// 點擊 backdrop 關閉
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', (e) => {
+    if (e.target === m) m.classList.remove('active');
+  });
+});
+
+// 篩選器
+document.getElementById('stockFilter').addEventListener('input', renderStocks);
+document.getElementById('categoryFilter').addEventListener('change', renderStocks);
+document.getElementById('priceFilter').addEventListener('change', renderStocks);
+
+// 匯出
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const data = {
+    export_date: new Date().toISOString().slice(0, 10),
+    stocks,
+    comments,
+    questions,
+    actions
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sinmag_dashboard_${data.export_date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// 新增問題按鈕
+document.getElementById('addCommentBtn').addEventListener('click', () => {
+  const q = prompt('新增待研究問題：');
+  if (!q) return;
+  questions.push({ id: 'q_' + Date.now(), text: q, status: 'open' });
+  saveData('questions', questions);
+  renderQuestions();
+});
+
+// =============================================
+// 初始渲染
+// =============================================
+renderStocks();
+renderAllocBar();
+renderComments();
+renderQuestions();
+renderActions();
+
+// 顯示歡迎訊息
+console.log('%c📊 新麥換股決策儀表板', 'font-size: 20px; font-weight: bold; color: #3b82f6;');
+console.log('%c所有資料自動儲存於 localStorage', 'color: #64748b;');
+console.log('%c可用函數：resetAllData() 重置所有資料', 'color: #64748b;');
+
+// 提供重置函數
+window.resetAllData = function() {
+  if (!confirm('確定要重置所有資料為預設值嗎？')) return;
+  localStorage.clear();
+  location.reload();
+};
+
+</script>
+</body>
+</html>

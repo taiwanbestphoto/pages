@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台股上市櫃市值分布儀表板（含 3 年比較）</title>
+<style>
+  :root {
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-sidebar: #f1f5f9;
+    --bg-hover: #e2e8f0;
+    --bg-tab-active: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --success: #10b981;
+    --success-bg: #d1fae5;
+    --warning: #f59e0b;
+    --warning-bg: #fef3c7;
+    --danger: #ef4444;
+    --danger-bg: #fee2e2;
+    --info: #06b6d4;
+    --info-bg: #cffafe;
+    --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    --c-semiconductor: #3b82f6;
+    --c-ai-server: #8b5cf6;
+    --c-pcb: #06b6d4;
+    --c-cooling: #f97316;
+    --c-finance: #10b981;
+    --c-telecom: #ec4899;
+    --c-plastic: #84cc16;
+    --c-food: #eab308;
+    --c-shipping: #14b8a6;
+    --c-other: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    color: white;
+    padding: 24px 32px;
+    box-shadow: var(--shadow);
+  }
+  .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .header .subtitle { font-size: 14px; opacity: 0.9; }
+  .header .data-date { font-size: 12px; opacity: 0.75; margin-top: 4px; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-sidebar);
+    padding: 6px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+  }
+  .tab:hover { background: var(--bg-hover); }
+  .tab.active {
+    background: var(--bg-tab-active);
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .card-title .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--info-bg);
+    color: var(--info);
+    font-weight: 600;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .stat .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .stat .value { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+  .stat .delta { font-size: 12px; margin-top: 4px; }
+  .delta.positive { color: var(--success); }
+  .delta.negative { color: var(--danger); }
+  .delta.neutral { color: var(--text-muted); }
+
+  .status-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .status-box.warning {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-left-color: var(--warning);
+  }
+  .status-box.success {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-left-color: var(--success);
+  }
+  .status-box.danger {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-left-color: var(--danger);
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .toolbar input, .toolbar select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: inherit;
+  }
+  .toolbar input { flex: 1; min-width: 200px; }
+  .toolbar input:focus, .toolbar select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary {
+    background: var(--bg-sidebar);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .donut-svg {
+    width: 320px;
+    height: 320px;
+    flex-shrink: 0;
+  }
+  .donut-legend { flex: 1; min-width: 280px; }
+
+  .hbar-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 80px;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .hbar-label { color: var(--text-secondary); font-weight: 600; }
+  .hbar-track {
+    background: var(--bg-sidebar);
+    height: 24px;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .hbar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    transition: width 0.6s ease-out;
+  }
+  .hbar-value { text-align: right; font-weight: 700; color: var(--text-primary); }
+
+  .treemap {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    height: 480px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 2px;
+  }
+  .treemap-cell {
+    background: var(--bg-card);
+    padding: 8px;
+    color: white;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .treemap-cell:hover {
+    transform: scale(1.02);
+    z-index: 10;
+    box-shadow: var(--shadow-lg);
+  }
+  .treemap-cell .name { font-size: 13px; font-weight: 700; }
+  .treemap-cell .pct { font-size: 11px; opacity: 0.9; margin-top: 2px; }
+  .treemap-cell.lg .name { font-size: 18px; }
+  .treemap-cell.lg .pct { font-size: 14px; }
+  .treemap-cell.md .name { font-size: 14px; }
+  .treemap-cell.sm .name { font-size: 11px; }
+  .treemap-cell.tiny .name { font-size: 10px; }
+  .treemap-cell.tiny .pct { display: none; }
+
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--bg-sidebar);
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend-text { color: var(--text-primary); flex: 1; }
+  .legend-value { color: var(--text-secondary); font-weight: 600; }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead { background: var(--bg-sidebar); }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  th.right { text-align: right; }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  td.right { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--bg-primary); }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+  }
+
+  /* 比較圖 */
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: var(--bg-sidebar);
+    border-radius: 8px;
+  }
+  .compare-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 14px;
+  }
+  .compare-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .compare-bar-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 70px;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .compare-year-tag {
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .compare-track {
+    background: white;
+    height: 18px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .compare-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease-out;
+  }
+  .compare-pct {
+    text-align: right;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  /* 時間軸比較 */
+  .timeline-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .timeline-box {
+    padding: 16px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+  }
+  .timeline-box.old {
+    border-color: var(--text-muted);
+    background: var(--bg-sidebar);
+  }
+  .timeline-box.new {
+    border-color: var(--accent);
+  }
+  .timeline-year {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .timeline-box.new .timeline-year {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* 變化指標 */
+  .change-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .change-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .change-icon.up { background: var(--success-bg); color: var(--success); }
+  .change-icon.down { background: var(--danger-bg); color: var(--danger); }
+  .change-icon.same { background: var(--info-bg); color: var(--info); }
+  .change-text { flex: 1; }
+  .change-title { font-size: 13px; color: var(--text-secondary); }
+  .change-value { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+
+  .insight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .insight {
+    background: var(--bg-sidebar);
+    padding: 16px;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+  }
+  .insight-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .insight-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .insight-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 16px; }
+    .header { padding: 16px 20px; }
+    .header h1 { font-size: 22px; }
+    .donut-svg { width: 280px; height: 280px; }
+    .hbar-row { grid-template-columns: 70px 1fr 70px; font-size: 12px; }
+    th, td { padding: 10px 12px; font-size: 13px; }
+    .timeline-compare { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>📊 台股上市櫃市值分布儀表板</h1>
+  <div class="subtitle">前 50 大市值權值股 ｜ <strong>2023 vs 2026 三年比較</strong></div>
+  <div class="data-date">資料來源：臺灣證券交易所 FACT BOOK 2024（2023 年底） + 證交所發行量加權指數成分股（2026/07）</div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" data-tab="overview">📋 總覽</button>
+    <button class="tab" data-tab="compare">🔄 三年比較</button>
+    <button class="tab" data-tab="donut">🍩 產業分布</button>
+    <button class="tab" data-tab="treemap">🟦 矩陣圖</button>
+    <button class="tab" data-tab="ranking">📈 排名比較</button>
+    <button class="tab" data-tab="industry">🏭 產業解析</button>
+  </div>
+
+  <!-- ===== Tab: 總覽 ===== -->
+  <div id="overview" class="tab-content active">
+    <div class="status-box danger">
+      <strong>🚨 三年最重大變化：</strong>台積電 (2330) 市值占比從 <strong>27.05% → 43.79%</strong>，暴增 <strong>+16.74 個百分點</strong>！台股已成為「台積電 + AI 供應鏈」高度集中的單極市場。
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="label">台積電占比 (2026)</div>
+        <div class="value">43.79%</div>
+        <div class="delta positive">+16.74pp vs 2023</div>
+      </div>
+      <div class="stat">
+        <div class="label">台積電占比 (2023)</div>
+        <div class="value">27.05%</div>
+        <div class="delta neutral">已是當時最大</div>
+      </div>
+      <div class="stat">
+        <div class="label">前 10 大占比 (2026)</div>
+        <div class="value">61.01%</div>
+        <div class="delta positive">+18.78pp vs 2023</div>
+      </div>
+      <div class="stat">
+        <div class="label">前 30 大占比 (2026)</div>
+        <div class="value">~75%</div>
+        <div class="delta positive">+18pp vs 2023 (56.74%)</div>
+      </div>
+      <div class="stat">
+        <div class="label">全市場市值</div>
+        <div class="value">~100 兆</div>
+        <div class="delta positive">2023: 56.84 兆 → +76%</div>
+      </div>
+      <div class="stat">
+        <div class="label">台股市值全球排名</div>
+        <div class="value">第 5 名</div>
+        <div class="delta positive">超越印度</div>
+      </div>
+    </div>
+
+    <div class="insight-grid">
+      <div class="insight">
+        <div class="insight-title">AI 相關權值股 (2026)</div>
+        <div class="insight-value">~25%</div>
+        <div class="insight-desc">含 AI 伺服器、散熱、PCB、電源。2023 不到 10%。</div>
+      </div>
+      <div class="insight">
+        <div class="insight-title">金融股占比 (2026)</div>
+        <div class="insight-value">~7%</div>
+        <div class="insight-desc">從 2023 的 ~12% 下降，被 AI 股稀釋。</div>
+      </div>
+      <div class="insight">
+        <div class="insight-title">傳產股占比 (2026)</div>
+        <div class="insight-value">~3%</div>
+        <div class="insight-desc">塑化 / 食品 / 航運 / 電信等，相對萎縮。</div>
+      </div>
+      <div class="insight">
+        <div class="insight-title">新進前 30 大</div>
+        <div class="insight-value">+8 檔</div>
+        <div class="insight-desc">奇鋐、台光電、欣興、智邦、緯穎、健策等 AI 題材股</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 2026 年前 10 大市值權值股 <span class="badge">占大盤 61.01%</span></div>
+      <div class="table-wrap">
+        <table id="top10Table">
+          <thead>
+            <tr>
+              <th>排名</th>
+              <th>代號</th>
+              <th>公司</th>
+              <th class="right">2026 占比</th>
+              <th>2023 排名</th>
+              <th>變化</th>
+              <th>產業/題材</th>
+            </tr>
+          </thead>
+          <tbody id="top10Body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Tab: 三年比較 ===== -->
+  <div id="compare" class="tab-content">
+    <div class="status-box">
+      <strong>💡 核心洞察：</strong>3 年內台股結構發生劇烈變化。半導體與 AI 題材市值佔比快速上升，金融與傳產股被稀釋。集中度大幅提高。
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔄 集中度指標比較 <span class="badge">2023 vs 2026</span></div>
+
+      <div class="compare-row">
+        <div class="compare-label">
+          <span>🥇 台積電 (2330) 市值占比</span>
+          <span style="color: var(--danger); font-size: 18px;">+16.74pp</span>
+        </div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2023</span>
+            <div class="compare-track">
+              <div class="compare-fill" style="width: 27.05%; background: #94a3b8;"></div>
+            </div>
+            <span class="compare-pct">27.05%</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2026</span>
+            <div class="compare-track">
+              <div class="compare-fill" style="width: 43.79%; background: linear-gradient(90deg, #3b82f6, #1d4ed8);"></div>
+            </div>
+            <span class="compare-pct">43.79%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-row">
+        <div class="compare-label">
+          <span>前 5 大合計占比</span>
+          <span style="color: var(--danger); font-size: 18px;">+20.04pp</span>
+        </div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2023</span>
+            <div class="compare-track"><div class="compare-fill" style="width: 35.62%; background: #94a3b8;"></div></div>
+            <span class="compare-pct">35.62%</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2026</span>
+            <div class="compare-track"><div class="compare-fill" style="width: 55.66%; background: linear-gradient(90deg, #3b82f6, #1d4ed8);"></div></div>
+            <span class="compare-pct">55.66%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-row">
+        <div class="compare-label">
+          <span>前 10 大合計占比</span>
+          <span style="color: var(--danger); font-size: 18px;">+18.78pp</span>
+        </div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2023</span>
+            <div class="compare-track"><div class="compare-fill" style="width: 42.23%; background: #94a3b8;"></div></div>
+            <span class="compare-pct">42.23%</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2026</span>
+            <div class="compare-track"><div class="compare-fill" style="width: 61.01%; background: linear-gradient(90deg, #3b82f6, #1d4ed8);"></div></div>
+            <span class="compare-pct">61.01%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-row">
+        <div class="compare-label">
+          <span>前 30 大合計占比</span>
+          <span style="color: var(--danger); font-size: 18px;">+18.26pp</span>
+        </div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2023</span>
+            <div class="compare-track"><div class="compare-fill" style="width: 56.74%; background: #94a3b8;"></div></div>
+            <span class="compare-pct">56.74%</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2026</span>
+            <div class="compare-track"><div class="compare-fill" style="width: 75%; background: linear-gradient(90deg, #3b82f6, #1d4ed8);"></div></div>
+            <span class="compare-pct">~75%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏆 排名變化（2023 → 2026）<span class="badge">漲跌分析</span></div>
+
+      <div class="timeline-compare">
+        <div class="timeline-box old">
+          <div class="timeline-year">📅 2023 年底 Top 10</div>
+          <ol style="padding-left: 20px; font-size: 13px; line-height: 1.9;">
+            <li><strong>2330 台積電</strong> - 27.05%</li>
+            <li>2454 聯發科 - 2.86%</li>
+            <li>2317 鴻海 - 2.55%</li>
+            <li>2412 中華電 - 1.64%</li>
+            <li>2382 廣達 - 1.53%</li>
+            <li>2881 富邦金 - 1.48%</li>
+            <li>2308 台達電 - 1.43%</li>
+            <li>6505 台塑化 - 1.35%</li>
+            <li>2882 國泰金 - 1.18%</li>
+            <li>2303 聯電 - 1.16%</li>
+          </ol>
+        </div>
+
+        <div class="timeline-box new">
+          <div class="timeline-year">📅 2026/07 Top 10</div>
+          <ol style="padding-left: 20px; font-size: 13px; line-height: 1.9;">
+            <li><strong>2330 台積電</strong> - 43.79% ⬆️</li>
+            <li>2308 台達電 - 4.45% ⬆️(從#7)</li>
+            <li>2454 聯發科 - 3.31% ⬇️</li>
+            <li>2317 鴻海 - 2.42% ⬇️</li>
+            <li>3711 日月光投控 - 1.68% ⬆️(從#11)</li>
+            <li>2383 台光電 - 1.29% 🆕</li>
+            <li>3037 欣興 - 1.10% 🆕</li>
+            <li>2345 智邦 - 1.01% 🆕</li>
+            <li>2881 富邦金 - 1.00% ⬇️</li>
+            <li>2382 廣達 - 0.95% ⬇️</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 個股排名變化分析</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>代號</th>
+              <th>公司</th>
+              <th class="right">2023 排名</th>
+              <th class="right">2026 排名</th>
+              <th class="right">變化</th>
+              <th>說明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: var(--success-bg);">
+              <td><strong>2308</strong></td>
+              <td>台達電</td>
+              <td class="right">#7 (1.43%)</td>
+              <td class="right"><strong>#2 (4.45%)</strong></td>
+              <td class="right"><strong>⬆️ +5</strong></td>
+              <td>AI 電源題材最大受惠者</td>
+            </tr>
+            <tr style="background: var(--success-bg);">
+              <td><strong>2383</strong></td>
+              <td>台光電</td>
+              <td class="right">前 30 外</td>
+              <td class="right"><strong>#6 (1.29%)</strong></td>
+              <td class="right"><strong>🆕 新進</strong></td>
+              <td>AI PCB 銅箔基板</td>
+            </tr>
+            <tr style="background: var(--success-bg);">
+              <td><strong>3037</strong></td>
+              <td>欣興</td>
+              <td class="right">前 30 外</td>
+              <td class="right"><strong>#7 (1.10%)</strong></td>
+              <td class="right"><strong>🆕 新進</strong></td>
+              <td>ABF 載板受惠 AI</td>
+            </tr>
+            <tr style="background: var(--success-bg);">
+              <td><strong>3017</strong></td>
+              <td>奇鋐</td>
+              <td class="right">未上榜</td>
+              <td class="right"><strong>#12 (0.88%)</strong></td>
+              <td class="right"><strong>🆕 新進</strong></td>
+              <td>散熱水冷題材爆發</td>
+            </tr>
+            <tr style="background: var(--success-bg);">
+              <td><strong>6669</strong></td>
+              <td>緯穎</td>
+              <td class="right">#27 (0.56%)</td>
+              <td class="right"><strong>#18 (0.69%)</strong></td>
+              <td class="right"><strong>⬆️ +9</strong></td>
+              <td>AI 伺服器白牌龍頭</td>
+            </tr>
+            <tr>
+              <td><strong>2412</strong></td>
+              <td>中華電</td>
+              <td class="right">#4 (1.64%)</td>
+              <td class="right">#13 (0.83%)</td>
+              <td class="right">⬇️ -9</td>
+              <td>電信類股被 AI 稀釋</td>
+            </tr>
+            <tr>
+              <td><strong>6505</strong></td>
+              <td>台塑化</td>
+              <td class="right">#8 (1.35%)</td>
+              <td class="right">#30 (0.42%)</td>
+              <td class="right">⬇️ -22</td>
+              <td>塑化業衰退</td>
+            </tr>
+            <tr style="background: var(--danger-bg);">
+              <td><strong>2207</strong></td>
+              <td>和泰車</td>
+              <td class="right">#19 (0.69%)</td>
+              <td class="right">前 50 外</td>
+              <td class="right"><strong>❌ 跌出 50</strong></td>
+              <td>車市競爭 + 電動車衝擊</td>
+            </tr>
+            <tr style="background: var(--danger-bg);">
+              <td><strong>2002</strong></td>
+              <td>中鋼</td>
+              <td class="right">#16 (0.75%)</td>
+              <td class="right">前 50 外</td>
+              <td class="right"><strong>❌ 跌出 50</strong></td>
+              <td>鋼鐵景氣低迷</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="status-box warning">
+      <strong>⚠️ 投資意涵：</strong>3 年來台股已從「多元權值市場」變成「台積電 + AI 供應鏈」單極市場。投資人若持有市值型 ETF (0050、006208)，等於實質上重押這 10-20 檔 AI 相關股，集中度風險顯著上升。
+    </div>
+  </div>
+
+  <!-- ===== Tab: 產業分布 ===== -->
+  <div id="donut" class="tab-content">
+    <div class="card">
+      <div class="card-title">🍩 2026 年前 50 大市值 產業分布</div>
+      <div class="donut-wrap">
+        <svg class="donut-svg" id="donutChart" viewBox="0 0 320 320"></svg>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+      <div class="legend-grid" id="industryLegend"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 2023 vs 2026 各產業占比變化</div>
+      <div id="industryCompare"></div>
+    </div>
+  </div>
+
+  <!-- ===== Tab: 矩陣圖 ===== -->
+  <div id="treemap" class="tab-content">
+    <div class="card">
+      <div class="card-title">🟦 2026 年前 50 大市值矩陣圖（Treemap）</div>
+      <div class="status-box">
+        <strong>💡 閱讀方式：</strong>區塊大小代表市值占比，顏色代表產業別。點擊任一區塊可查看詳細資訊。
+      </div>
+      <div class="treemap" id="treemapChart"></div>
+      <div class="legend-grid" id="treemapLegend"></div>
+    </div>
+  </div>
+
+  <!-- ===== Tab: 排名比較 ===== -->
+  <div id="ranking" class="tab-content">
+    <div class="card">
+      <div class="card-title">📈 完整排名比較（2023 vs 2026）</div>
+      <div class="toolbar">
+        <input type="text" id="rankFilter" placeholder="🔍 搜尋代號或公司名稱...">
+        <select id="rankIndustryFilter">
+          <option value="all">全部產業</option>
+        </select>
+        <button class="btn btn-secondary" id="exportRankBtn">📤 匯出 CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table id="rankTable">
+          <thead>
+            <tr>
+              <th>代號</th>
+              <th>公司名稱</th>
+              <th class="right">2023 排名</th>
+              <th class="right">2023 占比</th>
+              <th class="right">2026 排名</th>
+              <th class="right">2026 占比</th>
+              <th class="right">變化</th>
+              <th>產業</th>
+            </tr>
+          </thead>
+          <tbody id="rankBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Tab: 產業解析 ===== -->
+  <div id="industry" class="tab-content">
+    <div class="card">
+      <div class="card-title">🏭 2026 產業別解析</div>
+      <div id="industryDetail"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div>📊 台股上市櫃市值分布儀表板（含 3 年比較） ｜ 資料基準日：2026/07</div>
+  <div style="margin-top: 4px;">⚠️ 本頁面為研究整理，非投資建議。市值會隨股價變動，實際數據請以臺灣證券交易所公告為準。</div>
+</div>
+
+<script>
+// =============================================
+// 資料
+// =============================================
+
+// 2023 年底資料（NTD 百萬，TWSE FACT BOOK 2024）
+const STOCKS_2023 = {
+  '2330': { rank: 1, name: '台積電', pct: 27.0534, industry: '半導體/晶圓代工', category: 'semiconductor' },
+  '2454': { rank: 2, name: '聯發科', pct: 2.8564, industry: 'IC設計', category: 'semiconductor' },
+  '2317': { rank: 3, name: '鴻海', pct: 2.5486, industry: '電子代工/AI伺服器', category: 'ai-server' },
+  '2412': { rank: 4, name: '中華電', pct: 1.6377, industry: '電信', category: 'telecom' },
+  '2382': { rank: 5, name: '廣達', pct: 1.5256, industry: '電子代工/AI伺服器', category: 'ai-server' },
+  '2881': { rank: 6, name: '富邦金', pct: 1.4837, industry: '金融', category: 'finance' },
+  '2308': { rank: 7, name: '台達電', pct: 1.4326, industry: '電源/自動化/AI電力', category: 'ai-server' },
+  '6505': { rank: 8, name: '台塑化', pct: 1.3524, industry: '石化', category: 'plastic' },
+  '2882': { rank: 9, name: '國泰金', pct: 1.1807, industry: '金融', category: 'finance' },
+  '2303': { rank: 10, name: '聯電', pct: 1.1595, industry: '半導體/晶圓代工', category: 'semiconductor' },
+  '3711': { rank: 11, name: '日月光投控', pct: 1.0403, industry: '封測', category: 'semiconductor' },
+  '2886': { rank: 12, name: '兆豐金', pct: 0.9932, industry: '金融', category: 'finance' },
+  '2891': { rank: 13, name: '中信金', pct: 0.9767, industry: '金融', category: 'finance' },
+  '1303': { rank: 14, name: '南亞', pct: 0.9278, industry: '塑化/電子材料', category: 'plastic' },
+  '1301': { rank: 15, name: '台塑', pct: 0.8870, industry: '塑化', category: 'plastic' },
+  '2002': { rank: 16, name: '中鋼', pct: 0.7474, industry: '鋼鐵', category: 'other' },
+  '1216': { rank: 17, name: '統一', pct: 0.7447, industry: '食品/民生', category: 'food' },
+  '2884': { rank: 18, name: '玉山金', pct: 0.7110, industry: '金融', category: 'finance' },
+  '2207': { rank: 19, name: '和泰車', pct: 0.6949, industry: '汽車', category: 'other' },
+  '5880': { rank: 20, name: '合庫金', pct: 0.6909, industry: '金融', category: 'finance' },
+  '3008': { rank: 21, name: '大立光', pct: 0.6739, industry: '光學鏡頭', category: 'other' },
+  '2892': { rank: 22, name: '第一金', pct: 0.6565, industry: '金融', category: 'finance' },
+  '3045': { rank: 23, name: '台灣大', pct: 0.6458, industry: '電信', category: 'telecom' },
+  '1326': { rank: 24, name: '台化', pct: 0.6424, industry: '塑化', category: 'plastic' },
+  '2357': { rank: 25, name: '華碩', pct: 0.6396, industry: '品牌電腦', category: 'ai-server' },
+  '2885': { rank: 26, name: '元大金', pct: 0.6161, industry: '金融', category: 'finance' },
+  '6669': { rank: 27, name: '緯穎', pct: 0.5613, industry: 'AI伺服器', category: 'ai-server' },
+  '2395': { rank: 28, name: '研華', pct: 0.5607, industry: '工業電腦', category: 'ai-server' },
+  '3034': { rank: 29, name: '聯詠', pct: 0.5535, industry: 'IC設計', category: 'semiconductor' },
+  '5871': { rank: 30, name: '中租-KY', pct: 0.5482, industry: '租賃', category: 'finance' }
+};
+
+// 2026 年 7 月資料（證交所發行量加權指數成分股）
+const STOCKS_2026 = [
+  { code: '2330', name: '台積電', rank: 1, pct: 43.7908, industry: '半導體/晶圓代工', category: 'semiconductor' },
+  { code: '2308', name: '台達電', rank: 2, pct: 4.4480, industry: '電源/自動化/AI電力', category: 'ai-server' },
+  { code: '2454', name: '聯發科', rank: 3, pct: 3.3110, industry: 'IC設計', category: 'semiconductor' },
+  { code: '2317', name: '鴻海', rank: 4, pct: 2.4243, industry: '電子代工/AI伺服器', category: 'ai-server' },
+  { code: '3711', name: '日月光投控', rank: 5, pct: 1.6813, industry: '封測', category: 'semiconductor' },
+  { code: '2383', name: '台光電', rank: 6, pct: 1.2881, industry: 'PCB/銅箔基板', category: 'pcb' },
+  { code: '3037', name: '欣興', rank: 7, pct: 1.1003, industry: 'ABF載板/PCB', category: 'pcb' },
+  { code: '2345', name: '智邦', rank: 8, pct: 1.0119, industry: '網通/交換器', category: 'ai-server' },
+  { code: '2881', name: '富邦金', rank: 9, pct: 0.9971, industry: '金融', category: 'finance' },
+  { code: '2382', name: '廣達', rank: 10, pct: 0.9547, industry: '電子代工/AI伺服器', category: 'ai-server' },
+  { code: '2882', name: '國泰金', rank: 11, pct: 0.8957, industry: '金融', category: 'finance' },
+  { code: '3017', name: '奇鋐', rank: 12, pct: 0.8761, industry: '散熱', category: 'cooling' },
+  { code: '2412', name: '中華電', rank: 13, pct: 0.8344, industry: '電信', category: 'telecom' },
+  { code: '2891', name: '中信金', rank: 14, pct: 0.8140, industry: '金融', category: 'finance' },
+  { code: '2303', name: '聯電', rank: 15, pct: 0.7690, industry: '半導體/晶圓代工', category: 'semiconductor' },
+  { code: '2360', name: '致茂', rank: 16, pct: 0.7130, industry: '測試設備', category: 'semiconductor' },
+  { code: '7769', name: '鴻勁', rank: 17, pct: 0.7037, industry: '半導體測試設備', category: 'semiconductor' },
+  { code: '6669', name: '緯穎', rank: 18, pct: 0.6872, industry: 'AI伺服器', category: 'ai-server' },
+  { code: '3653', name: '健策', rank: 19, pct: 0.6244, industry: '散熱/均熱片', category: 'cooling' },
+  { code: '1303', name: '南亞', rank: 20, pct: 0.5620, industry: '塑化/電子材料', category: 'plastic' },
+  { code: '2368', name: '金像電', rank: 21, pct: 0.5613, industry: 'PCB', category: 'pcb' },
+  { code: '2885', name: '元大金', rank: 22, pct: 0.5504, industry: '金融', category: 'finance' },
+  { code: '2408', name: '南亞科', rank: 23, pct: 0.5281, industry: '記憶體', category: 'semiconductor' },
+  { code: '2327', name: '國巨', rank: 24, pct: 0.5197, industry: '被動元件', category: 'semiconductor' },
+  { code: '8046', name: '南電', rank: 25, pct: 0.5136, industry: 'IC載板', category: 'pcb' },
+  { code: '2887', name: '台新新光金', rank: 26, pct: 0.4681, industry: '金融', category: 'finance' },
+  { code: '2886', name: '兆豐金', rank: 27, pct: 0.4587, industry: '金融', category: 'finance' },
+  { code: '3443', name: '創意', rank: 28, pct: 0.4515, industry: 'ASIC/IP', category: 'semiconductor' },
+  { code: '3665', name: '貿聯-KY', rank: 29, pct: 0.4272, industry: '線束/連接', category: 'ai-server' },
+  { code: '6505', name: '台塑化', rank: 30, pct: 0.4249, industry: '石化', category: 'plastic' },
+  { code: '2884', name: '玉山金', rank: 31, pct: 0.4074, industry: '金融', category: 'finance' },
+  { code: '4958', name: '臻鼎-KY', rank: 32, pct: 0.3565, industry: 'PCB', category: 'pcb' },
+  { code: '2890', name: '永豐金', rank: 33, pct: 0.3548, industry: '金融', category: 'finance' },
+  { code: '2880', name: '華南金', rank: 34, pct: 0.3528, industry: '金融', category: 'finance' },
+  { code: '2603', name: '長榮', rank: 35, pct: 0.3459, industry: '航運', category: 'shipping' },
+  { code: '3231', name: '緯創', rank: 36, pct: 0.3446, industry: '電子代工/AI伺服器', category: 'ai-server' },
+  { code: '2357', name: '華碩', rank: 37, pct: 0.3413, industry: '品牌電腦', category: 'ai-server' },
+  { code: '3045', name: '台灣大', rank: 38, pct: 0.3284, industry: '電信', category: 'telecom' },
+  { code: '2892', name: '第一金', rank: 39, pct: 0.3281, industry: '金融', category: 'finance' },
+  { code: '2344', name: '華邦電', rank: 40, pct: 0.3196, industry: '記憶體', category: 'semiconductor' },
+  { code: '1216', name: '統一', rank: 41, pct: 0.3114, industry: '食品/民生', category: 'food' },
+  { code: '2301', name: '光寶科', rank: 42, pct: 0.3042, industry: '電源/光電', category: 'ai-server' },
+  { code: '6515', name: '穎崴', rank: 43, pct: 0.2960, industry: '半導體測試介面', category: 'semiconductor' },
+  { code: '2059', name: '川湖', rank: 44, pct: 0.2947, industry: '伺服器滑軌', category: 'ai-server' },
+  { code: '2449', name: '京元電子', rank: 45, pct: 0.2926, industry: '半導體測試', category: 'semiconductor' },
+  { code: '2883', name: '凱基金', rank: 46, pct: 0.2887, industry: '金融', category: 'finance' },
+  { code: '5880', name: '合庫金', rank: 47, pct: 0.2846, industry: '金融', category: 'finance' },
+  { code: '3008', name: '大立光', rank: 48, pct: 0.2655, industry: '光學鏡頭', category: 'other' },
+  { code: '4904', name: '遠傳', rank: 49, pct: 0.2626, industry: '電信', category: 'telecom' },
+  { code: '1301', name: '台塑', rank: 50, pct: 0.2593, industry: '塑化', category: 'plastic' }
+];
+
+const CATEGORY_INFO = {
+  'semiconductor': { name: '半導體', color: '#3b82f6', desc: '晶圓代工、IC 設計、封測、記憶體' },
+  'ai-server':     { name: 'AI 伺服器', color: '#8b5cf6', desc: 'AI 伺服器組裝、電源、網通' },
+  'pcb':           { name: 'PCB / 載板', color: '#06b6d4', desc: 'PCB、IC 載板、銅箔基板' },
+  'cooling':       { name: '散熱', color: '#f97316', desc: '散熱模組、水冷板、均熱片' },
+  'finance':       { name: '金融', color: '#10b981', desc: '金控、銀行、壽險' },
+  'telecom':       { name: '電信', color: '#ec4899', desc: '電信業者' },
+  'plastic':       { name: '塑化', color: '#84cc16', desc: '塑化、石化' },
+  'food':          { name: '食品', color: '#eab308', desc: '食品、民生消費' },
+  'shipping':      { name: '航運', color: '#14b8a6', desc: '航運' },
+  'other':         { name: '其他', color: '#94a3b8', desc: '光學、品牌、鋼鐵等' }
+};
+
+// =============================================
+// Tabs
+// =============================================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'treemap') renderTreemap();
+    if (tab.dataset.tab === 'donut') { renderDonut(); renderIndustryCompare(); }
+    if (tab.dataset.tab === 'industry') renderIndustry();
+    if (tab.dataset.tab === 'ranking') renderRankTable();
+  });
+});
+
+// =============================================
+// 總覽：前 10 大（加上 2023 對照）
+// =============================================
+function renderTop10() {
+  const top10 = STOCKS_2026.slice(0, 10);
+  const maxPct = top10[0].pct;
+  const body = document.getElementById('top10Body');
+
+  body.innerHTML = top10.map(s => {
+    const info = CATEGORY_INFO[s.category];
+    const oldData = STOCKS_2023[s.code];
+    let oldRankHtml = '—';
+    let changeHtml = '🆕 新進';
+
+    if (oldData) {
+      const rankChange = oldData.rank - s.rank;
+      oldRankHtml = `#${oldData.rank}`;
+      if (rankChange > 0) changeHtml = `<strong style="color: var(--success);">⬆️ +${rankChange}</strong>`;
+      else if (rankChange < 0) changeHtml = `<strong style="color: var(--danger);">⬇️ ${rankChange}</strong>`;
+      else changeHtml = '持平';
+    }
+
+    const widthPct = (s.pct / maxPct) * 100;
+
+    return `
+      <tr>
+        <td><strong>#${s.rank}</strong></td>
+        <td><strong>${s.code}</strong></td>
+        <td>${s.name}</td>
+        <td class="right" style="font-weight: 700;">${s.pct.toFixed(4)}%</td>
+        <td>${oldRankHtml}</td>
+        <td>${changeHtml}</td>
+        <td><span class="tag" style="background:${info.color};">${s.industry}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// =============================================
+// 產業分布（2026）
+// =============================================
+function aggregateByCategory(year) {
+  const data = year === 2026 ? STOCKS_2026 : Object.entries(STOCKS_2023).map(([code, v]) => ({ code, ...v }));
+  const agg = {};
+  data.forEach(s => {
+    if (!agg[s.category]) agg[s.category] = { total: 0, count: 0, stocks: [] };
+    agg[s.category].total += s.pct;
+    agg[s.category].count += 1;
+    agg[s.category].stocks.push(s);
+  });
+  return Object.entries(agg)
+    .map(([cat, data]) => ({ category: cat, ...data }))
+    .sort((a, b) => b.total - a.total);
+}
+
+function renderDonut() {
+  const data = aggregateByCategory(2026);
+  const total = data.reduce((sum, d) => sum + d.total, 0);
+  const svg = document.getElementById('donutChart');
+  const cx = 160, cy = 160, r = 100, ir = 60;
+
+  let cumulative = 0;
+  let paths = '';
+
+  data.forEach((d) => {
+    const info = CATEGORY_INFO[d.category];
+    const startAngle = (cumulative / total) * Math.PI * 2 - Math.PI / 2;
+    const endAngle = ((cumulative + d.total) / total) * Math.PI * 2 - Math.PI / 2;
+    const x1 = cx + Math.cos(startAngle) * r;
+    const y1 = cy + Math.sin(startAngle) * r;
+    const x2 = cx + Math.cos(endAngle) * r;
+    const y2 = cy + Math.sin(endAngle) * r;
+    const xi1 = cx + Math.cos(endAngle) * ir;
+    const yi1 = cy + Math.sin(endAngle) * ir;
+    const xi2 = cx + Math.cos(startAngle) * ir;
+    const yi2 = cy + Math.sin(startAngle) * ir;
+    const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+
+    paths += `
+      <path d="M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}
+               L ${xi1} ${yi1} A ${ir} ${ir} 0 ${largeArc} 0 ${xi2} ${yi2} Z"
+            fill="${info.color}" stroke="white" stroke-width="2"
+            style="cursor:pointer; transition: opacity 0.2s;"
+            onmouseover="this.style.opacity=0.7"
+            onmouseout="this.style.opacity=1">
+        <title>${info.name}: ${d.total.toFixed(2)}% (${d.count} 檔)</title>
+      </path>
+    `;
+    cumulative += d.total;
+  });
+
+  svg.innerHTML = `
+    ${paths}
+    <text x="160" y="155" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">2026 前 50 大</text>
+    <text x="160" y="180" text-anchor="middle" font-size="22" font-weight="700" fill="#3b82f6">${total.toFixed(1)}%</text>
+  `;
+
+  const legend = document.getElementById('donutLegend');
+  legend.innerHTML = data.map(d => {
+    const info = CATEGORY_INFO[d.category];
+    return `
+      <div class="legend-item">
+        <div class="legend-dot" style="background:${info.color};"></div>
+        <div class="legend-text">${info.name}</div>
+        <div class="legend-value">${d.total.toFixed(2)}%</div>
+      </div>
+    `;
+  }).join('');
+
+  const legendGrid = document.getElementById('industryLegend');
+  legendGrid.innerHTML = Object.entries(CATEGORY_INFO).map(([cat, info]) => {
+    const found = data.find(d => d.category === cat);
+    return `
+      <div class="legend-item">
+        <div class="legend-dot" style="background:${info.color};"></div>
+        <div class="legend-text">${info.name}</div>
+        <div class="legend-value">${found ? found.total.toFixed(2) + '%' : '0%'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderIndustryCompare() {
+  const data2023 = aggregateByCategory(2023);
+  const data2026 = aggregateByCategory(2026);
+  const container = document.getElementById('industryCompare');
+
+  const allCats = new Set([...data2023.map(d => d.category), ...data2026.map(d => d.category)]);
+  const merged = Array.from(allCats).map(cat => {
+    const d23 = data2023.find(d => d.category === cat) || { total: 0, count: 0 };
+    const d26 = data2026.find(d => d.category === cat) || { total: 0, count: 0 };
+    return { cat, d23, d26, change: d26.total - d23.total };
+  }).sort((a, b) => b.d26.total - a.d26.total);
+
+  const maxTotal = Math.max(...merged.map(m => Math.max(m.d23.total, m.d26.total)));
+
+  container.innerHTML = merged.map(m => {
+    const info = CATEGORY_INFO[m.cat];
+    const width23 = (m.d23.total / maxTotal) * 100;
+    const width26 = (m.d26.total / maxTotal) * 100;
+    const changeColor = m.change > 0 ? 'var(--success)' : m.change < 0 ? 'var(--danger)' : 'var(--text-muted)';
+    const changeSign = m.change > 0 ? '+' : '';
+
+    return `
+      <div style="margin-bottom: 16px; padding: 12px 16px; background: var(--bg-sidebar); border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 700;">
+            <span style="display:inline-block; width:14px; height:14px; background:${info.color}; border-radius:3px;"></span>
+            ${info.name}
+          </div>
+          <div style="font-weight: 700; color: ${changeColor};">
+            ${changeSign}${m.change.toFixed(2)}pp
+          </div>
+        </div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2023</span>
+            <div class="compare-track"><div class="compare-fill" style="width:${width23}%; background: #94a3b8;"></div></div>
+            <span class="compare-pct">${m.d23.total.toFixed(2)}%</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-year-tag">2026</span>
+            <div class="compare-track"><div class="compare-fill" style="width:${width26}%; background: ${info.color};"></div></div>
+            <span class="compare-pct">${m.d26.total.toFixed(2)}%</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// =============================================
+// Treemap
+// =============================================
+function renderTreemap() {
+  const container = document.getElementById('treemapChart');
+  const data = STOCKS_2026.slice().sort((a, b) => b.pct - a.pct);
+  const total = data.reduce((sum, s) => sum + s.pct, 0);
+  const W = container.clientWidth || 1200;
+  const H = 480;
+  const items = data.map(d => ({ ...d, area: (d.pct / total) * W * H }));
+  const cells = squarify(items, [], 0, 0, W, H);
+
+  container.innerHTML = cells.map(c => {
+    const info = CATEGORY_INFO[c.category];
+    const size = c.area;
+    const cls = size > 20000 ? 'lg' : size > 8000 ? 'md' : size > 3000 ? 'sm' : 'tiny';
+    return `
+      <div class="treemap-cell ${cls}"
+           style="background:${info.color}; grid-column: ${c.x+1} / span ${c.w}; grid-row: ${c.y+1} / span ${c.h};"
+           onclick="alert('${c.code} ${c.name}\\n產業：${c.industry}\\n占比：${c.pct}%')">
+        <div class="name">${c.name}</div>
+        <div class="pct">${c.pct.toFixed(2)}%</div>
+      </div>
+    `;
+  }).join('');
+
+  const legend = document.getElementById('treemapLegend');
+  legend.innerHTML = Object.entries(CATEGORY_INFO).map(([cat, info]) => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${info.color};"></div>
+      <div class="legend-text">${info.name}</div>
+    </div>
+  `).join('');
+}
+
+function squarify(items, currentRow, x, y, w, h) {
+  const cells = [];
+  const total = items.reduce((sum, d) => sum + d.area, 0);
+  let remaining = items.slice();
+  let cx = x, cy = y, cw = w, ch = h;
+
+  while (remaining.length > 0) {
+    const side = Math.min(cw, ch);
+    let row = [];
+    let bestRatio = Infinity;
+
+    for (let i = 0; i < remaining.length; i++) {
+      const test = remaining.slice(0, i + 1);
+      const testArea = test.reduce((s, d) => s + d.area, 0);
+      const ratio = worstRatio(test, side, side);
+      if (ratio < bestRatio && testArea / total <= side / (cw + ch - side)) {
+        row = test;
+        bestRatio = ratio;
+      } else if (row.length > 0) {
+        break;
+      } else {
+        row = [remaining[0]];
+        break;
+      }
+    }
+
+    const rowArea = row.reduce((s, d) => s + d.area, 0);
+    let offset = 0;
+    const vertical = cw >= ch;
+    row.forEach(item => {
+      const cellSize = vertical ? ch : cw;
+      const cellLength = (item.area / cellSize);
+      if (vertical) {
+        cells.push({
+          ...item,
+          x: Math.round(cx / 30), y: Math.round((cy + offset) / 30),
+          w: Math.max(1, Math.round(cellLength / 30)),
+          h: Math.max(1, Math.round(cellSize / 30))
+        });
+        offset += cellLength;
+      } else {
+        cells.push({
+          ...item,
+          x: Math.round((cx + offset) / 30), y: Math.round(cy / 30),
+          w: Math.max(1, Math.round(cellSize / 30)),
+          h: Math.max(1, Math.round(cellLength / 30))
+        });
+        offset += cellLength;
+      }
+    });
+
+    const used = vertical ? ch : cw;
+    const usedLength = rowArea / used;
+    if (vertical) { cx += usedLength; cw -= usedLength; }
+    else { cy += usedLength; ch -= usedLength; }
+
+    remaining = remaining.slice(row.length);
+  }
+
+  return cells;
+}
+
+function worstRatio(row, w, h) {
+  const sum = row.reduce((s, d) => s + d.area, 0);
+  const max = Math.max(...row.map(d => d.area));
+  const min = Math.min(...row.map(d => d.area));
+  return Math.max((w * w * max) / (sum * sum), (sum * sum) / (h * h * min));
+}
+
+// =============================================
+// 排名比較表
+// =============================================
+function renderRankTable() {
+  const filter = document.getElementById('rankFilter').value.toLowerCase();
+  const indFilter = document.getElementById('rankIndustryFilter').value;
+  const body = document.getElementById('rankBody');
+
+  let data = STOCKS_2026.filter(s => {
+    if (filter && !s.code.includes(filter) && !s.name.toLowerCase().includes(filter)) return false;
+    if (indFilter !== 'all' && s.category !== indFilter) return false;
+    return true;
+  });
+
+  body.innerHTML = data.map(s => {
+    const info = CATEGORY_INFO[s.category];
+    const old = STOCKS_2023[s.code];
+    let oldRankHtml = '<span style="color:var(--text-muted);">—</span>';
+    let oldPctHtml = '<span style="color:var(--text-muted);">—</span>';
+    let changeHtml = '<span class="tag" style="background: var(--info);">🆕 新進</span>';
+
+    if (old) {
+      oldRankHtml = `#${old.rank}`;
+      oldPctHtml = `${old.pct.toFixed(4)}%`;
+      const rankChange = old.rank - s.rank;
+      const pctChange = s.pct - old.pct;
+      if (rankChange > 0) changeHtml = `<span class="tag" style="background: var(--success);">⬆️ +${rankChange} (${pctChange >= 0 ? '+' : ''}${pctChange.toFixed(2)}pp)</span>`;
+      else if (rankChange < 0) changeHtml = `<span class="tag" style="background: var(--danger);">⬇️ ${rankChange} (${pctChange >= 0 ? '+' : ''}${pctChange.toFixed(2)}pp)</span>`;
+      else changeHtml = `<span class="tag" style="background: var(--text-muted);">持平</span>`;
+    }
+
+    return `
+      <tr>
+        <td><strong>${s.code}</strong></td>
+        <td>${s.name}</td>
+        <td class="right">${oldRankHtml}</td>
+        <td class="right">${oldPctHtml}</td>
+        <td class="right"><strong>#${s.rank}</strong></td>
+        <td class="right" style="font-weight: 700; color:${info.color};">${s.pct.toFixed(4)}%</td>
+        <td class="right">${changeHtml}</td>
+        <td><span class="tag" style="background:${info.color};">${s.industry}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+document.getElementById('rankFilter').addEventListener('input', renderRankTable);
+document.getElementById('rankIndustryFilter').addEventListener('change', renderRankTable);
+
+const indFilter = document.getElementById('rankIndustryFilter');
+Object.entries(CATEGORY_INFO).forEach(([cat, info]) => {
+  const opt = document.createElement('option');
+  opt.value = cat;
+  opt.textContent = info.name;
+  indFilter.appendChild(opt);
+});
+
+document.getElementById('exportRankBtn').addEventListener('click', () => {
+  let csv = '代號,公司,2023排名,2023占比,2026排名,2026占比,變化,產業\n';
+  STOCKS_2026.forEach(s => {
+    const old = STOCKS_2023[s.code];
+    const oldRank = old ? old.rank : '';
+    const oldPct = old ? old.pct : '';
+    const rankChange = old ? (old.rank - s.rank) : '新進';
+    csv += `${s.code},${s.name},${oldRank},${oldPct},${s.rank},${s.pct},${rankChange},${s.industry}\n`;
+  });
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '台股前50大市值_2023vs2026.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// =============================================
+// 產業解析
+// =============================================
+function renderIndustry() {
+  const data = aggregateByCategory(2026);
+  const container = document.getElementById('industryDetail');
+
+  container.innerHTML = data.map(d => {
+    const info = CATEGORY_INFO[d.category];
+    const topStocks = d.stocks.slice().sort((a, b) => b.pct - a.pct).slice(0, 8);
+
+    return `
+      <div class="card" style="margin-bottom: 12px;">
+        <div class="card-title">
+          <span style="display:inline-block; width:16px; height:16px; background:${info.color}; border-radius:4px;"></span>
+          ${info.name}
+          <span class="badge" style="background:${info.color}20; color:${info.color};">${d.count} 檔 ｜ ${d.total.toFixed(2)}%</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">${info.desc}</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>代號</th><th>公司</th><th class="right">占比</th><th>細分題材</th></tr></thead>
+            <tbody>
+              ${topStocks.map(s => `
+                <tr>
+                  <td><strong>${s.code || ''}</strong></td>
+                  <td>${s.name}</td>
+                  <td class="right" style="font-weight:700; color:${info.color};">${s.pct.toFixed(4)}%</td>
+                  <td>${s.industry}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// =============================================
+// 初始渲染
+// =============================================
+renderTop10();
+renderDonut();
+renderIndustryCompare();
+renderRankTable();
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('treemap').classList.contains('active')) {
+    renderTreemap();
+  }
+});
+
+console.log('%c📊 台股市值儀表板（含 3 年比較）已載入', 'font-size: 16px; font-weight: bold; color: #3b82f6;');
+</script>
+</body>
+</html>

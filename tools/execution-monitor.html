@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>執行監控儀表板</title>
+<style>
+  :root {
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-sidebar: #f1f5f9;
+    --bg-hover: #e2e8f0;
+    --bg-tab-active: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --success: #10b981;
+    --success-bg: #d1fae5;
+    --warning: #f59e0b;
+    --warning-bg: #fef3c7;
+    --danger: #ef4444;
+    --danger-bg: #fee2e2;
+    --info: #06b6d4;
+    --info-bg: #cffafe;
+    --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    color: white;
+    padding: 20px 32px;
+    box-shadow: var(--shadow);
+  }
+  .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .header .subtitle { font-size: 13px; opacity: 0.9; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-sidebar);
+    padding: 6px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+  }
+  .tab:hover { background: var(--bg-hover); }
+  .tab.active {
+    background: var(--bg-tab-active);
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .card-title .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--info-bg);
+    color: var(--info);
+    font-weight: 600;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .stat .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .stat .value { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+  .stat .delta { font-size: 12px; margin-top: 4px; }
+  .delta.positive { color: var(--success); font-weight: 600; }
+  .delta.negative { color: var(--danger); font-weight: 600; }
+  .delta.neutral { color: var(--text-muted); }
+
+  .status-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .status-box.warning {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-left-color: var(--warning);
+  }
+  .status-box.success {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-left-color: var(--success);
+  }
+  .status-box.danger {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-left-color: var(--danger);
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .toolbar input, .toolbar select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: inherit;
+  }
+  .toolbar input { flex: 1; min-width: 200px; }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary {
+    background: var(--bg-sidebar);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* SOP Cards */
+  .sop-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .sop-card.entered {
+    border-color: var(--success);
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  }
+  .sop-card.waiting {
+    border-color: var(--warning);
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  }
+  .sop-card.exited {
+    border-color: var(--text-muted);
+    background: var(--bg-sidebar);
+    opacity: 0.85;
+  }
+  .sop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .sop-title { font-size: 18px; font-weight: 700; }
+  .sop-tag {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .sop-tag.entered { background: var(--success-bg); color: var(--success); }
+  .sop-tag.waiting { background: var(--warning-bg); color: var(--warning); }
+  .sop-tag.exited { background: var(--bg-hover); color: var(--text-muted); }
+
+  .sop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .sop-item {
+    background: var(--bg-sidebar);
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .sop-item .key { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+  .sop-item .val { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+
+  .price-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .price-label {
+    min-width: 80px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+  .price-bar {
+    flex: 1;
+    height: 28px;
+    background: var(--bg-sidebar);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .price-fill-stop { background: linear-gradient(90deg, #fee2e2, #fecaca); height: 100%; }
+  .price-fill-buy { background: linear-gradient(90deg, #d1fae5, #a7f3d0); height: 100%; }
+  .price-fill-target { background: linear-gradient(90deg, #fef3c7, #fde68a); height: 100%; }
+  .price-marker {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 3px;
+    background: var(--text-primary);
+    z-index: 5;
+  }
+  .price-marker::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  /* Position tracking */
+  .position-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .position-card.profit { border-left: 4px solid var(--success); }
+  .position-card.loss { border-left: 4px solid var(--danger); }
+  .position-card.flat { border-left: 4px solid var(--text-muted); }
+
+  .position-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .position-name { font-size: 16px; font-weight: 700; }
+  .position-pnl {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .position-pnl.profit { color: var(--success); }
+  .position-pnl.loss { color: var(--danger); }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--bg-sidebar);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    transition: width 0.3s;
+  }
+  .progress-fill.good { background: var(--success); }
+  .progress-fill.warn { background: var(--warning); }
+  .progress-fill.bad { background: var(--danger); }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead { background: var(--bg-sidebar); }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  th.right, td.right { text-align: right; font-variant-numeric: tabular-nums; }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--bg-primary); }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+  }
+  .tag-conservative { background: #6366f1; }
+  .tag-growth { background: #f97316; }
+
+  /* Form */
+  .form-group { margin-bottom: 12px; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  input[type="text"], input[type="number"], select, textarea {
+    padding: 8px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-backdrop.active { display: flex; }
+  .modal {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h3 { font-size: 18px; margin-bottom: 16px; }
+
+  /* Rebalance */
+  .rebalance-bar {
+    display: flex;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 12px 0;
+    border: 1px solid var(--border);
+  }
+  .rebalance-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.3s;
+  }
+
+  .alert-item {
+    background: var(--bg-card);
+    border-left: 4px solid var(--warning);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .alert-item.danger { border-left-color: var(--danger); }
+  .alert-item.success { border-left-color: var(--success); }
+  .alert-title { font-weight: 700; margin-bottom: 4px; }
+  .alert-desc { font-size: 13px; color: var(--text-secondary); }
+
+  .footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 16px; }
+    .header { padding: 16px 20px; }
+    .header h1 { font-size: 20px; }
+    th, td { padding: 8px 10px; font-size: 13px; }
+  }
+
+  /* Action buttons in position */
+  .action-btns { display: flex; gap: 6px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>🎯 執行監控儀表板</h1>
+  <div class="subtitle">進場 SOP ｜ 部位追蹤 ｜ 停損停利 ｜ 再平衡提醒</div>
+</header>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab active" data-tab="dashboard">📊 總覽</button>
+    <button class="tab" data-tab="sop">📋 進場 SOP</button>
+    <button class="tab" data-tab="positions">💼 部位追蹤</button>
+    <button class="tab" data-tab="rebalance">⚖️ 再平衡</button>
+    <button class="tab" data-tab="alerts">🔔 警示</button>
+  </div>
+
+  <!-- ===== 總覽 ===== -->
+  <div id="dashboard" class="tab-content active">
+    <div class="status-box">
+      <strong>💡 今日重點：</strong><span id="todayHighlight">所有部位尚未進場，請依 SOP 卡片準備執行。</span>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="label">總投入資金</div>
+        <div class="value" id="stat_total_invested">0</div>
+        <div class="delta neutral">準備金 745,936</div>
+      </div>
+      <div class="stat">
+        <div class="label">目前市值</div>
+        <div class="value" id="stat_total_value">0</div>
+        <div class="delta" id="stat_total_pnl">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">已實現損益</div>
+        <div class="value" id="stat_realized">0</div>
+        <div class="delta neutral">含領息</div>
+      </div>
+      <div class="stat">
+        <div class="label">組合報酬率</div>
+        <div class="value" id="stat_return">0%</div>
+        <div class="delta" id="stat_return_delta">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">持有部位</div>
+        <div class="value" id="stat_position_count">0</div>
+        <div class="delta neutral">/ 7 檔標的</div>
+      </div>
+      <div class="stat">
+        <div class="label">距組合停損</div>
+        <div class="value" id="stat_to_stop">—</div>
+        <div class="delta neutral">-15% 警戒</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 部位即時損益 <span class="badge" id="positionsCount">0 筆</span></div>
+      <div id="dashPositions"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚖️ 當前配置 vs 目標</div>
+      <div id="dashAllocation"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔔 最新警示</div>
+      <div id="dashAlerts"></div>
+    </div>
+  </div>
+
+  <!-- ===== SOP ===== -->
+  <div id="sop" class="tab-content">
+    <div class="action-bar" style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+      <h2 style="font-size: 18px; font-weight: 700;">進場 SOP（具體執行規則）</h2>
+      <button class="btn btn-primary" id="addSopBtn">➕ 新增標的</button>
+    </div>
+
+    <div class="status-box">
+      <strong>💡 使用說明：</strong>每張卡片顯示具體買進價、停損點、目標價、進場時機。標的狀態分為「已進場」、「等待進場」、「已出場」。
+    </div>
+
+    <div id="sopList"></div>
+  </div>
+
+  <!-- ===== 部位追蹤 ===== -->
+  <div id="positions" class="tab-content">
+    <div class="action-bar" style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+      <h2 style="font-size: 18px; font-weight: 700;">部位追蹤（買進後填寫）</h2>
+      <button class="btn btn-primary" id="addPosBtn">➕ 記錄買進</button>
+    </div>
+
+    <div class="status-box success">
+      <strong>💡 使用說明：</strong>每次買進後點「記錄買進」填寫成本與張數。之後每天更新「現價」即可追蹤損益與距停損多遠。
+    </div>
+
+    <div id="positionList"></div>
+
+    <div class="card" id="summaryCard" style="display: none;">
+      <div class="card-title">📊 組合總覽</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th class="right">金額</th>
+            </tr>
+          </thead>
+          <tbody id="summaryBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 再平衡 ===== -->
+  <div id="rebalance" class="tab-content">
+    <div class="card">
+      <div class="card-title">⚖️ 配置偏離監控 <span class="badge">目標 60/40</span></div>
+      <div class="status-box">
+        <strong>規則：</strong>當保守部位偏離目標 ±5pp（例如低於 55% 或高於 65%），需考慮再平衡。偏離 ±10pp 強制再平衡。
+      </div>
+      <div id="rebalanceContent"></div>
+    </div>
+  </div>
+
+  <!-- ===== 警示 ===== -->
+  <div id="alerts" class="tab-content">
+    <div class="action-bar" style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+      <h2 style="font-size: 18px; font-weight: 700;">警示中心</h2>
+      <button class="btn btn-secondary" id="clearAlertsBtn">🗑️ 清除全部</button>
+    </div>
+    <div id="alertList"></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div>🎯 執行監控儀表板 ｜ 資料自動儲存於 localStorage</div>
+  <div style="margin-top: 4px;">⚠️ 本工具為投資決策輔助，非具體買賣建議</div>
+</div>
+
+<!-- ===== Modal: SOP ===== -->
+<div id="sopModal" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="sopModalTitle">➕ 新增進場 SOP</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>代號</label>
+        <input type="text" id="sop_code" placeholder="例如 1216">
+      </div>
+      <div class="form-group">
+        <label>名稱</label>
+        <input type="text" id="sop_name" placeholder="例如 統一">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>類型</label>
+        <select id="sop_type">
+          <option value="conservative">保守型</option>
+          <option value="growth">成長型</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>狀態</label>
+        <select id="sop_status">
+          <option value="waiting">等待進場</option>
+          <option value="entered">已進場</option>
+          <option value="exited">已出場</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>建議買進價</label>
+        <input type="number" id="sop_buy_price" step="0.5" placeholder="例如 90">
+      </div>
+      <div class="form-group">
+        <label>進場張數</label>
+        <input type="number" id="sop_shares" placeholder="例如 2">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>停損價</label>
+        <input type="number" id="sop_stop_loss" step="0.5" placeholder="例如 81">
+      </div>
+      <div class="form-group">
+        <label>目標價（第一）</label>
+        <input type="number" id="sop_target_1" step="0.5" placeholder="例如 105">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>目標價（第二）</label>
+        <input type="number" id="sop_target_2" step="0.5" placeholder="例如 120">
+      </div>
+      <div class="form-group">
+        <label>分批進場次數</label>
+        <input type="number" id="sop_batch" value="1" placeholder="例如 1">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>進場時機描述</label>
+      <textarea id="sop_timing" rows="2" placeholder="例如：除息後回穩、7/15-7/20 進場"></textarea>
+    </div>
+    <div class="form-group">
+      <label>備註</label>
+      <textarea id="sop_notes" rows="2" placeholder="例如：食品龍頭，殖利率 4-5%"></textarea>
+    </div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+      <button class="btn btn-secondary" onclick="closeModal('sopModal')">取消</button>
+      <button class="btn btn-primary" id="saveSopBtn">💾 儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: Position ===== -->
+<div id="posModal" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="posModalTitle">➕ 記錄買進</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>代號</label>
+        <input type="text" id="pos_code" placeholder="例如 1216">
+      </div>
+      <div class="form-group">
+        <label>買進價</label>
+        <input type="number" id="pos_buy_price" step="0.5" placeholder="例如 90">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>張數</label>
+        <input type="number" id="pos_shares" placeholder="例如 2">
+      </div>
+      <div class="form-group">
+        <label>現價（更新）</label>
+        <input type="number" id="pos_current_price" step="0.5" placeholder="例如 92">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>備註</label>
+      <input type="text" id="pos_notes" placeholder="例如：第 1 次進場">
+    </div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+      <button class="btn btn-secondary" onclick="closeModal('posModal')">取消</button>
+      <button class="btn btn-primary" id="savePosBtn">💾 儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// 預設 SOP 資料（依據先前規劃）
+// =============================================
+const DEFAULT_SOP = [
+  {
+    id: 'sop_1', code: '1216', name: '統一', type: 'conservative',
+    buy_price: 90, shares: 2, stop_loss: 81, target_1: 105, target_2: 120,
+    batch: 1, status: 'waiting',
+    timing: '7/15-7/20 進場，分 1 次',
+    notes: '食品龍頭，殖利率 4-5%，單張 9 萬'
+  },
+  {
+    id: 'sop_2', code: '1215', name: '卜蜂', type: 'conservative',
+    buy_price: 62, shares: 2, stop_loss: 56, target_1: 72, target_2: 85,
+    batch: 1, status: 'waiting',
+    timing: '7/15-7/20 進場，分 1 次',
+    notes: '東南亞布局完整，單張 6.2 萬'
+  },
+  {
+    id: 'sop_3', code: '1303', name: '南亞', type: 'conservative',
+    buy_price: 65, shares: 1, stop_loss: 58, target_1: 75, target_2: 88,
+    batch: 1, status: 'waiting',
+    timing: '7/15-7/20 進場',
+    notes: '塑化中游、PCB 上游連動，單張 6.5 萬'
+  },
+  {
+    id: 'sop_4', code: '0050', name: '元大台灣50', type: 'conservative',
+    buy_price: 60, shares: 1, stop_loss: 54, target_1: 70, target_2: 80,
+    batch: 1, status: 'waiting',
+    timing: '7/15-7/20 進場',
+    notes: '市值型 ETF，單張 6 萬'
+  },
+  {
+    id: 'sop_5', code: '4540', name: '全球傳動', type: 'growth',
+    buy_price: 80, shares: 1, stop_loss: 70, target_1: 100, target_2: 120,
+    batch: 3, status: 'waiting',
+    timing: '8月起分 3 次進場（8/5、8/20、9/5）',
+    notes: '機器人滾珠螺桿題材，單張 8 萬'
+  },
+  {
+    id: 'sop_6', code: '2359', name: '所羅門', type: 'growth',
+    buy_price: 100, shares: 1, stop_loss: 88, target_1: 125, target_2: 150,
+    batch: 3, status: 'waiting',
+    timing: '8月起分 3 次進場',
+    notes: 'AI 機器視覺題材，單張 10 萬'
+  },
+  {
+    id: 'sop_7', code: '6191', name: '精成科', type: 'growth',
+    buy_price: 60, shares: 1, stop_loss: 53, target_1: 75, target_2: 90,
+    batch: 3, status: 'waiting',
+    timing: '8月起分 3 次進場',
+    notes: 'PCB 載板，AI 伺服器題材'
+  }
+];
+
+// =============================================
+// LocalStorage
+// =============================================
+const KEY_SOP = 'monitor_sop_v1';
+const KEY_POS = 'monitor_positions_v1';
+const KEY_ALERTS = 'monitor_alerts_v1';
+const KEY_DIVIDEND = 'monitor_dividend_v1';
+
+function load(key) {
+  try { const d = localStorage.getItem(key); return d ? JSON.parse(d) : null; }
+  catch(e) { return null; }
+}
+function save(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); }
+  catch(e) {}
+}
+
+let sops = load(KEY_SOP) || DEFAULT_SOP;
+let positions = load(KEY_POS) || [];
+let alerts = load(KEY_ALERTS) || [];
+let realizedDividend = load(KEY_DIVIDEND) || 0;
+
+save(KEY_SOP, sops);
+save(KEY_POS, positions);
+save(KEY_ALERTS, alerts);
+save(KEY_DIVIDEND, realizedDividend);
+
+// =============================================
+// Tabs
+// =============================================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'dashboard') renderDashboard();
+    if (tab.dataset.tab === 'rebalance') renderRebalance();
+    if (tab.dataset.tab === 'alerts') renderAlerts();
+  });
+});
+
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('active');
+};
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+});
+
+// =============================================
+// SOP
+// =============================================
+let editingSopId = null;
+
+function renderSOP() {
+  const container = document.getElementById('sopList');
+  if (sops.length === 0) {
+    container.innerHTML = '<div class="status-box">尚無 SOP，新增標的開始規劃。</div>';
+    return;
+  }
+
+  container.innerHTML = sops.map(s => {
+    const statusClass = s.status === 'entered' ? 'entered' : s.status === 'exited' ? 'exited' : 'waiting';
+    const statusLabel = s.status === 'entered' ? '已進場' : s.status === 'exited' ? '已出場' : '等待進場';
+    const typeLabel = s.type === 'conservative' ? '保守' : '成長';
+    const typeClass = s.type === 'conservative' ? 'tag-conservative' : 'tag-growth';
+
+    // 計算價格區間（用於視覺化）
+    const minPrice = s.stop_loss;
+    const maxPrice = s.target_2;
+    const range = maxPrice - minPrice;
+
+    const buyPos = ((s.buy_price - minPrice) / range * 100).toFixed(1);
+    const stopPos = 0;
+    const target1Pos = ((s.target_1 - minPrice) / range * 100).toFixed(1);
+    const target2Pos = 100;
+
+    return `
+      <div class="sop-card ${statusClass}">
+        <div class="sop-header">
+          <div>
+            <div class="sop-title">${s.code} ${s.name} <span class="tag ${typeClass}">${typeLabel}</span></div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">${s.notes || ''}</div>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="sop-tag ${statusClass}">${statusLabel}</span>
+            <button class="btn btn-sm btn-secondary" onclick="editSop('${s.id}')">✏️</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteSop('${s.id}')">🗑️</button>
+          </div>
+        </div>
+
+        <div class="sop-grid">
+          <div class="sop-item">
+            <div class="key">建議買進價</div>
+            <div class="val" style="color: var(--success);">${s.buy_price} 元</div>
+          </div>
+          <div class="sop-item">
+            <div class="key">進場張數</div>
+            <div class="val">${s.shares} 張</div>
+          </div>
+          <div class="sop-item">
+            <div class="key">投入金額</div>
+            <div class="val">${(s.buy_price * s.shares * 1000).toLocaleString()} 元</div>
+          </div>
+          <div class="sop-item">
+            <div class="key">停損價</div>
+            <div class="val" style="color: var(--danger);">${s.stop_loss} 元 (-10%)</div>
+          </div>
+          <div class="sop-item">
+            <div class="key">目標價 1</div>
+            <div class="val" style="color: var(--info);">${s.target_1} 元</div>
+          </div>
+          <div class="sop-item">
+            <div class="key">目標價 2</div>
+            <div class="val" style="color: var(--info);">${s.target_2} 元</div>
+          </div>
+          <div class="sop-item">
+            <div class="key">分批次數</div>
+            <div class="val">${s.batch} 次</div>
+          </div>
+          <div class="sop-item">
+            <div class="key">預估報酬</div>
+            <div class="val">${(((s.target_1 - s.buy_price) / s.buy_price) * 100).toFixed(1)}% ~ ${(((s.target_2 - s.buy_price) / s.buy_price) * 100).toFixed(1)}%</div>
+          </div>
+        </div>
+
+        <div style="background: var(--bg-sidebar); padding: 12px; border-radius: 8px;">
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">📍 價格區間圖</div>
+          <div class="price-bar">
+            <div class="price-fill-stop" style="position: absolute; left: 0; width: ${buyPos}%;"></div>
+            <div class="price-fill-buy" style="position: absolute; left: ${buyPos}%; width: ${target1Pos - buyPos}%;"></div>
+            <div class="price-fill-target" style="position: absolute; left: ${target1Pos}%; width: ${100 - target1Pos}%;"></div>
+            <div class="price-marker" style="left: ${stopPos}%;" data-label="停損 ${s.stop_loss}"></div>
+            <div class="price-marker" style="left: ${buyPos}%;" data-label="買進 ${s.buy_price}"></div>
+            <div class="price-marker" style="left: ${target1Pos}%;" data-label="目標1 ${s.target_1}"></div>
+            <div class="price-marker" style="left: ${target2Pos}%;" data-label="目標2 ${s.target_2}"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 11px; color: var(--text-muted);">
+            <span>🔴 停損區</span>
+            <span>🟢 持有區</span>
+            <span>🟡 目標區</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 12px; padding: 10px 14px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+          <strong>⏰ 進場時機：</strong>${s.timing || '依市況決定'}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('addSopBtn').addEventListener('click', () => {
+  editingSopId = null;
+  document.getElementById('sopModalTitle').textContent = '➕ 新增進場 SOP';
+  ['sop_code','sop_name','sop_buy_price','sop_shares','sop_stop_loss','sop_target_1','sop_target_2','sop_timing','sop_notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('sop_batch').value = 1;
+  document.getElementById('sop_type').value = 'conservative';
+  document.getElementById('sop_status').value = 'waiting';
+  document.getElementById('sopModal').classList.add('active');
+});
+
+window.editSop = function(id) {
+  const s = sops.find(x => x.id === id);
+  if (!s) return;
+  editingSopId = id;
+  document.getElementById('sopModalTitle').textContent = '✏️ 編輯 SOP';
+  document.getElementById('sop_code').value = s.code;
+  document.getElementById('sop_name').value = s.name;
+  document.getElementById('sop_type').value = s.type;
+  document.getElementById('sop_status').value = s.status;
+  document.getElementById('sop_buy_price').value = s.buy_price;
+  document.getElementById('sop_shares').value = s.shares;
+  document.getElementById('sop_stop_loss').value = s.stop_loss;
+  document.getElementById('sop_target_1').value = s.target_1;
+  document.getElementById('sop_target_2').value = s.target_2;
+  document.getElementById('sop_batch').value = s.batch;
+  document.getElementById('sop_timing').value = s.timing || '';
+  document.getElementById('sop_notes').value = s.notes || '';
+  document.getElementById('sopModal').classList.add('active');
+};
+
+window.deleteSop = function(id) {
+  if (!confirm('確定要刪除這個 SOP？')) return;
+  sops = sops.filter(x => x.id !== id);
+  save(KEY_SOP, sops);
+  renderSOP();
+};
+
+document.getElementById('saveSopBtn').addEventListener('click', () => {
+  const data = {
+    code: document.getElementById('sop_code').value.trim(),
+    name: document.getElementById('sop_name').value.trim(),
+    type: document.getElementById('sop_type').value,
+    status: document.getElementById('sop_status').value,
+    buy_price: parseFloat(document.getElementById('sop_buy_price').value) || 0,
+    shares: parseInt(document.getElementById('sop_shares').value) || 0,
+    stop_loss: parseFloat(document.getElementById('sop_stop_loss').value) || 0,
+    target_1: parseFloat(document.getElementById('sop_target_1').value) || 0,
+    target_2: parseFloat(document.getElementById('sop_target_2').value) || 0,
+    batch: parseInt(document.getElementById('sop_batch').value) || 1,
+    timing: document.getElementById('sop_timing').value,
+    notes: document.getElementById('sop_notes').value
+  };
+  if (!data.code || !data.name || !data.buy_price) {
+    alert('代號、名稱、建議買進價為必填');
+    return;
+  }
+  if (editingSopId) {
+    sops = sops.map(s => s.id === editingSopId ? { ...s, ...data } : s);
+  } else {
+    sops.push({ id: 'sop_' + Date.now(), ...data });
+  }
+  save(KEY_SOP, sops);
+  closeModal('sopModal');
+  renderSOP();
+});
+
+// =============================================
+// 部位追蹤
+// =============================================
+let editingPosId = null;
+
+function renderPositions() {
+  const container = document.getElementById('positionList');
+  if (positions.length === 0) {
+    container.innerHTML = '<div class="status-box">尚無部位記錄。買進後點「記錄買進」開始追蹤。</div>';
+    document.getElementById('summaryCard').style.display = 'none';
+    return;
+  }
+
+  container.innerHTML = positions.map(p => {
+    const cost = p.buy_price * p.shares * 1000;
+    const mv = p.current_price * p.shares * 1000;
+    const pnl = mv - cost;
+    const pnlPct = (pnl / cost) * 100;
+    const pnlClass = pnl >= 0 ? 'profit' : 'loss';
+    const pnlSign = pnl >= 0 ? '+' : '';
+
+    const sop = sops.find(s => s.code === p.code);
+    let stopDistance = '';
+    if (sop && sop.stop_loss) {
+      const stopMv = sop.stop_loss * p.shares * 1000;
+      const dist = (mv - stopMv) / mv * 100;
+      const distClass = dist < 5 ? 'bad' : dist < 15 ? 'warn' : 'good';
+      stopDistance = `
+        <div style="margin-top: 6px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">
+            <span>距停損 ${sop.stop_loss} 元</span>
+            <span>${dist.toFixed(1)}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill ${distClass}" style="width: ${Math.min(100, dist * 3)}%;"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="position-card ${pnlClass}">
+        <div class="position-header">
+          <div>
+            <div class="position-name">${p.code} <span style="font-size: 14px; color: var(--text-secondary); font-weight: 500;">${p.notes || ''}</span></div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+              買進 ${p.buy_price} × ${p.shares} 張 = ${cost.toLocaleString()} 元
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div class="position-pnl ${pnlClass}">${pnlSign}${pnl.toLocaleString()} 元</div>
+            <div style="font-size: 12px; color: ${pnl >= 0 ? 'var(--success)' : 'var(--danger)'};">${pnlSign}${pnlPct.toFixed(2)}%</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--text-secondary);">
+          <span>現價：</span>
+          <input type="number" value="${p.current_price}" step="0.5" style="width: 80px; padding: 4px 8px;"
+                 onchange="updateCurrentPrice('${p.id}', this.value)">
+          <span>元 ｜ 市值 ${mv.toLocaleString()} 元</span>
+          <div style="margin-left: auto;" class="action-btns">
+            <button class="btn btn-sm btn-secondary" onclick="editPosition('${p.id}')">✏️</button>
+            <button class="btn btn-sm btn-danger" onclick="deletePosition('${p.id}')">🗑️</button>
+          </div>
+        </div>
+        ${stopDistance}
+      </div>
+    `;
+  }).join('');
+
+  renderSummary();
+}
+
+function renderSummary() {
+  const card = document.getElementById('summaryCard');
+  card.style.display = 'block';
+  const body = document.getElementById('summaryBody');
+
+  const totalCost = positions.reduce((sum, p) => sum + p.buy_price * p.shares * 1000, 0);
+  const totalMv = positions.reduce((sum, p) => sum + p.current_price * p.shares * 1000, 0);
+  const totalPnl = totalMv - totalCost;
+  const pnlPct = (totalPnl / totalCost) * 100;
+  const pnlSign = totalPnl >= 0 ? '+' : '';
+  const pnlColor = totalPnl >= 0 ? 'var(--success)' : 'var(--danger)';
+
+  body.innerHTML = `
+    <tr><td>總投入成本</td><td class="right">${totalCost.toLocaleString()} 元</td></tr>
+    <tr><td>目前市值</td><td class="right">${totalMv.toLocaleString()} 元</td></tr>
+    <tr style="background: ${totalPnl >= 0 ? 'var(--success-bg)' : 'var(--danger-bg)'}; font-weight: 700;">
+      <td>未實現損益</td>
+      <td class="right" style="color: ${pnlColor};">${pnlSign}${totalPnl.toLocaleString()} 元 (${pnlSign}${pnlPct.toFixed(2)}%)</td>
+    </tr>
+    <tr><td>已領股息</td><td class="right">${realizedDividend.toLocaleString()} 元</td></tr>
+    <tr style="font-weight: 700; border-top: 2px solid var(--border);">
+      <td>總損益（含股息）</td>
+      <td class="right" style="color: ${(totalPnl + realizedDividend) >= 0 ? 'var(--success)' : 'var(--danger)'};">
+        ${(totalPnl + realizedDividend >= 0 ? '+' : '')}${(totalPnl + realizedDividend).toLocaleString()} 元
+      </td>
+    </tr>
+    <tr><td>距離組合停損 -15%</td><td class="right">${(totalCost * 0.85).toLocaleString()} 元 (距離 ${((totalMv - totalCost * 0.85) / totalMv * 100).toFixed(1)}%)</td></tr>
+  `;
+}
+
+document.getElementById('addPosBtn').addEventListener('click', () => {
+  editingPosId = null;
+  document.getElementById('posModalTitle').textContent = '➕ 記錄買進';
+  ['pos_code','pos_buy_price','pos_shares','pos_current_price','pos_notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('posModal').classList.add('active');
+});
+
+window.editPosition = function(id) {
+  const p = positions.find(x => x.id === id);
+  if (!p) return;
+  editingPosId = id;
+  document.getElementById('posModalTitle').textContent = '✏️ 編輯部位';
+  document.getElementById('pos_code').value = p.code;
+  document.getElementById('pos_buy_price').value = p.buy_price;
+  document.getElementById('pos_shares').value = p.shares;
+  document.getElementById('pos_current_price').value = p.current_price;
+  document.getElementById('pos_notes').value = p.notes || '';
+  document.getElementById('posModal').classList.add('active');
+};
+
+window.deletePosition = function(id) {
+  if (!confirm('確定要刪除這個部位？')) return;
+  positions = positions.filter(p => p.id !== id);
+  save(KEY_POS, positions);
+  renderPositions();
+  renderDashboard();
+};
+
+window.updateCurrentPrice = function(id, price) {
+  const p = parseFloat(price);
+  if (isNaN(p) || p <= 0) return;
+  positions = positions.map(pos => pos.id === id ? { ...pos, current_price: p } : pos);
+  save(KEY_POS, positions);
+  renderPositions();
+  renderDashboard();
+};
+
+document.getElementById('savePosBtn').addEventListener('click', () => {
+  const data = {
+    code: document.getElementById('pos_code').value.trim(),
+    buy_price: parseFloat(document.getElementById('pos_buy_price').value) || 0,
+    shares: parseInt(document.getElementById('pos_shares').value) || 0,
+    current_price: parseFloat(document.getElementById('pos_current_price').value) || parseFloat(document.getElementById('pos_buy_price').value) || 0,
+    notes: document.getElementById('pos_notes').value
+  };
+  if (!data.code || !data.buy_price || !data.shares) {
+    alert('代號、買進價、張數為必填');
+    return;
+  }
+  if (editingPosId) {
+    positions = positions.map(p => p.id === editingPosId ? { ...p, ...data } : p);
+  } else {
+    positions.push({ id: 'pos_' + Date.now(), ...data });
+    addAlert('success', `${data.code} 買進記錄已新增`, `${data.shares} 張 @ ${data.buy_price} 元 = ${(data.buy_price * data.shares * 1000).toLocaleString()} 元`);
+  }
+  save(KEY_POS, positions);
+  closeModal('posModal');
+  renderPositions();
+  renderDashboard();
+});
+
+// =============================================
+// 再平衡
+// =============================================
+function renderRebalance() {
+  const container = document.getElementById('rebalanceContent');
+  if (positions.length === 0) {
+    container.innerHTML = '<div class="status-box warning">尚無部位，無法計算配置偏離。</div>';
+    return;
+  }
+
+  const total = positions.reduce((sum, p) => sum + p.current_price * p.shares * 1000, 0);
+  const consValue = positions.filter(p => {
+    const sop = sops.find(s => s.code === p.code);
+    return sop && sop.type === 'conservative';
+  }).reduce((sum, p) => sum + p.current_price * p.shares * 1000, 0);
+  const growValue = total - consValue;
+
+  const consPct = (consValue / total) * 100;
+  const growPct = (growValue / total) * 100;
+  const targetCons = 60;
+  const targetGrow = 40;
+  const devCons = consPct - targetCons;
+  const devGrow = growPct - targetGrow;
+
+  const devAlert = Math.abs(devCons) >= 10 ? 'danger' : Math.abs(devCons) >= 5 ? 'warning' : 'success';
+  const devColor = devAlert === 'danger' ? 'var(--danger)' : devAlert === 'warning' ? 'var(--warning)' : 'var(--success)';
+
+  container.innerHTML = `
+    <div class="rebalance-bar">
+      <div class="rebalance-segment" style="width: ${consPct}%; background: #6366f1;">
+        保守 ${consPct.toFixed(1)}%
+      </div>
+      <div class="rebalance-segment" style="width: ${growPct}%; background: #f97316;">
+        成長 ${growPct.toFixed(1)}%
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>類型</th>
+            <th class="right">目前占比</th>
+            <th class="right">目標占比</th>
+            <th class="right">偏離</th>
+            <th>建議動作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>🟦 保守型</td>
+            <td class="right">${consPct.toFixed(2)}%</td>
+            <td class="right">${targetCons}%</td>
+            <td class="right" style="color: ${devColor}; font-weight: 700;">
+              ${devCons >= 0 ? '+' : ''}${devCons.toFixed(2)}pp
+            </td>
+            <td>${getActionAdvice(devCons, '保守')}</td>
+          </tr>
+          <tr>
+            <td>🟧 成長型</td>
+            <td class="right">${growPct.toFixed(2)}%</td>
+            <td class="right">${targetGrow}%</td>
+            <td class="right" style="color: ${devColor}; font-weight: 700;">
+              ${devGrow >= 0 ? '+' : ''}${devGrow.toFixed(2)}pp
+            </td>
+            <td>${getActionAdvice(devGrow, '成長')}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    ${Math.abs(devCons) >= 5 ? `
+      <div class="alert-item ${devAlert === 'danger' ? 'danger' : ''}">
+        <div class="alert-title">⚠️ ${Math.abs(devCons) >= 10 ? '強制' : '建議'} 再平衡訊號</div>
+        <div class="alert-desc">${getRebalanceAdvice(devCons)}</div>
+      </div>
+    ` : `
+      <div class="alert-item success">
+        <div class="alert-title">✅ 配置正常</div>
+        <div class="alert-desc">目前偏離在 ±5pp 內，無需調整。</div>
+      </div>
+    `}
+  `;
+}
+
+function getActionAdvice(dev, type) {
+  if (Math.abs(dev) < 5) return '✅ 維持現狀';
+  if (dev > 10) return `🚨 ${type}占比過高，考慮減碼`;
+  if (dev < -10) return `🚨 ${type}占比過低，考慮加碼`;
+  if (dev > 0) return `⚠️ ${type}占比偏高，建議部分獲利了結`;
+  return `⚠️ ${type}占比偏低，可考慮加碼`;
+}
+
+function getRebalanceAdvice(devCons) {
+  if (devCons > 10) return '保守型占比超過 70%，建議賣出部分保守部位，轉入成長型維持 60/40 配置。';
+  if (devCons > 5) return '保守型占比略高，可部分獲利了結，等待成長型回檔再加碼。';
+  if (devCons < -10) return '成長型占比過低（< 30%），可能是保守型下跌或成長型已實現部分獲利。建議檢視並考慮加碼成長型。';
+  if (devCons < -5) return '成長型占比略低，可考慮保守型獲利了結，轉入成長型。';
+  return '目前配置在合理範圍。';
+}
+
+// =============================================
+// 警示
+// =============================================
+function addAlert(type, title, desc) {
+  alerts.push({
+    id: 'alert_' + Date.now(),
+    type, title, desc,
+    date: new Date().toISOString().slice(0, 16).replace('T', ' ')
+  });
+  save(KEY_ALERTS, alerts);
+}
+
+function renderAlerts() {
+  const container = document.getElementById('alertList');
+  if (alerts.length === 0) {
+    container.innerHTML = '<div class="status-box success">目前沒有警示。當部位損益觸發停損、目標價或重大事件時，會自動顯示在這裡。</div>';
+    return;
+  }
+  container.innerHTML = alerts.slice().reverse().map(a => `
+    <div class="alert-item ${a.type}">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <div class="alert-title">${a.title}</div>
+          <div class="alert-desc">${a.desc}</div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap;">📅 ${a.date}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('clearAlertsBtn').addEventListener('click', () => {
+  if (!confirm('清除所有警示？')) return;
+  alerts = [];
+  save(KEY_ALERTS, alerts);
+  renderAlerts();
+});
+
+// =============================================
+// 總覽
+// =============================================
+function renderDashboard() {
+  // 統計
+  const totalCost = positions.reduce((sum, p) => sum + p.buy_price * p.shares * 1000, 0);
+  const totalMv = positions.reduce((sum, p) => sum + p.current_price * p.shares * 1000, 0);
+  const totalPnl = totalMv - totalCost;
+  const pnlPct = totalCost > 0 ? (totalPnl / totalCost) * 100 : 0;
+  const pnlSign = totalPnl >= 0 ? '+' : '';
+
+  document.getElementById('stat_total_invested').textContent = totalCost.toLocaleString();
+  document.getElementById('stat_total_value').textContent = totalMv.toLocaleString();
+
+  const pnlEl = document.getElementById('stat_total_pnl');
+  pnlEl.textContent = `${pnlSign}${totalPnl.toLocaleString()} 元`;
+  pnlEl.className = `delta ${totalPnl >= 0 ? 'positive' : 'negative'}`;
+
+  document.getElementById('stat_realized').textContent = realizedDividend.toLocaleString();
+  document.getElementById('stat_return').textContent = `${pnlSign}${pnlPct.toFixed(2)}%`;
+  const retEl = document.getElementById('stat_return_delta');
+  retEl.textContent = totalPnl >= 0 ? '📈 獲利中' : '📉 虧損中';
+  retEl.className = `delta ${totalPnl >= 0 ? 'positive' : 'negative'}`;
+
+  document.getElementById('stat_position_count').textContent = positions.length;
+
+  // 距組合停損
+  if (totalCost > 0) {
+    const stopMv = totalCost * 0.85;
+    const dist = ((totalMv - stopMv) / totalMv) * 100;
+    const stopEl = document.getElementById('stat_to_stop');
+    stopEl.textContent = `${dist.toFixed(1)}%`;
+    stopEl.parentElement.querySelector('.delta').textContent = dist < 5 ? '🚨 接近警戒' : dist < 15 ? '⚠️ 注意' : '✅ 安全';
+  }
+
+  document.getElementById('positionsCount').textContent = `${positions.length} 筆`;
+
+  // 部位損益卡片
+  const dashPos = document.getElementById('dashPositions');
+  if (positions.length === 0) {
+    dashPos.innerHTML = '<div class="status-box">尚未建立部位。點「💼 部位追蹤」分頁記錄買進。</div>';
+  } else {
+    dashPos.innerHTML = positions.slice(0, 5).map(p => {
+      const cost = p.buy_price * p.shares * 1000;
+      const mv = p.current_price * p.shares * 1000;
+      const pnl = mv - cost;
+      const pnlPct = (pnl / cost) * 100;
+      const cls = pnl >= 0 ? 'profit' : 'loss';
+      return `
+        <div class="position-card ${cls}" style="margin-bottom: 8px;">
+          <div class="position-header">
+            <div class="position-name">${p.code} <span style="font-size: 12px; color: var(--text-muted);">${p.shares} 張</span></div>
+            <div class="position-pnl ${cls}">${pnl >= 0 ? '+' : ''}${pnl.toLocaleString()} (${pnl >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 配置
+  renderDashAllocation();
+
+  // 警示
+  renderDashAlerts();
+
+  // 今日重點
+  const waitingCount = sops.filter(s => s.status === 'waiting').length;
+  const enteredCount = positions.length;
+  let highlight = '';
+  if (positions.length === 0 && waitingCount > 0) {
+    highlight = `尚有 ${waitingCount} 檔 SOP 等待進場。建議依 SOP 規劃執行。`;
+  } else if (enteredCount > 0) {
+    highlight = `已進場 ${enteredCount} 檔部位。持續追蹤損益與距停損距離。`;
+  } else {
+    highlight = '請依 SOP 卡片準備執行。';
+  }
+  document.getElementById('todayHighlight').textContent = highlight;
+}
+
+function renderDashAllocation() {
+  const container = document.getElementById('dashAllocation');
+  if (positions.length === 0) {
+    container.innerHTML = '<div class="status-box">尚無部位資料</div>';
+    return;
+  }
+  const total = positions.reduce((sum, p) => sum + p.current_price * p.shares * 1000, 0);
+  const cons = positions.filter(p => {
+    const sop = sops.find(s => s.code === p.code);
+    return sop && sop.type === 'conservative';
+  }).reduce((sum, p) => sum + p.current_price * p.shares * 1000, 0);
+  const grow = total - cons;
+  const consPct = (cons / total) * 100;
+  const growPct = 100 - consPct;
+
+  container.innerHTML = `
+    <div class="rebalance-bar">
+      <div class="rebalance-segment" style="width: ${consPct}%; background: #6366f1;">保守 ${consPct.toFixed(1)}%</div>
+      <div class="rebalance-segment" style="width: ${growPct}%; background: #f97316;">成長 ${growPct.toFixed(1)}%</div>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
+      <span>🟦 目標 60%</span>
+      <span>🟧 目標 40%</span>
+    </div>
+  `;
+}
+
+function renderDashAlerts() {
+  const container = document.getElementById('dashAlerts');
+  // 自動檢查警示
+  const newAlerts = [];
+
+  positions.forEach(p => {
+    const sop = sops.find(s => s.code === p.code);
+    if (!sop) return;
+    const pnlPct = ((p.current_price - p.buy_price) / p.buy_price) * 100;
+    if (pnlPct <= -8) {
+      newAlerts.push({
+        type: 'danger',
+        title: `🚨 ${p.code} 接近停損`,
+        desc: `現價 ${p.current_price}，虧損 ${pnlPct.toFixed(2)}%。停損價 ${sop.stop_loss}。請檢視是否執行。`
+      });
+    } else if (pnlPct >= ((sop.target_1 - p.buy_price) / p.buy_price * 100)) {
+      newAlerts.push({
+        type: 'success',
+        title: `🎯 ${p.code} 達到目標價 1`,
+        desc: `現價 ${p.current_price}，已達目標 1 (${sop.target_1})。可考慮部分獲利了結。`
+      });
+    }
+  });
+
+  // 組合停損
+  if (positions.length > 0) {
+    const totalCost = positions.reduce((sum, p) => sum + p.buy_price * p.shares * 1000, 0);
+    const totalMv = positions.reduce((sum, p) => sum + p.current_price * p.shares * 1000, 0);
+    const pnlPct = ((totalMv - totalCost) / totalCost) * 100;
+    if (pnlPct <= -12) {
+      newAlerts.push({
+        type: 'danger',
+        title: `🚨 組合接近 -15% 停損`,
+        desc: `組合虧損 ${pnlPct.toFixed(2)}%。已進入強制警戒區，請立即檢視所有部位。`
+      });
+    } else if (pnlPct <= -8) {
+      newAlerts.push({
+        type: 'warning',
+        title: `⚠️ 組合虧損擴大`,
+        desc: `組合虧損 ${pnlPct.toFixed(2)}%。距 -15% 停損還有 ${(15 + pnlPct).toFixed(2)}pp 緩衝。`
+      });
+    }
+  }
+
+  if (newAlerts.length === 0) {
+    container.innerHTML = '<div class="alert-item success"><div class="alert-title">✅ 目前無警示</div><div class="alert-desc">所有部位均在安全範圍內。</div></div>';
+  } else {
+    container.innerHTML = newAlerts.map(a => `
+      <div class="alert-item ${a.type}">
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-desc">${a.desc}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// =============================================
+// 初始化
+// =============================================
+renderSOP();
+renderPositions();
+renderDashboard();
+
+console.log('%c🎯 執行監控儀表板已載入', 'font-size: 16px; font-weight: bold; color: #3b82f6;');
+console.log('提示：所有資料儲存於 localStorage，重新整理頁面不會遺失');
+window.resetMonitor = function() { if(confirm('重置所有資料？')) { localStorage.clear(); location.reload(); } };
+</script>
+</body>
+</html>
