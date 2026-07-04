@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes Agent v0.18.0 — The Judgment Release</title>
+<meta name="description" content="Hermes Agent v0.18.0 功能一覽：Mixture-of-Agents、Completion Contracts、Background Fan-out、Desktop Projects、Scale-to-Zero Gateway">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --soft: #a8a29e;
+    --card: #ffffff; --bd: #e7e5e4; --bd2: #d6d3d1;
+    --accent: #3b82f6; --accent2: #1d4ed8;
+    --tag-bg: #e0e7ff; --tag-fg: #3730a3;
+    --success-bg: #d1fae5; --success-fg: #065f46;
+    --warning-bg: #fef3c7; --warning-fg: #92400e;
+    --danger-bg: #fee2e2; --danger-fg: #991b1b;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+    --shadow-lg: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -1px rgba(0,0,0,.04);
+    --radius: 12px; --radius-sm: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --soft: #57534e;
+      --card: #1c1917; --bd: #292524; --bd2: #44403c;
+      --accent: #60a5fa; --accent2: #93c5fd;
+      --tag-bg: #1e3a5f; --tag-fg: #93c5fd;
+      --success-bg: #064e3b; --success-fg: #6ee7b7;
+      --warning-bg: #451a03; --warning-fg: #fcd34d;
+      --danger-bg: #450a0a; --danger-fg: #fca5a5;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+      --shadow-lg: 0 4px 6px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.3);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+    background: var(--bg); color: var(--fg);
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    background: linear-gradient(135deg, #1d4ed8 0%, #7c3aed 100%);
+    color: white;
+    padding: 56px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-inner { position: relative; max-width: 720px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    color: #bfdbfe;
+    font-size: 12px; font-weight: 600;
+    padding: 4px 12px; border-radius: 999px;
+    margin-bottom: 16px; letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 800; letter-spacing: -0.03em;
+    margin-bottom: 10px; line-height: 1.1;
+  }
+  .hero .sub {
+    font-size: 16px; opacity: .85;
+    margin-bottom: 28px; line-height: 1.5;
+  }
+  .hero-stats {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+  }
+  .hero-stat {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: var(--radius-sm);
+    padding: 12px 20px; text-align: center;
+    min-width: 90px;
+  }
+  .hero-stat .num {
+    font-size: 24px; font-weight: 800;
+    letter-spacing: -0.02em; display: block;
+  }
+  .hero-stat .lbl {
+    font-size: 11px; opacity: .75; text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  /* ===== LAYOUT ===== */
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* ===== STICKY NAV ===== */
+  .sticky-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--bd);
+    padding: 0;
+    margin-bottom: 32px;
+  }
+  .nav-inner {
+    display: flex; gap: 4px; overflow-x: auto;
+    padding: 8px 0;
+    scrollbar-width: none;
+  }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex: 0 0 auto;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent; color: var(--muted);
+    font-size: 13px; font-weight: 500;
+    font-family: inherit; cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .nav-btn:hover { color: var(--fg); background: var(--card); }
+  .nav-btn.active {
+    background: var(--card); color: var(--fg);
+    border-color: var(--bd);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ===== SECTION ===== */
+  .section { margin-bottom: 48px; }
+  .section-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px; padding-bottom: 10px;
+    border-bottom: 2px solid var(--bd);
+  }
+  .section-icon { font-size: 20px; }
+  .section-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .section-count {
+    margin-left: auto; font-size: 12px; color: var(--muted);
+    background: var(--tag-bg); color: var(--tag-fg);
+    padding: 2px 8px; border-radius: 999px;
+  }
+
+  /* ===== FEATURE GRID ===== */
+  .feat-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  .feat-card {
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: border-color .15s, transform .05s;
+  }
+  .feat-card:hover { border-color: var(--accent); }
+  .feat-card:active { transform: scale(.99); }
+
+  .feat-card.large {
+    grid-column: 1 / -1;
+  }
+
+  .feat-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--bd);
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .feat-icon { font-size: 26px; line-height: 1; flex: 0 0 auto; }
+  .feat-title-group { flex: 1; min-width: 0; }
+  .feat-title {
+    font-size: 16px; font-weight: 700; line-height: 1.3;
+    margin-bottom: 2px;
+  }
+  .feat-subtitle {
+    font-size: 12px; color: var(--muted);
+  }
+  .feat-badge {
+    flex: 0 0 auto;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 8px; border-radius: 5px;
+    text-transform: uppercase; letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .badge-new { background: var(--success-bg); color: var(--success-fg); }
+  .badge-core { background: var(--tag-bg); color: var(--tag-fg); }
+  .badge-sec { background: var(--danger-bg); color: var(--danger-fg); }
+  .badge-infra { background: var(--warning-bg); color: var(--warning-fg); }
+
+  .feat-body { padding: 16px 20px; }
+  .feat-desc { font-size: 14px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+  .feat-bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .feat-bullets li {
+    font-size: 13.5px; color: var(--fg);
+    display: flex; align-items: flex-start; gap: 7px;
+    line-height: 1.4;
+  }
+  .feat-bullets li::before {
+    content: '→'; color: var(--accent); font-weight: 700;
+    flex: 0 0 auto; margin-top: 1px;
+  }
+
+  /* ===== COMPARISON TABLE ===== */
+  .table-wrap {
+    overflow-x: auto; border-radius: var(--radius);
+    border: 1px solid var(--bd);
+    box-shadow: var(--shadow);
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13.5px;
+    background: var(--card);
+  }
+  th {
+    text-align: left; padding: 12px 16px;
+    background: var(--bg); color: var(--muted);
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em;
+    border-bottom: 1px solid var(--bd);
+  }
+  td {
+    padding: 12px 16px; border-bottom: 1px solid var(--bd);
+    vertical-align: top; line-height: 1.5;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+  .old { text-decoration: line-through; color: var(--soft); }
+  .new-val { color: var(--success-fg); font-weight: 600; }
+  .tag-cell { display: flex; gap: 5px; flex-wrap: wrap; }
+  .mini-tag {
+    font-size: 11px; padding: 2px 7px; border-radius: 4px;
+    background: var(--tag-bg); color: var(--tag-fg);
+  }
+
+  /* ===== STATS BAR ===== */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px; margin-bottom: 40px;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--bd);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow); padding: 14px 16px;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.02em; color: var(--accent);
+  }
+  .stat-card .lbl {
+    font-size: 11px; color: var(--muted); margin-top: 2px;
+  }
+
+  /* ===== JOES WORKFLOW ===== */
+  .joe-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
+    border: 1px solid #c7d2fe;
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 40px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .joe-box {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2e1065 100%);
+      border-color: #3730a3;
+    }
+  }
+  .joe-box-title {
+    font-size: 15px; font-weight: 700; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .joe-steps { display: flex; flex-direction: column; gap: 10px; }
+  .joe-step {
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 13.5px; line-height: 1.5;
+  }
+  .step-num {
+    flex: 0 0 auto; width: 22px; height: 22px;
+    border-radius: 50%; background: var(--accent);
+    color: white; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .step-text { flex: 1; }
+  .step-text strong { color: var(--accent2); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    margin-top: 56px; padding-top: 20px;
+    border-top: 1px solid var(--bd);
+    font-size: 12.5px; color: var(--muted);
+    text-align: center;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media print { .sticky-nav { display: none; } }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">✨ v0.18.0 — The Judgment Release</div>
+    <h1>Hermes Agent</h1>
+    <p class="sub">讓 AI 真正知道什麼時候工作「完成了」，而不只是「感覺做完了」。<br>v0.18.0 同時修完所有 P0/P1 臭蟲，近 700 個高優先問題歸零。</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="num">949</span>
+        <span class="lbl">Issues 關閉</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">998</span>
+        <span class="lbl">PRs 合併</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">1,720</span>
+        <span class="lbl">Commits</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">0</span>
+        <span class="lbl">Open P0/P1</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">370+</span>
+        <span class="lbl">貢獻者</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===== STATS BAR ===== -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="num">12天</div>
+      <div class="lbl">衝刺週期</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">692</div>
+      <div class="lbl">P0/P1 解決</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">251K</div>
+      <div class="lbl">新增行數</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">v0.17→v0.18</div>
+      <div class="lbl">主要版本</div>
+    </div>
+  </div>
+
+  <!-- ===== STICKY NAV ===== -->
+  <nav class="sticky-nav" aria-label="功能分類">
+    <div class="nav-inner">
+      <button class="nav-btn active" onclick="showSection('all')">全部</button>
+      <button class="nav-btn" onclick="showSection('core')">🤖 核心升級</button>
+      <button class="nav-btn" onclick="showSection('desktop')">💻 桌面功能</button>
+      <button class="nav-btn" onclick="showSection('system')">⚙️ 系統/安全</button>
+      <button class="nav-btn" onclick="showSection('compare')">📊 版本對比</button>
+      <button class="nav-btn" onclick="showSection('joe')">🚀 Joe 的用法</button>
+    </div>
+  </nav>
+
+  <!-- ===== SECTION: 核心升級 ===== -->
+  <section class="section" data-sec="core">
+    <div class="section-head">
+      <span class="section-icon">🤖</span>
+      <span class="section-title">核心升級</span>
+      <span class="section-count">4 功能</span>
+    </div>
+    <div class="feat-grid">
+
+      <div class="feat-card large">
+        <div class="feat-header">
+          <div class="feat-icon">🔮</div>
+          <div class="feat-title-group">
+            <div class="feat-title">Mixture-of-Agents（MoA）</div>
+            <div class="feat-subtitle">多模型 Ensemble，第一公民等級</div>
+          </div>
+          <span class="feat-badge badge-new">新功能</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">把多個模型組合成命名集合，像選單一模型一樣直接選用。參考模型的推理過程會即時顯示，聚合答案以 Streaming 方式呈現。</p>
+          <ul class="feat-bullets">
+            <li>支援任意 LLM 混搭（OpenAI / Anthropic / 本地模型等）</li>
+            <li>每個模型的推理過程對你可見，不是黑盒子</li>
+            <li>Aggregator Streaming 输出，邊推理邊看到結果</li>
+            <li>適合重要決策：研究報告、股票分析、策略評估</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">🎯</div>
+          <div class="feat-title-group">
+            <div class="feat-title">Completion Contracts</div>
+            <div class="feat-subtitle">/goal — 工作完成標準</div>
+          </div>
+          <span class="feat-badge badge-new">新功能</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">下 /goal 時定義「完成是什麼樣子」，Agent 會對照這個標準驗證自己的工作，不會「感覺做完了」就停。</p>
+          <ul class="feat-bullets">
+            <li>Agent 自己 Judge 完成度</li>
+            <li>可綁定具體可測量標準（如：本益比、殖利率）</li>
+            <li>減少來回校正次數</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">📈</div>
+          <div class="feat-title-group">
+            <div class="feat-title">/learn + /journey</div>
+            <div class="feat-subtitle">自我改進機制</div>
+          </div>
+          <span class="feat-badge badge-new">新功能</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">把自我改善變成可見、可操控的循環。系統會記住每次執行的優缺點，你可以在下次扭轉。</p>
+          <ul class="feat-bullets">
+            <li>/learn：總結這次執行的經驗教訓</li>
+            <li>/journey：看到整個決策鏈的来龍去脈</li>
+            <li>改進決策品質，不是只是執行</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">⚡</div>
+          <div class="feat-title-group">
+            <div class="feat-title">Background Subagent Fan-out</div>
+            <div class="feat-subtitle">並列子代理</div>
+          </div>
+          <span class="feat-badge badge-core">核心功能</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">子代理可以在背景並列展開。適合多路徑研究或分析任務，結果同時回來再整合。</p>
+          <ul class="feat-bullets">
+            <li>最多 3 個子代理並列</li>
+            <li>各自獨立執行，不需等待彼此</li>
+            <li>應用：法人報告 + 社群情緒 + Vault 歷史三路並列</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== SECTION: 桌面功能 ===== -->
+  <section class="section" data-sec="desktop">
+    <div class="section-head">
+      <span class="section-icon">💻</span>
+      <span class="section-title">桌面功能</span>
+      <span class="section-count">3 功能</span>
+    </div>
+    <div class="feat-grid">
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">📁</div>
+          <div class="feat-title-group">
+            <div class="feat-title">Desktop Projects</div>
+            <div class="feat-subtitle">一級編碼專案支援</div>
+          </div>
+          <span class="feat-badge badge-new">新功能</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">將工作區綁定到真實資料夾（如 ~/Documents/StockResearch/），所有工具鏈、Cline/VSCode 直接作用在該目錄。</p>
+          <ul class="feat-bullets">
+            <li>session 的 workspace 直接在指定目錄</li>
+            <li>綁定後 tools 自動具備該目錄上下文</li>
+            <li>適合長期研究專案（股票分析、內容企劃）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">🧠</div>
+          <div class="feat-title-group">
+            <div class="feat-title">Memory Graph</div>
+            <div class="feat-subtitle">記憶圖譜視覺化</div>
+          </div>
+          <span class="feat-badge badge-new">新功能</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">將 vault 中散落的筆記找出關聯並視覺化。Obsidian 的 contacts / Spaces / DailyNote 都能串成可探索的節點圖。</p>
+          <ul class="feat-bullets">
+            <li>探索 vault 內的隱藏關聯</li>
+            <li>人物、空間、筆記的連結一覽</li>
+            <li>發現以前沒注意到的關係</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">🖥️</div>
+          <div class="feat-title-group">
+            <div class="feat-title">電腦使用（CUA Driver）</div>
+            <div class="feat-subtitle">直接操控桌面 GUI</div>
+          </div>
+          <span class="feat-badge badge-core">既有用</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">CUA（Computer Use Agent）模式：點擊、輸入、截圖，全自動驅動本機桌面應用（Chrome、Obsidian 等）。</p>
+          <ul class="feat-bullets">
+            <li>可用於自動化網頁操作</li>
+            <li>驅動 Obsidian 直接寫筆記</li>
+            <li>需 macOS/Windows/Linux 桌面版</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== SECTION: 系統/安全 ===== -->
+  <section class="section" data-sec="system">
+    <div class="section-head">
+      <span class="section-icon">⚙️</span>
+      <span class="section-title">系統 / 安全 / 部署</span>
+      <span class="section-count">5 功能</span>
+    </div>
+    <div class="feat-grid">
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">🔒</div>
+          <div class="feat-title-group">
+            <div class="feat-title">MCP 安全加固</div>
+            <div class="feat-subtitle">設定持久化強化</div>
+          </div>
+          <span class="feat-badge badge-sec">安全</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">MCP 設定持久化的攻擊面已全面硬化，block base_url 滲漏，並為短 TTL session 加入 keepalive。</p>
+          <ul class="feat-bullets">
+            <li>封鎖 base_url exfiltration</li>
+            <li>Session keepalive 防止中斷</li>
+            <li>攻擊面大幅縮小</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">📦</div>
+          <div class="feat-title-group">
+            <div class="feat-title">Gateway Scale-to-Zero</div>
+            <div class="feat-subtitle">生產級部署</div>
+          </div>
+          <span class="feat-badge badge-infra">基礎設施</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">Gateway 現在可以真正 Scale-to-Zero，閒置時完全釋放資源，並具備 drain 協調機制。</p>
+          <ul class="feat-bullets">
+            <li>零實例時不收費</li>
+            <li>Drain 協調確保請求不丢失</li>
+            <li>支援 Kubernetes / 雲函數部署</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">🎵</div>
+          <div class="feat-title-group">
+            <div class="feat-title">AAC 語音備忘錄 Remux</div>
+            <div class="feat-subtitle">Signal 格式強化</div>
+          </div>
+          <span class="feat-badge badge-core">既有強化</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">Signal 訊號格式升級：支援 AAC 語音備忘錄自動 Remux，並統一各平台的 Markdown 格式化。</p>
+          <ul class="feat-bullets">
+            <li>AAC 語音檔自動處理</li>
+            <li>Markdown 跨平台一致</li>
+            <li>改善 Telegram / Signal 轉發忠誠度</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">☁️</div>
+          <div class="feat-title-group">
+            <div class="feat-title">多平台 Adapter 統一捆綁</div>
+            <div class="feat-subtitle">一鍵開通</div>
+          </div>
+          <span class="feat-badge badge-infra">基礎設施</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">Slack / DingTalk / WhatsApp / Matrix / Feishu / Telegram / WeCom / Email / SMS 全部遷移到統一捆綁架構。</p>
+          <ul class="feat-bullets">
+            <li>一個安裝包含所有平台</li>
+            <li>設定更簡單，維護更容易</li>
+            <li>減少重複適配代碼</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-header">
+          <div class="feat-icon">🗄️</div>
+          <div class="feat-title-group">
+            <div class="feat-title">Blank Slate Setup Mode</div>
+            <div class="feat-subtitle">極簡起步</div>
+          </div>
+          <span class="feat-badge badge-core">既有強化</span>
+        </div>
+        <div class="feat-body">
+          <p class="feat-desc">新用戶預設為最小化 Agent，按需逐步開通功能（而非一開始全部轟炸）。</p>
+          <ul class="feat-bullets">
+            <li>極簡起步，降低學習曲線</li>
+            <li>漸進式開通功能</li>
+            <li>減少第一次上手的認知負擔</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== SECTION: 版本對比 ===== -->
+  <section class="section" data-sec="compare">
+    <div class="section-head">
+      <span class="section-icon">📊</span>
+      <span class="section-title">v0.17 → v0.18 差異</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>v0.17</th>
+            <th>v0.18</th>
+            <th>標籤</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Mixture-of-Agents</strong></td>
+            <td><span class="old">無</span></td>
+            <td><span class="new-val">第一公民，命名 Ensemble</span></td>
+            <td><span class="mini-tag">新功能</span></td>
+          </tr>
+          <tr>
+            <td><strong>Completion Contracts</strong></td>
+            <td><span class="old">無（憑模型感覺）</span></td>
+            <td><span class="new-val">/goal + 標準驗證</span></td>
+            <td><span class="mini-tag">新功能</span></td>
+          </tr>
+          <tr>
+            <td><strong>Background Subagent</strong></td>
+            <td><span class="old">同步或單一背景</span></td>
+            <td><span class="new-val">最多 3 路並列 Fan-out</span></td>
+            <td><span class="mini-tag">強化</span></td>
+          </tr>
+          <tr>
+            <td><strong>Desktop Projects</strong></td>
+            <td><span class="old">無或初步</span></td>
+            <td><span class="new-val">一級專案，workspace 綁定資料夾</span></td>
+            <td><span class="mini-tag">新功能</span></td>
+          </tr>
+          <tr>
+            <td><strong>Memory Graph</strong></td>
+            <td><span class="old">無</span></td>
+            <td><span class="new-val">可探索的節點圖</span></td>
+            <td><span class="mini-tag">新功能</span></td>
+          </tr>
+          <tr>
+            <td><strong>Gateway Scale-to-Zero</strong></td>
+            <td><span class="old">需要最小 1 實例</span></td>
+            <td><span class="new-val">真正縮到 0 + drain 協調</span></td>
+            <td><span class="mini-tag">基礎設施</span></td>
+          </tr>
+          <tr>
+            <td><strong>P0/P1 開放數</strong></td>
+            <td><span class="old">近 700 個開放</span></td>
+            <td><span class="new-val">0（全部關閉）</span></td>
+            <td><span class="mini-tag">品質</span></td>
+          </tr>
+          <tr>
+            <td><strong>MCP 安全</strong></td>
+            <td><span class="old">base_url 有滲漏風險</span></td>
+            <td><span class="new-val">封鎖 exfil + keepalive</span></td>
+            <td><span class="mini-tag">安全</span></td>
+          </tr>
+          <tr>
+            <td><strong>多平台 Adapter</strong></td>
+            <td><span class="old">各自獨立安裝</span></td>
+            <td><span class="new-val">統一捆綁（1 安裝）</span></td>
+            <td><span class="mini-tag">基礎設施</span></td>
+          </tr>
+          <tr>
+            <td><strong>Blank Slate Mode</strong></td>
+            <td><span class="old">預設全開</span></td>
+            <td><span class="new-val">極簡起步，按需開通</span></td>
+            <td><span class="mini-tag">UX</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== SECTION: JOE'S WORKFLOW ===== -->
+  <section class="section" data-sec="joe">
+    <div class="section-head">
+      <span class="section-icon">🚀</span>
+      <span class="section-title">Joe 的實際用法</span>
+      <span class="section-count">今日已實測</span>
+    </div>
+    <div class="joe-box">
+      <div class="joe-box-title">⚡ 這次示範：新麥 (1580) 換股研究</div>
+      <div class="joe-steps">
+        <div class="joe-step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>Background Subagent Fan-out</strong> — 派出 3 路子代理同時研究：<br>
+            A）法人報告（公開資訊觀測站）<br>
+            B）社群情緒（PTT / CMoney）<br>
+            C）Vault 歷史軌跡（舊有新麥記錄）<br>
+            <em>→ 2 分鐘完成，節省 3 倍時間</em>
+          </div>
+        </div>
+        <div class="joe-step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>Completion Contracts</strong> — 建立「換股框架.md」寫入 vault<br>
+            <em>→ 日後任何檔股票都可複用，有標準、不情緒化</em>
+          </div>
+        </div>
+        <div class="joe-step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>Cron Job</strong> — 設定 7/10 9:30 提醒（新麥 6 月營收公布）<br>
+            <em>→ 到時自動 Telegram 通知，直接回覆啟動下一步評估</em>
+          </div>
+        </div>
+        <div class="joe-step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <strong>Desktop Projects</strong> — 專案直接綁定 ~/Documents/GitHub/pages/tools<br>
+            <em>→ 研究資料、HTML 工具、Vault 筆記全部在同一 workspace</em>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  資料來源：<a href="https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.1" target="_blank" rel="noopener">Hermes Agent v0.18.0 Release Notes</a> ·
+  Hermes Agent v2026.7.1 · The Judgment Release
+</footer>
+
+</body>
+<script>
+  function showSection(id) {
+    // Update buttons
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      if (b.textContent.includes('全部') && id === 'all') b.classList.add('active');
+      if (b.textContent.includes('核心') && id === 'core') b.classList.add('active');
+      if (b.textContent.includes('桌面') && id === 'desktop') b.classList.add('active');
+      if (b.textContent.includes('系統') && id === 'system') b.classList.add('active');
+      if (b.textContent.includes('版本') && id === 'compare') b.classList.add('active');
+      if (b.textContent.includes('Joe') && id === 'joe') b.classList.add('active');
+    });
+
+    // Show/hide sections
+    document.querySelectorAll('.section').forEach(s => {
+      if (id === 'all') {
+        s.style.display = '';
+      } else {
+        s.style.display = s.dataset.sec === id ? '' : 'none';
+      }
+    });
+  }
+</script>
+</html>
