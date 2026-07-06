@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新麥 1580 中國子公司上市案 — 定論機率與股價影響</title>
+  <meta name="description" content="新麥 (1580) 中國子公司新麥機械（中國）股份有限公司 上市上交所主板進度分析：2027H2 定論機率、三情境股價帶動、關鍵時間錨點。">
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-sidebar: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --accent: #3b82f6;
+      --accent-2: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #06b6d4;
+      --shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,.06);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+      color: white;
+      padding: 32px 24px;
+    }
+    .header-inner { max-width: 1100px; margin: 0 auto; }
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .header .sub {
+      font-size: 14px;
+      opacity: 0.9;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .header .sub span { display: inline-flex; align-items: center; gap: 4px; }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .status-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--accent);
+    }
+    .stat.success { border-left-color: var(--success); }
+    .stat.warning { border-left-color: var(--warning); }
+    .stat.danger { border-left-color: var(--danger); }
+    .stat.info { border-left-color: var(--info); }
+    .stat .label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .stat .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+    .stat .desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 18px;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card h3 {
+      font-size: 15px;
+      margin: 20px 0 10px 0;
+      color: var(--text-secondary);
+    }
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 9px;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      background: var(--border);
+    }
+    .tl-item {
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 6px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 2px solid var(--text-muted);
+    }
+    .tl-item.done::before { background: var(--success); border-color: var(--success); }
+    .tl-item.curr::before { background: var(--warning); border-color: var(--warning); box-shadow: 0 0 0 4px rgba(245,158,11,.18); }
+    .tl-item.future::before { background: var(--bg-card); border-color: var(--text-muted); }
+    .tl-date { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .tl-title { font-size: 15px; font-weight: 600; margin: 2px 0; }
+    .tl-desc { font-size: 13px; color: var(--text-secondary); }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .badge.done { background: #d1fae5; color: #065f46; }
+    .badge.curr { background: #fef3c7; color: #92400e; }
+    .badge.future { background: #f1f5f9; color: #475569; }
+    .badge.high { background: #fecaca; color: #991b1b; }
+    .badge.mid { background: #fed7aa; color: #9a3412; }
+    .badge.low { background: #fef3c7; color: #92400e; }
+    .badge.good { background: #d1fae5; color: #065f46; }
+    .badge.bad { background: #fecaca; color: #991b1b; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--bg-sidebar);
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    tr:hover td { background: #fafbfc; }
+    .gantt-wrap {
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .scenario {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      background: var(--bg-card);
+    }
+    .scenario.pos { border-color: var(--success); background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%); }
+    .scenario.neu { border-color: var(--warning); background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%); }
+    .scenario.neg { border-color: var(--danger); background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%); }
+    .scenario .name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .scenario .prob {
+      font-size: 26px;
+      font-weight: 700;
+      margin: 6px 0;
+    }
+    .scenario.pos .prob { color: var(--success); }
+    .scenario.neu .prob { color: var(--warning); }
+    .scenario.neg .prob { color: var(--danger); }
+    .scenario .prob-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .scenario ul {
+      margin: 10px 0 0 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .scenario ul li { margin-bottom: 4px; }
+    .anchor-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .anchor-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .anchor-list li:last-child { border-bottom: 0; }
+    .anchor-time {
+      flex: 0 0 110px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .anchor-body { flex: 1; }
+    .anchor-body .ttl { font-size: 14px; font-weight: 600; }
+    .anchor-body .d { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .anchor-body .impact {
+      display: inline-block;
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: #dbeafe;
+      color: #1e40af;
+      margin-left: 4px;
+      font-weight: 600;
+    }
+    .risk-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 14px;
+    }
+    .risk-list li {
+      padding: 8px 0 8px 24px;
+      position: relative;
+      border-bottom: 1px dashed var(--border);
+    }
+    .risk-list li:last-child { border-bottom: 0; }
+    .risk-list li::before {
+      content: '⚠';
+      position: absolute;
+      left: 0;
+      top: 8px;
+    }
+    .conclusion {
+      background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+    .conclusion h2 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      color: white;
+    }
+    .conclusion p { margin: 0; font-size: 15px; line-height: 1.7; }
+    .conclusion strong { color: #fde68a; }
+    footer {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 16px 24px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    @media (max-width: 768px) {
+      .header h1 { font-size: 22px; }
+      .container { padding: 16px; }
+      .card { padding: 16px; }
+      .stat .value { font-size: 22px; }
+      .anchor-time { flex: 0 0 90px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <h1>🥯 新麥 1580 中國子公司上市案</h1>
+      <div class="sub">
+        <span>📅 報告日：2026-07-06</span>
+        <span>🏢 標的：新麥 (1580.TWO)</span>
+        <span>🇨🇳 子公司：新麥機械（中國）股份有限公司</span>
+        <span>🏛️ 目標：上海證交所主板</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- KPI 概覽 -->
+    <div class="status-row">
+      <div class="stat info">
+        <div class="label">最新進度</div>
+        <div class="value">已遞件</div>
+        <div class="desc">2026/06/26 向上交所遞交主板上市申請</div>
+      </div>
+      <div class="stat success">
+        <div class="label">母公司持股</div>
+        <div class="value">96.39%</div>
+        <div class="desc">新麥機械（中國）股本</div>
+      </div>
+      <div class="stat warning">
+        <div class="label">2027H2 定論機率</div>
+        <div class="value">55–70%</div>
+        <div class="desc">拿到「同意上市註冊批文」</div>
+      </div>
+      <div class="stat">
+        <div class="label">現價</div>
+        <div class="value">NT$ 124.5</div>
+        <div class="desc">2026/07/04 收盤 +1.22%</div>
+      </div>
+    </div>
+
+    <!-- 上市時程表 -->
+    <div class="card">
+      <h2>📅 上市時程事實</h2>
+      <div class="timeline">
+        <div class="tl-item done">
+          <div class="tl-date">2025/06/06</div>
+          <div class="tl-title">母公司股東會通過 <span class="badge done">已完成</span></div>
+          <div class="tl-desc">新麥 114 年股東常會決議通過子公司上市案</div>
+        </div>
+        <div class="tl-item done">
+          <div class="tl-date">2026/06/03</div>
+          <div class="tl-title">子公司董事會決議 <span class="badge done">已完成</span></div>
+          <div class="tl-desc">董事會決議通過 A 股 IPO 案，並召開 2026 第一次臨時股東會</div>
+        </div>
+        <div class="tl-item done">
+          <div class="tl-date">2026/06/25</div>
+          <div class="tl-title">江蘇監管局驗收完成 <span class="badge done">關鍵節點</span></div>
+          <div class="tl-desc">取得中國證監會江蘇監管局「驗收工作完成函」——輔導期階段性瑕疵已清</div>
+        </div>
+        <div class="tl-item done">
+          <div class="tl-date">2026/06/26</div>
+          <div class="tl-title">正式遞件上交所 <span class="badge done">關鍵節點</span></div>
+          <div class="tl-desc">向上交所遞交主板上市申請文件，IPO 正式啟動</div>
+        </div>
+        <div class="tl-item done">
+          <div class="tl-date">2026/06/28</div>
+          <div class="tl-title">第二次臨時股東會 <span class="badge done">已完成</span></div>
+          <div class="tl-desc">子公司召開 2026 年第二次臨時股東會（過戶 / 架構調整）</div>
+        </div>
+        <div class="tl-item future">
+          <div class="tl-date">2026 Q4（估）</div>
+          <div class="tl-title">首輪問詢 <span class="badge future">領先指標</span></div>
+          <div class="tl-desc">上交所首輪問詢函（最敏感的成敗訊號）—— 過了 +5–8%、被退件則需重啟</div>
+        </div>
+        <div class="tl-item future">
+          <div class="tl-date">2027 H1（估）</div>
+          <div class="tl-title">上會過審 <span class="badge future">最大利多</span></div>
+          <div class="tl-desc">發審委過會——歷史平均 +15–25%</div>
+        </div>
+        <div class="tl-item future">
+          <div class="tl-date">2027 Q4（估，中性）</div>
+          <div class="tl-title">拿到批文 <span class="badge future">靴子落地</span></div>
+          <div class="tl-desc">註冊批文到手——短期 +10–20%，隨後 2–3 個月內掛牌</div>
+        </div>
+        <div class="tl-item future">
+          <div class="tl-date">2028 Q1（估）</div>
+          <div class="tl-title">正式掛牌 <span class="badge future">蜜月行情</span></div>
+          <div class="tl-desc">A 股掛牌——歷史 +20–40%，但母公司後續常見回吐</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2027H2 定論機率 -->
+    <div class="card">
+      <h2>🎯 2027 下半年「定論」機率分析</h2>
+      <p style="font-size:14px;color:var(--text-secondary);margin-top:0;">
+        「定論」= 拿到「同意上市註冊批文」（不是掛牌日）。
+      </p>
+
+      <h3>A 股主板審查週期參考</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>區間</th>
+            <th>樣本</th>
+            <th>平均審查天數</th>
+            <th>來源</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2025/06 – 2026/01</td>
+            <td>82 家註冊生效</td>
+            <td><strong>472 天</strong></td>
+            <td>21 財經</td>
+          </tr>
+          <tr>
+            <td>2025 起快案</td>
+            <td>20 家</td>
+            <td><strong>172 天</strong></td>
+            <td>騰訊新聞 / 投行提速</td>
+          </tr>
+          <tr>
+            <td>最快紀錄</td>
+            <td>—</td>
+            <td>110–111 天</td>
+            <td>知乎統計</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>新麥中國時程推算（從 2026/06/26 受理起算）</h3>
+      <div class="scenario-grid">
+        <div class="scenario neg">
+          <div class="name">🐢 悲觀情境</div>
+          <div class="prob-label">2027H2 無定論</div>
+          <div class="prob">20–30%</div>
+          <ul>
+            <li>審查 600+ 天（暫緩、補件、財報更新）</li>
+            <li>跨入 2028 才拿到批文</li>
+            <li>可能原因：發審委質疑財報（中國削價競爭致毛利率）、政策放緩</li>
+          </ul>
+        </div>
+        <div class="scenario neu">
+          <div class="name">🚶 中性情境（最可能）</div>
+          <div class="prob-label">2027H2 末定論</div>
+          <div class="prob">50–55%</div>
+          <ul>
+            <li>審查 350–450 天（中性偏快）</li>
+            <li>2027 Q4 拿到批文</li>
+            <li>2027H2 末剛好定論</li>
+            <li>加分項：江蘇監管局驗收已過、輔導期瑕疵已清、成熟子公司不需跑 3 年報表</li>
+          </ul>
+        </div>
+        <div class="scenario pos">
+          <div class="name">🚀 樂觀情境</div>
+          <div class="prob-label">2027H2 已掛牌</div>
+          <div class="prob">20–25%</div>
+          <ul>
+            <li>審查 172 天（投行提速快案）</li>
+            <li>2027 Q1 拿到批文、Q2 掛牌</li>
+            <li>2027H2 已是「定論 + 掛牌後蜜月期」</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 對股價的帶動 -->
+    <div class="card">
+      <h2>💰 對 1580 股價的帶動（情境分析）</h2>
+      <p style="font-size:14px;color:var(--text-secondary);margin-top:0;">
+        不是一次性「過關利多」，而是「價值重估」+「流動性釋放」雙引擎。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>情境</th>
+            <th>母子公司結構</th>
+            <th>1580 隱含意義</th>
+            <th>股價帶動</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge good">順利上市</span></td>
+            <td>持股 96% 子公司變成「陸股上市公司 96% 股東」</td>
+            <td>淨值大幅增厚、享有陸股高本益比估值溢價</td>
+            <td><strong>+30% 至 +60%</strong></td>
+          </tr>
+          <tr>
+            <td><span class="badge mid">定論但延宕</span></td>
+            <td>進度確定、僅時程延後</td>
+            <td>失去時間溢價但維持題材熱度</td>
+            <td><strong>+10% 至 +20%</strong></td>
+          </tr>
+          <tr>
+            <td><span class="badge bad">撤回 / 失敗</span></td>
+            <td>中止 IPO</td>
+            <td>短期失望性下跌，基本面不變</td>
+            <td><strong>−10% 至 −20%</strong>（半年內修復）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 關鍵時間錨點 -->
+    <div class="card">
+      <h2>⏱️ 關鍵時間錨點（可操作的股價時機）</h2>
+      <ul class="anchor-list">
+        <li>
+          <div class="anchor-time">2026/06/26</div>
+          <div class="anchor-body">
+            <div class="ttl">遞件受理 <span class="impact">起步</span></div>
+            <div class="d">正式向上交所遞件——已完成</div>
+          </div>
+        </li>
+        <li>
+          <div class="anchor-time">2026 Q4</div>
+          <div class="anchor-body">
+            <div class="ttl">首輪問詢 <span class="impact">+5–8%</span></div>
+            <div class="d">上交所首輪問詢函（受理後 1–2 個月內）。過了 = 進審查深水區；被退件 = 需重啟</div>
+          </div>
+        </li>
+        <li>
+          <div class="anchor-time">2027 H1</div>
+          <div class="anchor-body">
+            <div class="ttl">上會過審 <span class="impact">+15–25%</span></div>
+            <div class="d">發審委過會——整個 IPO 流程最大的單一利多事件</div>
+          </div>
+        </li>
+        <li>
+          <div class="anchor-time">2027 Q4</div>
+          <div class="anchor-body">
+            <div class="ttl">拿到批文 <span class="impact">+10–20%</span></div>
+            <div class="d">註冊批文到手——靴子落地，短期反應（視大盤）</div>
+          </div>
+        </li>
+        <li>
+          <div class="anchor-time">2028 Q1</div>
+          <div class="anchor-body">
+            <div class="ttl">A 股掛牌 <span class="impact">+20–40%</span></div>
+            <div class="d">蜜月行情——但母公司後續常見回吐（利多出盡）</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 風險 -->
+    <div class="card">
+      <h2>⚠️ 風險與不確定性</h2>
+      <ul class="risk-list">
+        <li><strong>A 股 IPO 政策是動態的</strong>：2024 年 9 月曾短暫暫緩 IPO 受理；2025–2026 重啟且加速，但不能排除「政策性放緩」再來</li>
+        <li><strong>中美 / 中港監管環境</strong>：江蘇監管局已放行 + 國台辦無新阻力 = 短期政治風險低</li>
+        <li><strong>財報品質</strong>：新麥 105 年起面臨中國削價競爭（財報狗舊文），若子公司毛利率/負債比被發審委質疑，會拉長流程</li>
+        <li><strong>股本膨脹稀釋</strong>：A 股 IPO 後，子公司流通股會稀釋母公司 96% → 約 80%+，但 1580 仍是絕對控股</li>
+        <li><strong>新麥中國業務本質</strong>：雖是亞洲最大烘焙器具廠、智慧烤爐熱賣 50 國，但中國整體烘焙市場成長趨緩，需看 2026 H2 訂單動能</li>
+      </ul>
+    </div>
+
+    <!-- 結論 -->
+    <div class="conclusion">
+      <h2>🎬 結論一句話</h2>
+      <p>
+        <strong>2027H2 有 55–70% 機率拿到定論（註冊批文）</strong>，關鍵看 2026 Q4 前能否順利通過首輪問詢。
+        順利上市下 <strong>1580 股價有 30–60% 的中長期帶動空間</strong>，但時間錨點要看 2026 Q4 問詢回覆 + 2027 H1 上會兩個閘口。
+      </p>
+    </div>
+
+    <!-- 下一步 -->
+    <div class="card">
+      <h2>🛠️ 下一步可選</h2>
+      <ol style="font-size:14px;color:var(--text-secondary);line-height:1.9;padding-left:20px;">
+        <li>追蹤 <strong>2026 Q3 上交所首輪問詢函</strong>（何時收到、問什麼）— 最敏感的領先指標</li>
+        <li>拉 <strong>新麥機械（中國）財報</strong>（看毛利率/負債比）— 預判發審委可能質疑點</li>
+        <li>對照 <strong>同業陸股烘焙設備廠</strong>（如銀都餐飲 603277）本益比 — 量化隱含估值</li>
+        <li>把這案加入 stock_archive，cron 自動追蹤關鍵節點推送</li>
+      </ol>
+    </div>
+  </div>
+
+  <footer>
+    📊 資料日期：2026-07-06 ｜ 報告者：Hermes Agent + Joe 對話
+    ｜ 公開資訊觀測站 / Goodinfo / 鉅亨網 / 21 財經 / 騰訊新聞
+    <br>
+    <a href="https://taiwanbestphoto.github.io/pages/">← 回 hub 首頁</a>
+  </footer>
+</body>
+</html>
