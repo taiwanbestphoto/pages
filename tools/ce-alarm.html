@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>機房檢測輔助工具 · DHTML</title>
+<style>
+  :root{
+    --bg:#f7f7f5; --bg2:#ffffff; --ink:#1a1a22; --ink2:#4a4a55; --ink3:#8a8a95;
+    --bd:#e6e6e0; --bd2:#d6d6cf; --accent:#4f46e5; --accent2:#7c3aed;
+    --tag:#eef2ff; --tag-ink:#3730a3; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+    --radius:14px;
+  }
+  html[data-theme="dark"]{
+    --bg:#0f1115; --bg2:#181b22; --ink:#ececef; --ink2:#bcbcc4; --ink3:#7e7e88;
+    --bd:#262932; --bd2:#2f333d; --accent:#818cf8; --accent2:#a78bfa;
+    --tag:#1f2230; --tag-ink:#a5b4fc; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--bg); color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.6;
+    min-height:100vh;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:18px 16px 96px}
+
+  /* ── header ── */
+  header.top{
+    position:sticky; top:0; z-index:50;
+    background:color-mix(in srgb,var(--bg) 92%,transparent);
+    backdrop-filter:saturate(140%) blur(10px);
+    border-bottom:1px solid var(--bd);
+    margin:-18px -16px 18px; padding:14px 16px;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  a.back{
+    text-decoration:none; color:var(--ink2); font-size:14px;
+    display:inline-flex; align-items:center; gap:4px;
+    transition:color .15s; white-space:nowrap;
+  }
+  a.back:hover{color:var(--ink)}
+  header.top h1{margin:0;font-size:17px;font-weight:700;flex:1;min-width:0}
+
+  /* ── hero ── */
+  .hero{
+    text-align:center; padding:48px 0 40px;
+    background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+    color:#fff; border-radius:var(--radius); margin-bottom:36px;
+  }
+  .hero h2{margin:0;font-size:clamp(1.4rem,4vw,2.2rem);font-weight:800;letter-spacing:.5px}
+  .hero h2 span{color:#00d4ff}
+  .hero p{margin:10px 0 0;opacity:.85;font-size:.95rem}
+  .b{
+    display:inline-block;margin-top:16px;padding:4px 14px;border-radius:20px;
+    background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.3);
+    font-size:.8rem;color:#00d4ff;
+  }
+
+  /* ── sections ── */
+  section{margin-bottom:40px}
+  section h3{
+    font-size:1.2rem;font-weight:700;margin:0 0 4px;
+    display:flex;align-items:center;gap:8px;
+  }
+  section > p.sub{margin:0 0 20px;color:var(--ink3);font-size:.88rem}
+
+  /* ── cards ── */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .card{
+    background:var(--bg2);border:1px solid var(--bd);border-radius:12px;
+    padding:20px;box-shadow:var(--shadow);transition:border-color .15s;
+  }
+  .card:hover{border-color:var(--bd2)}
+  .card .e{font-size:1.6rem;margin-bottom:6px}
+  .card h4{margin:0 0 4px;font-size:.98rem}
+  .card p{margin:0;font-size:.84rem;color:var(--ink2)}
+  .card p code,.tl-item code,td code{font-size:.82em;background:var(--tag);color:var(--tag-ink);padding:1px 5px;border-radius:4px}
+
+  /* ── timeline ── */
+  .tl{position:relative;padding-left:28px}
+  .tl::before{
+    content:'';position:absolute;left:10px;top:4px;bottom:4px;
+    width:2px;background:linear-gradient(#302b63,#00d4ff);border-radius:2px;
+  }
+  .tl-item{position:relative;margin-bottom:22px}
+  .tl-item::before{
+    content:'';position:absolute;left:-22px;top:6px;
+    width:10px;height:10px;border-radius:50%;
+    background:#302b63;border:2px solid var(--bg);box-shadow:0 0 0 2px #302b63;
+  }
+  .tl-item .tm{font-weight:700;color:var(--accent);font-size:.85rem}
+  .tl-item h4{margin:2px 0 4px;font-size:.95rem}
+  .tl-item p{margin:0;font-size:.85rem;color:var(--ink2)}
+
+  /* ── table ── */
+  table{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);font-size:.88rem}
+  th,td{padding:10px 14px;text-align:left}
+  th{background:#302b63;color:#fff;font-weight:600}
+  tr:nth-child(even){background:color-mix(in srgb,var(--bg) 60%,var(--bg2))}
+  td:first-child{font-weight:600;white-space:nowrap}
+  .tag{
+    display:inline-block;padding:1px 8px;border-radius:8px;
+    font-size:.72rem;font-weight:600;white-space:nowrap;
+  }
+  .tag-w{background:#dbeafe;color:#1e40af}
+  .tag-b{background:#fef3c7;color:#92400e}
+  .tag-p{background:#d1fae5;color:#065f46}
+  .tag-t{background:#e0e7ff;color:#3730a3}
+  .tag-h{background:#fce7f3;color:#9d174d}
+  @media(prefers-color-scheme:dark){
+    .tag-w{background:#1e3a5f;color:#93c5fd}
+    .tag-b{background:#4a3a0e;color:#fcd34d}
+    .tag-p{background:#0a3a2a;color:#6ee7b7}
+    .tag-t{background:#1e1f5f;color:#a5b4fc}
+    .tag-h{background:#4a1d3a;color:#f9a8d4}
+  }
+
+  /* ── responsive ── */
+  @media(max-width:600px){
+    .hero{padding:32px 16px 28px}
+    table,th,td{font-size:.82rem}
+    th,td{padding:8px 10px}
+  }
+  @media print{
+    header.top{display:none}
+    .hero{padding:24px 0;background:#302b63!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- top bar -->
+<header class="top">
+  <a class="back" href="../index.html">← 回 hub</a>
+  <h1>🏭 機房檢測輔助工具</h1>
+  <span style="font-size:13px;color:var(--ink3);cursor:pointer" onclick="document.querySelector('html').toggleAttribute('data-theme')">🌓</span>
+</header>
+
+<!-- hero -->
+<div class="hero">
+  <h2>ScheduledPages <span>·</span> 機房檢測助手</h2>
+  <p>定時排程 · Telegram 心跳 · 四種動作類型 — 機房維運自動化</p>
+  <span class="b">⚡ 4 種動作 · 3 種週期 · 心跳監測</span>
+</div>
+
+<!-- 功能一覽 -->
+<section>
+  <h3>🛠️ 功能一覽</h3>
+  <p class="sub">四種動作類型 × 三種週期設定（每日 / 每週 / 一次），涵蓋機房維運所需</p>
+  <div class="cards">
+    <div class="card">
+      <div class="e">🌐</div>
+      <h4>開啟網頁</h4>
+      <p>時間到自動用瀏覽器開啟指定 URL。適用於每日打開 Grafana / Zabbix 儀表板、管理後台。</p>
+    </div>
+    <div class="card">
+      <div class="e">📝</div>
+      <h4>備忘彈窗</h4>
+      <p>跳出 always-on-top 視窗，顯示自訂內容。支援 <code>{time}</code> <code>{date}</code> 變數。適用於跳出檢測清單逐項確認。</p>
+    </div>
+    <div class="card">
+      <div class="e">▶️</div>
+      <h4>執行程式</h4>
+      <p>以 subprocess.Popen 執行本機腳本或程式（.bat / .ps1 / .exe）。適用於定時跑 ping 檢測、磁碟檢查。</p>
+    </div>
+    <div class="card">
+      <div class="e">✈️</div>
+      <h4>Telegram 通知</h4>
+      <p>透過 Bot API 發送訊息到指定 Chat ID（可逗號分隔多人）。支援心跳定時發送與排程觸發。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 每日巡檢 -->
+<section>
+  <h3>🌅 每日巡檢流程</h3>
+  <p class="sub">自動化早班、午班、下班前的例行工作</p>
+  <div class="tl">
+    <div class="tl-item">
+      <div class="tm">07:30</div>
+      <h4>📝 備忘彈窗 — 早班檢測表</h4>
+      <p>跳出完整 checklist：UPS 運作正常、空調溫度 22±2°C、機櫃指示燈、備份狀態、防火牆連線數。</p>
+    </div>
+    <div class="tl-item">
+      <div class="tm">08:00</div>
+      <h4>🌐 自動開啟監控儀表板</h4>
+      <p>瀏覽器自動打開 Grafana / Zabbix 首頁，接班直接檢視。</p>
+    </div>
+    <div class="tl-item">
+      <div class="tm">09:00</div>
+      <h4>▶️ 執行檢測腳本</h4>
+      <p>背景執行 ping 多台核心設備 + 檢查 C 槽剩餘空間，結果寫入日誌。</p>
+    </div>
+    <div class="tl-item">
+      <div class="tm">12:00</div>
+      <h4>✈️ TG 通知 — 午間確認</h4>
+      <p>發送「✅ 機房上午運作正常 {time}」到 Telegram 群組。</p>
+    </div>
+    <div class="tl-item">
+      <div class="tm">17:00</div>
+      <h4>📝 備忘彈窗 — 下班清單</h4>
+      <p>提醒：確認備份完成、檢查異常告警、填寫日報。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 每週作業 & 臨時項目 -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+<section>
+  <h3>📅 每週定期作業</h3>
+  <p class="sub">設定每週特定日執行的維護項目</p>
+  <div class="cards" style="grid-template-columns:1fr">
+    <div class="card">
+      <div class="e">🧹</div>
+      <h4>週一 09:00 — 環境整理</h4>
+      <p>備忘彈窗列出：清潔濾網、檢查線纜標籤、確認備份媒體狀態。</p>
+    </div>
+    <div class="card">
+      <div class="e">📊</div>
+      <h4>週五 15:00 — 週報彙整</h4>
+      <p>開啟網頁 → 管理後台報表頁面，截圖準備週報。</p>
+    </div>
+    <div class="card">
+      <div class="e">🔐</div>
+      <h4>週六 02:00 — 離峰維護</h4>
+      <p>執行程式 → 執行 Windows Update 檢測腳本或磁碟重組。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h3>⚡ 臨時 / 不定期項目</h3>
+  <p class="sub">一次性排程 + 心跳監測即時告警</p>
+  <div class="cards" style="grid-template-columns:1fr">
+    <div class="card">
+      <div class="e">❤️</div>
+      <h4>心跳監測 (Heartbeat)</h4>
+      <p>每 N 分鐘發送 Telegram 確認主機存活。未收到通知 → 主機關機或斷線 → 人員需到機房確認。<br><br>
+      <em>支援變數：</em><code>✅ 主機正常 {date} {time}</code></p>
+    </div>
+    <div class="card">
+      <div class="e">🔔</div>
+      <h4>一次性排程 (Once)</h4>
+      <p>指定日期觸發一次，適用於：年末檢查、設備汰換日提醒、合約到期通知。</p>
+    </div>
+    <div class="card">
+      <div class="e">📋</div>
+      <h4>排除日期設定</h4>
+      <p>國定假日、特休日可設定排除，該日不觸發排程。避免放假時收到不必要的通知。</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- 完整時程表 -->
+<section style="margin-top:8px">
+  <h3>📋 機房檢測完整時程表</h3>
+  <p class="sub">將以下排程一次建入 ScheduledPages，即可自動化運作</p>
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>時間</th><th>週期</th><th>類型</th><th>內容</th></tr></thead>
+    <tbody>
+      <tr><td>07:30</td><td>每日</td><td><span class="tag tag-b">備忘</span></td><td>早班檢測清單（UPS、空調、伺服器燈號、備份）</td></tr>
+      <tr><td>08:00</td><td>每日</td><td><span class="tag tag-w">網頁</span></td><td>開啟 Grafana / Zabbix 儀表板</td></tr>
+      <tr><td>09:00</td><td>每日</td><td><span class="tag tag-p">程式</span></td><td>執行 ping 檢測腳本 + 磁碟空間檢查</td></tr>
+      <tr><td>12:00</td><td>每日</td><td><span class="tag tag-t">TG</span></td><td>發送午間確認通知</td></tr>
+      <tr><td>17:00</td><td>每日</td><td><span class="tag tag-b">備忘</span></td><td>下班清單（備份確認、異常回報、日誌填寫）</td></tr>
+      <tr><td>09:00</td><td>週一</td><td><span class="tag tag-b">備忘</span></td><td>週保養：濾網、線纜、備份媒體檢查</td></tr>
+      <tr><td>15:00</td><td>週五</td><td><span class="tag tag-w">網頁</span></td><td>開啟週報報表頁面</td></tr>
+      <tr><td>02:00</td><td>週六</td><td><span class="tag tag-p">程式</span></td><td>離峰維護：磁碟重組 / 更新檢測</td></tr>
+      <tr><td>—</td><td>每日</td><td><span class="tag tag-h">心跳</span></td><td>每 10 分鐘 TG 通知主機存活</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- 關於 -->
+<section>
+  <h3>💻 關於 ScheduledPages</h3>
+  <p class="sub">Python + tkinter 桌面應用程式，系統匣常駐、開機自動啟動</p>
+  <div class="cards">
+    <div class="card">
+      <div class="e">🐍</div>
+      <h4>技術棧</h4>
+      <p>Python 3 · tkinter · Shell_NotifyIconW · PyInstaller 打包單一 EXE（~2.3 MB）</p>
+    </div>
+    <div class="card">
+      <div class="e">💾</div>
+      <h4>資料儲存</h4>
+      <p>JSON 檔案於 <code>%APPDATA%/ScheduledPages/config.json</code>，可匯出匯入</p>
+    </div>
+    <div class="card">
+      <div class="e">📎</div>
+      <h4>原始碼</h4>
+      <p><a href="https://github.com/taiwanbestphoto/ce_alarm" target="_blank" rel="noopener" style="color:var(--accent)">github.com/taiwanbestphoto/ce_alarm</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- footer -->
+<p style="text-align:center;color:var(--ink3);font-size:.78rem;margin-top:48px">
+  Hosted on GitHub Pages · 工具由 ScheduledPages 實作
+</p>
+
+</div><!-- /wrap -->
+
+<script>
+  // 自動偵測系統 dark mode
+  if (matchMedia("(prefers-color-scheme:dark)").matches)
+    document.documentElement.setAttribute("data-theme","dark");
+  // 手動切換
+  document.querySelector('[onclick*="toggleAttribute"]')?.addEventListener("click",()=>{
+    const h=document.documentElement;
+    h.toggleAttribute("data-theme");
+  });
+</script>
+</body>
+</html>
