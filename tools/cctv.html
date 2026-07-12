@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>即時影像 monitoring</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --soft: #57534e;
+      --card: #1c1917; --bd: #292524; --bd2: #44403c;
+      --accent: #e7e5e4; --accent2: #d6d3d1;
+      --tag-bg: #292524; --tag-fg: #d6d3d1;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI",
+            "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      max-width: 1400px; margin: 0 auto;
+      padding: 28px 20px 0; text-align: center;
+    }
+    h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+    .sub a { color: var(--accent2); text-decoration: none; }
+    .sub a:hover { text-decoration: underline; }
+
+    .grid {
+      max-width: 1400px; margin: 0 auto; padding: 12px 16px 40px;
+      display: grid; gap: 12px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 640px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1100px) {
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    }
+
+    .cam {
+      background: var(--card); border: 1px solid var(--bd);
+      border-radius: 10px; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .cam-head {
+      padding: 10px 14px 8px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--bd);
+    }
+    .cam-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #ef4444; flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .35; }
+    }
+    .cam-name {
+      font-size: 13.5px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      flex: 1;
+    }
+    .cam-loc {
+      font-size: 11.5px; color: var(--muted); flex-shrink: 0;
+    }
+    .cam-body {
+      position: relative; width: 100%;
+      background: #000;
+      aspect-ratio: 16 / 9;
+    }
+    .cam-body img,
+    .cam-body video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+    .cam-body .placeholder {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--soft); font-size: 13px;
+    }
+    .cam-foot {
+      padding: 6px 14px 8px;
+      font-size: 11px; color: var(--soft);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .cam-foot a {
+      color: var(--accent2); text-decoration: none;
+    }
+    .cam-foot a:hover { text-decoration: underline; }
+    .cam-link {
+      display: inline-flex; align-items: center; gap: 3px;
+    }
+
+    footer {
+      max-width: 1400px; margin: 0 auto;
+      padding: 16px 20px 28px;
+      border-top: 1px solid var(--bd);
+      font-size: 12px; color: var(--soft);
+      text-align: center;
+    }
+    footer a { color: var(--accent2); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 639px) {
+      .cam-head { padding: 8px 12px 6px; }
+      .cam-name { font-size: 12.5px; }
+      .cam-loc { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📡 即時影像 monitoring</h1>
+    <p class="sub">
+      共 <span id="count"></span> 攝影機 ·
+      <a href="../">← 返回 hub</a>
+    </p>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    影像來源為各政府機關公開資料 ·
+    Hosted on GitHub Pages ·
+    <a href="https://github.com/taiwanbestphoto/pages" target="_blank" rel="noopener">source</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+  <script>
+    // ============================================================
+    //  CAMERAS — 新增攝影機只需複製一筆，修改對應欄位即可
+    // ============================================================
+    const CAMERAS = [
+      {
+        id:   "CCTV-13-0010-045-001",
+        name: "楊梅交流道(S)",
+        loc:  "桃園市楊梅區",
+        src:  "https://cctv-ss01.thb.gov.tw/T1-45K+800",
+        type: "image",          // "image" | "hls"
+        url:  "https://tw.live/cam/?id=CCTV-13-0010-045-001",
+        from: "交通部公路局",
+      },
+      {
+        id:   "NWT0512",
+        name: "三樹路、龍埔路",
+        loc:  "新北市三峽區",
+        src:  "https://cctvatis6.ntpc.gov.tw/hls/C000512/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=NWT0512",
+        from: "新北市交通局",
+      },
+      {
+        id:   "NWT0287",
+        name: "中正路、中園街",
+        loc:  "新北市三峽區",
+        src:  "https://cctvatis4.ntpc.gov.tw/hls/C000287/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=NWT0287",
+        from: "新北市交通局",
+      },
+      {
+        id:   "BOT291",
+        name: "衡陽路-中華路一段",
+        loc:  "台北市萬華區",
+        src:  "https://jtmctrafficcctv5.gov.taipei/NVR/384bc878-ed67-4cab-bad5-01d5dc891148/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=BOT291",
+        from: "臺北市交通管制工程處",
+      },
+      {
+        id:   "NWT0536",
+        name: "北宜路1段、中興路1段",
+        loc:  "新北市新店區",
+        src:  "https://cctvatis4.ntpc.gov.tw/hls/C000536/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=NWT0536",
+        from: "新北市交通局",
+      },
+      {
+        id:   "NWT0240",
+        name: "台2、玉田路(近明光港)",
+        loc:  "新北市萬里區",
+        src:  "https://cctvatis6.ntpc.gov.tw/hls/C000240/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=NWT0240",
+        from: "新北市交通局",
+      },
+      // 之後新增往下加 ...
+    ];
+
+    // ===== escape =====
+    const esc = s => String(s).replace(/[&<>"']/g, c =>
+      ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+    // ===== render =====
+    const grid = document.getElementById("grid");
+    document.getElementById("count").textContent = CAMERAS.length;
+
+    CAMERAS.forEach(cam => {
+      const div = document.createElement("div");
+      div.className = "cam";
+      div.innerHTML = `
+        <div class="cam-head">
+          <span class="cam-dot"></span>
+          <span class="cam-name">${esc(cam.name)}</span>
+          <span class="cam-loc">${esc(cam.loc)}</span>
+        </div>
+        <div class="cam-body" id="body-${esc(cam.id)}">
+          <span class="placeholder">載入中…</span>
+        </div>
+        <div class="cam-foot">
+          <span>${esc(cam.from)}</span>
+          <a class="cam-link" href="${esc(cam.url)}" target="_blank" rel="noopener">tw.live ↗</a>
+        </div>`;
+      grid.appendChild(div);
+
+      const body = div.querySelector(".cam-body");
+
+      if (cam.type === "image") {
+        const img = document.createElement("img");
+        img.src = cam.src;
+        img.alt = cam.name;
+        img.loading = "lazy";
+        img.onload = () => body.querySelector(".placeholder")?.remove();
+        img.onerror = () => {
+          body.querySelector(".placeholder").textContent = "影像載入失敗";
+        };
+        body.appendChild(img);
+        // 靜態快照自動刷新
+        setInterval(() => { img.src = cam.src + "?t=" + Date.now(); }, 8000);
+      }
+
+      if (cam.type === "hls") {
+        const video = document.createElement("video");
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
+        video.controls = false;
+        video.setAttribute("playsinline", "");
+        body.appendChild(video);
+
+        if (Hls.isSupported()) {
+          const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+          hls.loadSource(cam.src);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            body.querySelector(".placeholder")?.remove();
+            video.play().catch(() => {});
+          });
+          hls.on(Hls.Events.ERROR, (_, data) => {
+            if (data.fatal) {
+              body.querySelector(".placeholder").textContent = "串流載入失敗";
+            }
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          // Safari 原生 HLS
+          video.src = cam.src;
+          video.addEventListener("loadeddata", () => {
+            body.querySelector(".placeholder")?.remove();
+          });
+          video.addEventListener("error", () => {
+            body.querySelector(".placeholder").textContent = "串流載入失敗";
+          });
+        } else {
+          body.querySelector(".placeholder").textContent = "瀏覽器不支援 HLS";
+        }
+      }
+    });
+  </script>
+</body>
+</html>
