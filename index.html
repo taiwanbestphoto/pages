@@ -394,7 +394,7 @@
       loadNotes();
     }
 
-    async function ghFetch(url, opts) {
+    async function ghFetch(url, opts = {}) {
       const token = getToken();
       if (!token) throw new Error("請先設定 GitHub Token");
       const headers = Object.assign({ "Authorization": "token " + token, "Accept": "application/vnd.github+json" }, opts.headers || {});
