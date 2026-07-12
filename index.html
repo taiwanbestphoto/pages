@@ -131,11 +131,69 @@
     @media print {
       .search-row { display: none; }
       a.card { break-inside: avoid; }
+      .notes-section { display: none; }
+    }
+
+    .notes-section {
+      max-width: 720px; margin: 0 auto 28px;
+      background: var(--card); border: 1px solid var(--bd);
+      border-radius: 12px; padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .notes-section h2 {
+      font-size: 15px; margin: 0 0 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .notes-section textarea {
+      width: 100%; min-height: 120px; resize: vertical;
+      background: var(--bg); color: var(--fg);
+      border: 1px solid var(--bd2); border-radius: 8px;
+      padding: 10px 12px; font-size: 14px; line-height: 1.6;
+      font-family: inherit; outline: none;
+    }
+    .notes-section textarea:focus { border-color: var(--accent); }
+    .notes-bar {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 10px; flex-wrap: wrap;
+    }
+    .notes-bar button {
+      padding: 6px 14px; border-radius: 8px;
+      border: 1px solid var(--bd2); background: var(--card);
+      color: var(--fg); font-size: 13px; cursor: pointer;
+      font-family: inherit;
+    }
+    .notes-bar button:hover { border-color: var(--accent); }
+    .notes-bar button.primary {
+      background: var(--accent); color: var(--bg);
+      border-color: var(--accent);
+    }
+    .notes-status {
+      font-size: 12px; color: var(--muted); margin-left: auto;
+    }
+    .notes-bar input {
+      flex: 1; min-width: 200px;
+      background: var(--bg); color: var(--fg);
+      border: 1px solid var(--bd2); border-radius: 8px;
+      padding: 6px 10px; font-size: 12px; outline: none;
+      font-family: inherit;
     }
   </style>
 </head>
 <body>
   <main>
+    <div class="notes-section">
+      <h2>📝 筆記</h2>
+      <textarea id="notes-textarea" placeholder="在這裡記錄任何想法…" disabled></textarea>
+      <div class="notes-bar">
+        <button class="primary" id="notes-save" onclick="saveNotes()">儲存</button>
+        <button onclick="loadNotes()">重新載入</button>
+        <input id="notes-token" type="password" placeholder="GitHub Token (ghp_...)" />
+        <input id="notes-gist-id" type="text" placeholder="Gist ID" />
+        <button onclick="saveConfig()">設定</button>
+        <span class="notes-status" id="notes-status"></span>
+      </div>
+    </div>
+
     <header>
       <h1>taiwanbestphoto / pages</h1>
       <p class="tag">一頁式內容 hub · 思考 / 工具 / 參考 · last updated <span id="d"></span></p>
@@ -305,6 +363,80 @@
       new Date().toISOString().slice(0, 10);
 
     render();
+
+    // ===== Notes (GitHub Gist backend) =====
+    // 步驟：1) 建立 GitHub Token (勾選 gist 權限)
+    //       2) 到 github.com/gist 建立一個 private gist
+    //       3) 複製 gist URL 最後一段作為 GIST_ID
+    const NOTES_GIST_ID = localStorage.getItem("gist_id") || "";
+    const NOTES_FILE = "pages-notes.md";
+    const statusEl = document.getElementById("notes-status");
+    const textarea = document.getElementById("notes-textarea");
+    const tokenInput = document.getElementById("notes-token");
+
+    function getToken() { return localStorage.getItem("gh_token") || ""; }
+    function setToken(t) { localStorage.setItem("gh_token", t); }
+    function getGistId() { return localStorage.getItem("gist_id") || NOTES_GIST_ID; }
+
+    // Restore fields
+    const saved = getToken();
+    const savedGist = getGistId();
+    if (saved) tokenInput.value = saved;
+    if (savedGist) document.getElementById("notes-gist-id").value = savedGist;
+    if (saved && savedGist) textarea.disabled = false;
+
+    function saveConfig() {
+      const t = tokenInput.value.trim();
+      const g = document.getElementById("notes-gist-id").value.trim();
+      if (!t) { statusEl.textContent = "請輸入 token"; return; }
+      if (!g) { statusEl.textContent = "請輸入 Gist ID"; return; }
+      setToken(t);
+      localStorage.setItem("gist_id", g);
+      textarea.disabled = false;
+      statusEl.textContent = "設定完成 ✓";
+      loadNotes();
+    }
+
+    async function ghFetch(url, opts) {
+      const token = getToken();
+      if (!token) throw new Error("請先設定 GitHub Token");
+      const headers = Object.assign({ "Authorization": "token " + token, "Accept": "application/vnd.github+json" }, opts.headers || {});
+      const res = await fetch(url, Object.assign({}, opts, { headers }));
+      if (!res.ok) throw new Error("GitHub API " + res.status);
+      return res.json();
+    }
+
+    async function loadNotes() {
+      const gistId = getGistId();
+      if (!gistId) { statusEl.textContent = "請先設定 Gist ID"; return; }
+      statusEl.textContent = "載入中…";
+      try {
+        const data = await ghFetch("https://api.github.com/gists/" + gistId);
+        const content = data.files[NOTES_FILE]?.content || "";
+        textarea.value = content;
+        statusEl.textContent = "已載入 ✓";
+      } catch (e) {
+        statusEl.textContent = "載入失敗：" + e.message;
+      }
+    }
+
+    async function saveNotes() {
+      const gistId = getGistId();
+      if (!gistId) { statusEl.textContent = "請先設定 Gist ID"; return; }
+      statusEl.textContent = "儲存中…";
+      try {
+        await ghFetch("https://api.github.com/gists/" + gistId, {
+          method: "PATCH",
+          body: JSON.stringify({ files: { [NOTES_FILE]: { content: textarea.value } } })
+        });
+        statusEl.textContent = "已儲存 ✓ " + new Date().toLocaleTimeString();
+      } catch (e) {
+        statusEl.textContent = "儲存失敗：" + e.message;
+      }
+    }
+
+    // Auto-load if token exists
+    if (getToken()) loadNotes();
   </script>
 </body>
 </html>
