@@ -188,7 +188,6 @@
         <button class="primary" id="notes-save" onclick="saveNotes()">儲存</button>
         <button onclick="loadNotes()">重新載入</button>
         <input id="notes-token" type="password" placeholder="GitHub Token (ghp_...)" />
-        <input id="notes-gist-id" type="text" placeholder="Gist ID" />
         <button onclick="saveConfig()">設定</button>
         <span class="notes-status" id="notes-status"></span>
       </div>
@@ -368,7 +367,7 @@
     // 步驟：1) 建立 GitHub Token (勾選 gist 權限)
     //       2) 到 github.com/gist 建立一個 private gist
     //       3) 複製 gist URL 最後一段作為 GIST_ID
-    const NOTES_GIST_ID = localStorage.getItem("gist_id") || "";
+    const NOTES_GIST_ID = "51c45e1f919c3e64f2b574dbfc94427d";
     const NOTES_FILE = "pages-notes.md";
     const statusEl = document.getElementById("notes-status");
     const textarea = document.getElementById("notes-textarea");
@@ -376,22 +375,19 @@
 
     function getToken() { return localStorage.getItem("gh_token") || ""; }
     function setToken(t) { localStorage.setItem("gh_token", t); }
-    function getGistId() { return localStorage.getItem("gist_id") || NOTES_GIST_ID; }
+    function getGistId() { return NOTES_GIST_ID; }
 
     // Restore fields
     const saved = getToken();
-    const savedGist = getGistId();
-    if (saved) tokenInput.value = saved;
-    if (savedGist) document.getElementById("notes-gist-id").value = savedGist;
-    if (saved && savedGist) textarea.disabled = false;
+    if (saved) {
+      tokenInput.value = saved;
+      textarea.disabled = false;
+    }
 
     function saveConfig() {
       const t = tokenInput.value.trim();
-      const g = document.getElementById("notes-gist-id").value.trim();
       if (!t) { statusEl.textContent = "請輸入 token"; return; }
-      if (!g) { statusEl.textContent = "請輸入 Gist ID"; return; }
       setToken(t);
-      localStorage.setItem("gist_id", g);
       textarea.disabled = false;
       statusEl.textContent = "設定完成 ✓";
       loadNotes();
