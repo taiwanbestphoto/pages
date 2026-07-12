@@ -60,6 +60,7 @@
       display: flex; align-items: baseline; gap: 10px;
       margin-bottom: 14px; padding-bottom: 6px;
       border-bottom: 1px solid var(--bd);
+      cursor: pointer; user-select: none;
     }
     .group-title {
       font-size: 18px; font-weight: 700;
@@ -69,6 +70,11 @@
       font-size: 12px; color: var(--muted);
       font-variant-numeric: tabular-nums;
     }
+    .group-toggle {
+      font-size: 11px; color: var(--muted); margin-left: auto;
+    }
+    .group.collapsed .grid { display: none; }
+    .group.collapsed .group-head { margin-bottom: 0; padding-bottom: 0; border-bottom-color: transparent; }
 
     .grid {
       display: grid; gap: 14px;
@@ -231,10 +237,10 @@
 
     const GROUP_ORDER = [
       { id: "思考", icon: "🧭", label: "思考框架" },
-      { id: "投資", icon: "📈", label: "投資工具" },
       { id: "監控", icon: "📡", label: "即時監控" },
       { id: "工具", icon: "🔧", label: "實用工具" },
       { id: "參考", icon: "📚", label: "參考速查" },
+      { id: "投資", icon: "📈", label: "投資工具", collapsed: true },
     ];
 
     // ===== 渲染 =====
@@ -268,11 +274,14 @@
         const inGroup = TOOLS.filter(t => t.group === g.id && matches(t, q));
         if (!inGroup.length) return "";
         const cards = inGroup.map(cardHtml).join("");
+        const collapsed = g.collapsed ? " collapsed" : "";
+        const toggle = g.collapsed ? "▶" : "▼";
         return `
-          <section class="group" aria-labelledby="g-${g.id}">
-            <div class="group-head">
+          <section class="group${collapsed}" data-group="${g.id}" aria-labelledby="g-${g.id}">
+            <div class="group-head" onclick="toggleGroup('${g.id}')">
               <div class="group-title" id="g-${g.id}">${g.icon} ${escapeHtml(g.label)}</div>
               <div class="group-count">${inGroup.length} 個</div>
+              <div class="group-toggle">${toggle}</div>
             </div>
             <div class="grid">${cards}</div>
           </section>`;
@@ -282,6 +291,14 @@
     }
 
     document.getElementById("q").addEventListener("input", render);
+
+    function toggleGroup(id) {
+      const section = document.querySelector(`[data-group="${id}"]`);
+      if (!section) return;
+      section.classList.toggle("collapsed");
+      const toggle = section.querySelector(".group-toggle");
+      if (toggle) toggle.textContent = section.classList.contains("collapsed") ? "▶" : "▼";
+    }
 
     // Last updated — 用 GitHub Pages 部署時間不可靠，改用 local build date。
     document.getElementById("d").textContent =
