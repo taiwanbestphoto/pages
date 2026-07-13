@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏰 女孩房設計 100 點子 · Girls Room 100</title>
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Pinterest 風格 6-10 歲女孩房 100 個設計主題 · 12 種風格 · 一鍵跳轉搜尋">
+<style>
+  :root {
+    --bg: #fdf6f9;
+    --card: #ffffffcc;
+    --text: #2d2438;
+    --muted: #8a7a93;
+    --accent: #e75480;
+    --accent2: #b85c9e;
+    --border: #f0d8e3;
+    --shadow: 0 4px 18px #e7548020;
+    --hover-shadow: 0 10px 32px #e7548040;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1620;
+      --card: #2a2433cc;
+      --text: #f5edf3;
+      --muted: #b0a0b8;
+      --border: #3d2f45;
+      --shadow: 0 4px 18px #00000060;
+      --hover-shadow: 0 10px 32px #e7548060;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    line-height: 1.55;
+  }
+  header {
+    padding: 48px 24px 24px;
+    text-align: center;
+    background: linear-gradient(135deg, #ffe5ef 0%, #f0e5ff 50%, #e5f0ff 100%);
+    border-bottom: 2px solid var(--border);
+  }
+  @media (prefers-color-scheme: dark) {
+    header { background: linear-gradient(135deg, #2d1f2a 0%, #1f1f2d 50%, #1f2a2d 100%); }
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  header p { margin: 4px 0; color: var(--muted); font-size: 14px; }
+  header .sub { font-size: 13px; }
+  .stats {
+    display: inline-flex; gap: 16px; margin-top: 16px;
+    padding: 8px 20px; background: var(--card); border-radius: 999px;
+    border: 1px solid var(--border); font-size: 13px;
+  }
+  .stats b { color: var(--accent); }
+
+  /* Filter bar */
+  .filters {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer;
+    font-size: 13px; font-weight: 500;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .filter-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white; border-color: transparent;
+  }
+
+  /* Masonry-ish columns */
+  .grid {
+    column-count: 4;
+    column-gap: 16px;
+    padding: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  @media (max-width: 1100px) { .grid { column-count: 3; } }
+  @media (max-width: 760px)  { .grid { column-count: 2; } }
+  @media (max-width: 480px)  { .grid { column-count: 1; } }
+
+  .card {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.25s;
+    position: relative;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--hover-shadow);
+  }
+  .card .num {
+    position: absolute; top: 10px; left: 10px;
+    background: #00000080; color: white;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    backdrop-filter: blur(4px);
+  }
+  .card .badge {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--card); backdrop-filter: blur(4px);
+    padding: 3px 8px; border-radius: 999px;
+    font-size: 11px; color: var(--muted);
+  }
+  .card .thumb {
+    width: 100%; aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    background: linear-gradient(135deg, #ffe5ef, #f0e5ff);
+  }
+  .card .body { padding: 12px 14px 14px; }
+  .card h3 {
+    margin: 0 0 4px; font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card .en { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .card .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .card .tag {
+    font-size: 11px; padding: 2px 8px;
+    background: var(--border); color: var(--text);
+    border-radius: 999px;
+  }
+  .card .cta {
+    margin-top: 10px;
+    font-size: 12px; color: var(--accent);
+    font-weight: 600;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .card .cta::after { content: "→"; transition: transform 0.2s; }
+  .card:hover .cta::after { transform: translateX(3px); }
+
+  .style-section {
+    padding: 32px 24px 0;
+    max-width: 1600px; margin: 0 auto;
+  }
+  .style-header {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .style-header h2 { margin: 0; font-size: 22px; }
+  .style-header .emoji { font-size: 28px; }
+  .style-header .count {
+    margin-left: auto; color: var(--muted); font-size: 13px;
+  }
+  .style-section.hidden { display: none; }
+
+  footer {
+    text-align: center; padding: 40px 20px;
+    color: var(--muted); font-size: 13px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* SVG placeholder */
+  .thumb-wrap {
+    position: relative; width: 100%; aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #ffe5ef, #f0e5ff);
+    overflow: hidden;
+  }
+  .thumb-wrap svg { width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏰 女孩房設計 100 點子</h1>
+  <p>Pinterest 風格 · 6–10 歲 · 12 種風格</p>
+  <p class="sub">點任一張卡片 → 跳轉 Pinterest 搜尋結果，看到喜歡的就釘到你的 board</p>
+  <div class="stats">
+    <span>📌 <b>100</b> 主題</span>
+    <span>🎨 <b>12</b> 風格</span>
+    <span>🔍 <b>100</b> 真實搜尋連結</span>
+  </div>
+</header>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-filter="all">全部 100</button>
+  <button class="filter-btn" data-filter="1">🌸 公主粉</button>
+  <button class="filter-btn" data-filter="2">🌿 森林</button>
+  <button class="filter-btn" data-filter="3">✨ 獨角獸</button>
+  <button class="filter-btn" data-filter="4">🪐 太空</button>
+  <button class="filter-btn" data-filter="5">🐚 海洋</button>
+  <button class="filter-btn" data-filter="6">🧶 波西米亞</button>
+  <button class="filter-btn" data-filter="7">🦊 童話動物</button>
+  <button class="filter-btn" data-filter="8">⛺ 冒險</button>
+  <button class="filter-btn" data-filter="9">🎨 藝術家</button>
+  <button class="filter-btn" data-filter="10">📚 閱讀</button>
+  <button class="filter-btn" data-filter="11">🌾 田園</button>
+  <button class="filter-btn" data-filter="12">🍡 日式</button>
+</div>
+
+<div id="board"></div>
+
+<footer>
+  點任一卡片 → 開新分頁到 Pinterest 搜尋 → 看到喜歡的釘到你的 board<br>
+  <small>每張卡片的連結都是真實可搜尋的 Pinterest URL · 本頁為輔助工具</small>
+</footer>
+
+<script>
+// 100 cards data
+const STYLES = {
+  1: { name: "公主浪漫粉色系", emoji: "🌸", palette: ["#ffd1dc","#ffb6c1","#ff85a2"] },
+  2: { name: "森林系自然綠意", emoji: "🌿", palette: ["#a8d5a8","#7fb87f","#5a9a5a"] },
+  3: { name: "夢幻獨角獸魔法", emoji: "✨", palette: ["#ffd6e7","#c4a8ff","#a8e0ff"] },
+  4: { name: "太空宇宙銀河", emoji: "🪐", palette: ["#1a1a3e","#3d2b6b","#6b4d9e"] },
+  5: { name: "海洋美人魚水世界", emoji: "🐚", palette: ["#a8d8e8","#7fc0d4","#4a9bb0"] },
+  6: { name: "波西米亞民族風", emoji: "🧶", palette: ["#e8c5a0","#d4a574","#a87a4a"] },
+  7: { name: "童話森林動物", emoji: "🦊", palette: ["#ffd4a8","#ffb074","#d4884a"] },
+  8: { name: "冒險家帳篷探險", emoji: "⛺", palette: ["#c5b48a","#a8965a","#6b5a3a"] },
+  9: { name: "藝術家創作工作室", emoji: "🎨", palette: ["#ffb8b8","#ffd4a8","#fff0a8"] },
+  10:{ name: "書蟲閱讀小天地", emoji: "📚", palette: ["#c8b8d4","#a89cb8","#7a6d8a"] },
+  11:{ name: "田園花漾 Cottagecore", emoji: "🌾", palette: ["#f0c5a8","#e8a890","#c48a70"] },
+  12:{ name: "日式無印簡約", emoji: "🍡", palette: ["#e8d4b8","#c8a878","#8a6a4a"] }
+};
+
+const CARDS = [
+  // 1. 公主粉
+  { s:1, n:"粉色紗帳公主床", en:"Canopy Bed Girl Pink", tags:["紗簾","公主","粉色"] },
+  { s:1, n:"玫瑰花牆打卡角", en:"Pink Flower Wall Bedroom", tags:["花牆","韓系","ins"] },
+  { s:1, n:"旋轉木馬主題牆", en:"Carousel Nursery Girl", tags:["木馬","童話","燈串"] },
+  { s:1, n:"雲朵天花板夜燈", en:"Cloud Ceiling Night Light", tags:["雲朵","夜燈","天花板"] },
+  { s:1, n:"蕾絲窗紗夢幻風", en:"Lace Curtain Girl Room", tags:["蕾絲","vintage","窗簾"] },
+  { s:1, n:"寶石水晶吊燈", en:"Crystal Chandelier Kids", tags:["水晶","吊燈","奢華"] },
+  { s:1, n:"韓系 ins 玫瑰金", en:"Rose Gold Bedroom Korean", tags:["玫瑰金","韓系","金屬"] },
+  { s:1, n:"城堡造型床組", en:"Castle Bed Girl Princess", tags:["城堡","實木","主題床"] },
+  { s:1, n:"公主化妝桌區", en:"Vanity Table Girl Room", tags:["化妝桌","LED鏡","首飾"] },
+  { s:1, n:"粉色拼貼幾何床頭", en:"Geometric Wall Pink Girl", tags:["幾何","拼貼","床頭"] },
+  { s:1, n:"婚紗禮服展示牆", en:"Dress Up Corner Kids", tags:["禮服","展示","扮家家"] },
+  { s:1, n:"茶會下午茶角", en:"Tea Party Corner Girls", tags:["茶會","扮家家","迷你家具"] },
+  // 2. 森林
+  { s:2, n:"樹屋造型高架床", en:"Treehouse Bed Girl", tags:["高架床","木屋","雙層"] },
+  { s:2, n:"森林動物壁畫牆", en:"Forest Mural Nursery", tags:["手繪","壁畫","森林"] },
+  { s:2, n:"蘑菇燈夜燈森林", en:"Mushroom Lamp Forest Room", tags:["蘑菇","北歐","燈具"] },
+  { s:2, n:"北歐白木風延伸", en:"Scandinavian Kids Room Wood", tags:["北歐","白木","淺色"] },
+  { s:2, n:"蕨類綠植掛畫", en:"Botanical Print Kids Room", tags:["植物","掛畫","綠色"] },
+  { s:2, n:"露營帳篷閱讀角", en:"Teepee Reading Nook", tags:["帳篷","閱讀","印地安"] },
+  { s:2, n:"木棧板掀床收納", en:"Platform Bed Storage Wood", tags:["掀床","收納","木棧板"] },
+  { s:2, n:"鳥籠造型展示架", en:"Birdcage Decor Girl", tags:["鳥籠","展示","復古"] },
+  { s:2, n:"田園野餐風地鋪", en:"Picnic Floor Kids Room", tags:["地毯","地鋪","野餐"] },
+  { s:2, n:"兔兔與蘑菇主題", en:"Bunny Mushroom Bedroom", tags:["兔子","蘑菇","童話"] },
+  // 3. 獨角獸
+  { s:3, n:"彩虹漸層牆面", en:"Rainbow Gradient Wall", tags:["彩虹","漸層","七彩"] },
+  { s:3, n:"獨角獸霓虹燈", en:"Unicorn Neon Sign Room", tags:["霓虹","獨角獸","LED"] },
+  { s:3, n:"亮片閃粉天花板", en:"Glitter Ceiling Girls Room", tags:["亮片","天花板","閃粉"] },
+  { s:3, n:"彩虹簾夢幻窗", en:"Rainbow Window Curtain", tags:["彩虹簾","流蘇","窗戶"] },
+  { s:3, n:"獨角獸造型床", en:"Unicorn Bed Frame", tags:["造型床","獨角獸","主題"] },
+  { s:3, n:"雲朵燈 + 彩虹地墊", en:"Cloud Light Rainbow Rug", tags:["雲朵燈","彩虹地墊","棉花糖"] },
+  { s:3, n:"魔法藥水實驗室", en:"Magic Potion Lab Kids", tags:["魔法","實驗","手作"] },
+  { s:3, n:"銀河星星天花板", en:"Glow Stars Ceiling", tags:["螢光","星星","銀河"] },
+  { s:3, n:"獨角獸生日派對房", en:"Unicorn Party Room Decor", tags:["派對","氣球","彩旗"] },
+  { s:3, n:"夢境捕捉網", en:"Dreamcatcher Wall Hanging", tags:["捕夢網","掛飾","波西"] },
+  // 4. 太空
+  { s:4, n:"銀河深藍壁畫牆", en:"Galaxy Mural Bedroom", tags:["銀河","深藍","壁畫"] },
+  { s:4, n:"太空人夜燈", en:"Astronaut Lamp Kids", tags:["太空人","夜燈","公仔"] },
+  { s:4, n:"火箭造型床", en:"Rocket Bed Kids", tags:["火箭","造型床","主題"] },
+  { s:4, n:"星球燈串天花板", en:"Planet String Lights", tags:["燈串","星球","LED"] },
+  { s:4, n:"太空梭造型書桌", en:"Rocket Desk Kids Room", tags:["書桌","火箭","造型"] },
+  { s:4, n:"月球表面地毯", en:"Moon Rug Kids", tags:["地毯","月球","立體"] },
+  { s:4, n:"星座掛圖天文牆", en:"Constellation Wall Art", tags:["星座","天文","掛圖"] },
+  { s:4, n:"太空站玩具收納", en:"Space Toy Storage", tags:["收納","壓克力","太空"] },
+  // 5. 海洋
+  { s:5, n:"美人魚漸層藍綠", en:"Mermaid Scale Wall", tags:["魚鱗","漸層","美人魚"] },
+  { s:5, n:"貝殼造型床頭板", en:"Seashell Headboard", tags:["貝殼","床頭","海洋"] },
+  { s:5, n:"海洋泡泡吊燈", en:"Bubble Chandelier Ocean", tags:["泡泡","吊燈","透明"] },
+  { s:5, n:"魚尾毯 + 沙灘椅", en:"Mermaid Tail Blanket", tags:["魚尾毯","沙灘","懶骨頭"] },
+  { s:5, n:"海底世界牆面", en:"Under The Sea Mural", tags:["立體","魚群","壁貼"] },
+  { s:5, n:"船舵床頭燈", en:"Ship Wheel Lamp Kids", tags:["船舵","夜燈","海盜"] },
+  { s:5, n:"海水藍更衣區", en:"Ocean Blue Dressing Area", tags:["更衣","藍色","船錨"] },
+  { s:5, n:"熱帶魚水族牆", en:"Tropical Fish Wall Light", tags:["魚群","剪影","燈光"] },
+  // 6. 波西米亞
+  { s:6, n:"流蘇掛毯整面牆", en:"Macrame Wall Hanging Boho", tags:["macramé","藤編","掛毯"] },
+  { s:6, n:"摩洛哥燈籠燈飾", en:"Moroccan Lantern Kids", tags:["摩洛哥","燈籠","鏤空"] },
+  { s:6, n:"民族風幾何地毯", en:"Boho Geometric Rug", tags:["地毯","幾何","圖騰"] },
+  { s:6, n:"藤編搖籃椅", en:"Rattan Egg Chair Kids", tags:["藤編","egg chair","懶人"] },
+  { s:6, n:"捕夢網牆面集合", en:"Dreamcatcher Gallery Wall", tags:["捕夢網","集合","牆面"] },
+  { s:6, n:"波西米亞流蘇窗簾", en:"Tassel Curtain Boho", tags:["流蘇","窗簾","奶茶色"] },
+  { s:6, n:"仙人掌綠植角落", en:"Cactus Corner Boho Room", tags:["仙人掌","綠植","角落"] },
+  { s:6, n:"圖騰抱枕堆地鋪", en:"Boho Floor Pillow Pile", tags:["抱枕","地鋪","圖騰"] },
+  // 7. 童話動物
+  { s:7, n:"北極熊北極風", en:"Polar Bear Arctic Room", tags:["北極","雪花","白色"] },
+  { s:7, n:"貓頭鷹夜間森林", en:"Owl Forest Dark Nursery", tags:["貓頭鷹","森林","深色"] },
+  { s:7, n:"兔子主題粉嫩", en:"Bunny Themed Bedroom", tags:["兔子","粉色","長耳"] },
+  { s:7, n:"貓咪懶人小天地", en:"Cat Room Girls", tags:["貓咪","貓跳台","懶人"] },
+  { s:7, n:"狐狸紅橘配色", en:"Fox Themed Room", tags:["狐狸","橘紅","造型"] },
+  { s:7, n:"海洋生物 + 陸地動物", en:"Zoo Animal Wall Kids", tags:["動物園","動物","牆貼"] },
+  { s:7, n:"柴犬日式可愛", en:"Shiba Inu Room Decor", tags:["柴犬","日式","富士山"] },
+  { s:7, n:"獨角獸 + 彩虹動物", en:"Magical Animals Room", tags:["動物","夢幻","混搭"] },
+  // 8. 冒險
+  { s:8, n:"印第安 teepee 帳篷", en:"Teepee Tent Girl Room", tags:["teepee","帳篷","羽毛"] },
+  { s:8, n:"世界地圖整面牆", en:"World Map Wall Kids", tags:["地圖","黑板漆","世界"] },
+  { s:8, n:"探險家行李箱收納", en:"Vintage Suitcase Storage", tags:["行李箱","復古","床頭櫃"] },
+  { s:8, n:"帳篷床下秘密基地", en:"Bed Tent Secret Hideout", tags:["床下","帳篷","基地"] },
+  { s:8, n:"羅盤 + 地圖書桌", en:"Explorer Desk Kids", tags:["地球儀","羅盤","書桌"] },
+  { s:8, n:"攀岩牆收納", en:"Indoor Climbing Wall Kids", tags:["攀岩","收納","抓點"] },
+  { s:8, n:"露營車造型床", en:"Camper Van Bed Kids", tags:["VW","露營車","造型床"] },
+  { s:8, n:"星空觀景天窗", en:"Stargazing Tent Kids", tags:["星空","帳篷","投影"] },
+  // 9. 藝術家
+  { s:9, n:"整面黑板牆", en:"Chalkboard Wall Kids", tags:["黑板漆","可擦","塗鴉"] },
+  { s:9, n:"畫架 + 顏料收納", en:"Art Easel Kids Room", tags:["畫架","顏料","手作"] },
+  { s:9, n:"藝廊掛畫線", en:"Art Gallery Line Kids", tags:["曬衣繩","圖夾","藝廊"] },
+  { s:9, n:"可塗鴉地墊", en:"Doodle Rug Kids", tags:["塗鴉","地毯","大張"] },
+  { s:9, n:"黏土 + 手作桌", en:"Craft Table Kids Room", tags:["工作桌","黏土","手作"] },
+  { s:9, n:"顏料罐展示架", en:"Paint Storage Display", tags:["層架","顏料","展示"] },
+  { s:9, n:"攝影小工作室", en:"Photography Studio Kids", tags:["攝影","燈","相機"] },
+  { s:9, n:"拼貼馬賽克牆", en:"Kids Art Display Wall", tags:["作品牆","拼貼","展示"] },
+  // 10. 閱讀
+  { s:10,n:"飄浮書架牆", en:"Floating Bookshelf Kids", tags:["隱形書架","飄浮","書架"] },
+  { s:10,n:"窗邊臥榻閱讀區", en:"Window Seat Reading Nook", tags:["窗台","臥榻","閱讀"] },
+  { s:10,n:"樹屋書櫃", en:"Tree Bookshelf Kids", tags:["樹形","書櫃","造型"] },
+  { s:10,n:"帳篷內秘密書窩", en:"Tent Reading Nook", tags:["帳篷","秘密","書窩"] },
+  { s:10,n:"復古圖書館風", en:"Library Style Kids Room", tags:["圖書館","深木","天鵝絨"] },
+  { s:10,n:"故事牆立體書", en:"Pop Up Book Display", tags:["立體書","展示","故事"] },
+  { s:10,n:"閱讀鞦韆", en:"Swing Reading Nook", tags:["鞦韆","室內","閱讀"] },
+  { s:10,n:"床頭書架延伸", en:"Headboard Bookshelf", tags:["床頭","延伸","書架"] },
+  // 11. 田園
+  { s:11,n:"碎花牆紙滿版", en:"Floral Wallpaper Cottage", tags:["碎花","wallpaper","古典"] },
+  { s:11,n:"復古木椅 + 乾燥花", en:"Dried Flower Cottage Room", tags:["木椅","乾燥花","鄉村"] },
+  { s:11,n:"維多利亞白瓷床架", en:"Wrought Iron Bed Girls", tags:["鍛鐵","雕花","vintage"] },
+  { s:11,n:"花園窗格改造", en:"Garden Window Wall", tags:["窗格","攀藤","假窗"] },
+  { s:11,n:"鄉村木屋閣樓", en:"Attic Cottage Bedroom", tags:["閣樓","斜屋頂","木樑"] },
+  { s:11,n:"草莓印花滿屋", en:"Strawberry Themed Room", tags:["草莓","印花","主題"] },
+  // 12. 日式
+  { s:12,n:"低架木床 + 床墊", en:"Japanese Low Bed Kids", tags:["低床","無印","淺木"] },
+  { s:12,n:"障子門拉門衣櫃", en:"Shoji Closet Kids", tags:["障子","和紙","白木"] },
+  { s:12,n:"榻榻米閱讀區", en:"Tatami Reading Nook", tags:["榻榻米","靠墊","平台"] },
+  { s:12,n:"收納箱疊櫃", en:"Muji Storage Kids", tags:["收納箱","無印","疊櫃"] },
+  { s:12,n:"單一植物一張畫", en:"Minimalist Kids Room", tags:["極簡","留白","綠植"] },
+  { s:12,n:"和風燈籠吊燈", en:"Washi Lantern Pendant", tags:["紙燈籠","吊燈","和風"] }
+];
+
+// 產生 SVG 縮圖（漸層 + 簡單幾何 + 編號）
+function makeThumb(idx, style) {
+  const pal = STYLES[style].palette;
+  const c1 = pal[0], c2 = pal[1], c3 = pal[2];
+  const shapes = [
+    `<circle cx="20%" cy="30%" r="40" fill="${c1}40"/>`,
+    `<circle cx="80%" cy="20%" r="30" fill="${c2}50"/>`,
+    `<circle cx="70%" cy="80%" r="50" fill="${c3}40"/>`,
+    `<rect x="50%" y="40%" width="80" height="80" rx="16" fill="${c1}60" transform="rotate(15 50% 50%)"/>`,
+  ];
+  return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs><linearGradient id="g${idx}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/>
+    </linearGradient></defs>
+    <rect width="400" height="300" fill="url(#g${idx})"/>
+    ${shapes.join('')}
+    <text x="50%" y="55%" text-anchor="middle" font-size="64" font-weight="700" fill="${c3}cc" font-family="-apple-system, sans-serif">${idx}</text>
+  </svg>`;
+}
+
+// 產生卡片
+function buildCard(c, idx) {
+  const url = "https://www.pinterest.com/search/pins/?q=" + encodeURIComponent(c.en);
+  return `<a class="card" href="${url}" target="_blank" rel="noopener noreferrer" data-style="${c.s}">
+    <div class="thumb-wrap">${makeThumb(idx, c.s)}
+      <div class="num">${idx}</div>
+      <div class="badge">#${c.s}</div>
+    </div>
+    <div class="body">
+      <h3>${c.n}</h3>
+      <div class="en">${c.en}</div>
+      <div class="tags">${c.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <div class="cta">Pinterest 搜尋</div>
+    </div>
+  </a>`;
+}
+
+// 分組 + 渲染
+function render(filter='all') {
+  const board = document.getElementById('board');
+  if (filter === 'all') {
+    let html = '';
+    for (let s = 1; s <= 12; s++) {
+      const cards = CARDS.map((c, i) => ({...c, idx: i+1})).filter(c => c.s === s);
+      html += `<section class="style-section" data-style="${s}">
+        <div class="style-header">
+          <span class="emoji">${STYLES[s].emoji}</span>
+          <h2>${STYLES[s].name}</h2>
+          <span class="count">${cards.length} 個主題</span>
+        </div>
+        <div class="grid">${cards.map(c => buildCard(c, c.idx)).join('')}</div>
+      </section>`;
+    }
+    board.innerHTML = html;
+  } else {
+    const cards = CARDS.map((c, i) => ({...c, idx: i+1})).filter(c => c.s === parseInt(filter));
+    const s = parseInt(filter);
+    board.innerHTML = `<section class="style-section" data-style="${s}">
+      <div class="style-header">
+        <span class="emoji">${STYLES[s].emoji}</span>
+        <h2>${STYLES[s].name}</h2>
+        <span class="count">${cards.length} 個主題</span>
+      </div>
+      <div class="grid">${cards.map(c => buildCard(c, c.idx)).join('')}</div>
+    </section>`;
+  }
+}
+
+// Filter
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.filter);
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+});
+
+render('all');
+</script>
+
+</body>
+</html>
