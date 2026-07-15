@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" light dark>
+<title>ISO 27001 內稽 2026 三軸分類法 · DHTML</title>
+<meta name="description" content="從 158 題題庫到 80 題年度內稽,三軸分類法:控制類型/查核方式/風險衝擊" />
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#fafaf9; --fg:#1c1917; --muted:#78716c; --soft:#a8a29e;
+    --card:#ffffff; --bd:#e7e5e4; --bd2:#d6d3d1;
+    --accent:#44403c; --accent2:#78716c;
+    --tag-bg:#e7e5e4; --tag-fg:#44403c;
+    --gov:#d9e1f2; --gov-ink:#1e3a5f;
+    --mgmt:#e2efda; --mgmt-ink:#2d5016;
+    --tech:#fce4d6; --tech-ink:#7c2d12;
+    --phy:#d5c8e8; --phy-ink:#4a1d6e;
+    --high:#c53030; --high-bg:#fed7d7;
+    --mid:#b7791f; --mid-bg:#feebc8;
+    --low:#2f855a; --low-bg:#c6f6d5;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c0a09; --fg:#e7e5e4; --muted:#a8a29e; --soft:#57534e;
+      --card:#1c1917; --bd:#292524; --bd2:#44403c;
+      --accent:#e7e5e4; --accent2:#d6d3d1;
+      --tag-bg:#292524; --tag-fg:#d6d3d1;
+      --gov:#1e3a5f; --gov-ink:#a7c0e0;
+      --mgmt:#1d3d1a; --mgmt-ink:#b6d9a4;
+      --tech:#5a2418; --tech-ink:#f0bcaa;
+      --phy:#3a1f55; --phy-ink:#cdb1e8;
+      --high:#fc8181; --high-bg:#742a2a;
+      --mid:#f6ad55; --mid-bg:#7b341e;
+      --low:#68d391; --low-bg:#22543d;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",
+      "PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    background:var(--bg); color:var(--fg);
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  main{max-width:1080px; margin:0 auto; padding:48px 24px 80px}
+
+  header{margin-bottom:32px}
+  .back{font-size:13px; color:var(--muted); text-decoration:none; margin-bottom:14px; display:inline-block}
+  .back:hover{color:var(--accent)}
+  h1{font-size:28px; margin:0 0 8px; letter-spacing:-.01em; font-weight:700}
+  p.sub{margin:0; color:var(--muted); font-size:14px}
+  .badges{margin-top:14px; display:flex; gap:8px; flex-wrap:wrap}
+  .badge{
+    display:inline-block; padding:4px 10px; border-radius:999px;
+    background:var(--tag-bg); color:var(--tag-fg); font-size:12px;
+    border:1px solid var(--bd);
+  }
+
+  /* KPI strip */
+  .kpi-strip{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+    margin:28px 0 36px;
+  }
+  @media (max-width:640px){.kpi-strip{grid-template-columns:repeat(2,1fr)}}
+  .kpi{
+    background:var(--card); border:1px solid var(--bd); border-radius:var(--radius);
+    padding:14px 16px; box-shadow:var(--shadow);
+  }
+  .kpi-num{font-size:28px; font-weight:700; letter-spacing:-.02em;
+    font-variant-numeric:tabular-nums; line-height:1.2}
+  .kpi-lbl{font-size:12px; color:var(--muted); margin-top:4px}
+
+  /* Section */
+  section{margin-bottom:36px}
+  h2{
+    font-size:18px; margin:0 0 14px; font-weight:700;
+    letter-spacing:-.005em; display:flex; align-items:baseline; gap:10px;
+  }
+  h2 .num{
+    background:var(--tag-bg); color:var(--tag-fg);
+    font-size:11px; padding:2px 8px; border-radius:999px; font-weight:500;
+  }
+
+  /* Three-axis cards */
+  .axis-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  @media (max-width:768px){.axis-grid{grid-template-columns:1fr}}
+  .axis{
+    background:var(--card); border:1px solid var(--bd); border-radius:var(--radius);
+    padding:18px; box-shadow:var(--shadow);
+  }
+  .axis h3{margin:0 0 6px; font-size:16px; font-weight:700; display:flex; align-items:center; gap:6px}
+  .axis .axis-sub{font-size:12px; color:var(--muted); margin-bottom:12px}
+  .axis ul{margin:0; padding-left:18px; font-size:13.5px; line-height:1.7}
+  .axis ul li b{font-weight:600}
+
+  /* Distribution bars */
+  .dist-row{
+    display:grid; grid-template-columns:120px 1fr 50px; gap:10px;
+    align-items:center; padding:6px 0; font-size:13px;
+  }
+  .dist-row .lbl{display:flex; align-items:center; gap:6px; font-weight:500}
+  .dist-row .lbl .swatch{
+    width:12px; height:12px; border-radius:3px; flex-shrink:0;
+  }
+  .bar-track{height:18px; background:var(--tag-bg); border-radius:9px; overflow:hidden; position:relative}
+  .bar-fill{height:100%; border-radius:9px; transition:width .6s ease}
+  .bar-fill.gov{background:var(--gov)}
+  .bar-fill.mgmt{background:var(--mgmt)}
+  .bar-fill.tech{background:var(--tech)}
+  .bar-fill.phy{background:var(--phy)}
+  .bar-fill.high{background:var(--high)}
+  .bar-fill.mid{background:var(--mid)}
+  .bar-fill.low{background:var(--low)}
+  .dist-row .val{text-align:right; font-variant-numeric:tabular-nums; color:var(--muted)}
+
+  /* Toolbar / filters */
+  .toolbar{
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    background:var(--card); border:1px solid var(--bd); border-radius:var(--radius);
+    padding:12px; margin-bottom:12px;
+  }
+  .toolbar input,.toolbar select{
+    background:var(--bg); color:var(--fg);
+    border:1px solid var(--bd2); border-radius:8px;
+    padding:7px 10px; font-size:13px; outline:none;
+    font-family:inherit;
+  }
+  .toolbar input{flex:1; min-width:160px}
+  .toolbar select{cursor:pointer}
+  .toolbar label{font-size:12px; color:var(--muted); margin-right:4px}
+  .toolbar .spacer{flex:1}
+  .toolbar .count{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+
+  /* Item list */
+  .item{
+    background:var(--card); border:1px solid var(--bd); border-radius:var(--radius);
+    padding:12px 14px; margin-bottom:8px;
+    display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:start;
+  }
+  .item .no{
+    font-variant-numeric:tabular-nums; font-size:12px; color:var(--muted);
+    background:var(--tag-bg); padding:3px 8px; border-radius:6px; align-self:start;
+  }
+  .item .q{font-size:14px; line-height:1.55}
+  .item .tags{display:flex; gap:6px; flex-wrap:wrap; align-self:start}
+  .item .tags .t{
+    font-size:11px; padding:2px 8px; border-radius:999px; font-weight:500;
+    white-space:nowrap;
+  }
+  .t.gov{background:var(--gov); color:var(--gov-ink)}
+  .t.mgmt{background:var(--mgmt); color:var(--mgmt-ink)}
+  .t.tech{background:var(--tech); color:var(--tech-ink)}
+  .t.phy{background:var(--phy); color:var(--phy-ink)}
+  .t.high{background:var(--high-bg); color:var(--high)}
+  .t.mid{background:var(--mid-bg); color:var(--mid)}
+  .t.low{background:var(--low-bg); color:var(--low)}
+  .t.muted{background:var(--tag-bg); color:var(--muted)}
+
+  .item .suggest{
+    grid-column:1 / -1; margin-top:8px; padding-top:8px;
+    border-top:1px dashed var(--bd); font-size:12.5px; color:var(--muted);
+    line-height:1.5;
+  }
+  .item .suggest b{color:var(--fg); font-weight:600}
+
+  /* Empty state */
+  .empty{padding:40px; text-align:center; color:var(--muted); font-size:14px}
+
+  /* Footer */
+  footer{
+    margin-top:48px; padding-top:24px; border-top:1px solid var(--bd);
+    color:var(--muted); font-size:12.5px; line-height:1.7;
+  }
+  footer a{color:var(--muted)}
+  footer a:hover{color:var(--accent)}
+
+  /* method chip wrap fix */
+  .t.method{background:var(--tag-bg); color:var(--fg)}
+
+  /* nav pills */
+  .quicknav{
+    display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;
+  }
+  .quicknav a{
+    text-decoration:none; color:var(--fg);
+    background:var(--card); border:1px solid var(--bd);
+    padding:6px 12px; border-radius:999px; font-size:12.5px;
+  }
+  .quicknav a:hover{border-color:var(--accent2)}
+
+  .legend{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--muted)}
+  .legend .swatch{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; vertical-align:middle}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../index.html">← 回 hub</a>
+  <header>
+    <h1>🔐 ISO 27001 內稽 2026 · 三軸分類法</h1>
+    <p class="sub">從 158 題題庫到 80 題年度內稽:用控制類型 / 查核方式 / 風險衝擊三個軸為 80 題分類,輔助規劃與執行。</p>
+    <div class="badges">
+      <span class="badge">台灣英文雜誌社</span>
+      <span class="badge">ISO/IEC 27001:2022</span>
+      <span class="badge">年度內稽 2026/07</span>
+      <span class="badge">題庫 → 文件 對應</span>
+    </div>
+  </header>
+
+  <div class="kpi-strip" id="kpiStrip"></div>
+
+  <nav class="quicknav">
+    <a href="#axis">三軸設計</a>
+    <a href="#dist">分布圖</a>
+    <a href="#lookup">題目速查</a>
+    <a href="#high">高風險清單</a>
+    <a href="#files">相關文件</a>
+  </nav>
+
+  <section id="axis">
+    <h2>三個分類軸 <span class="num">正交 · 規劃三角</span></h2>
+    <div class="axis-grid">
+      <div class="axis">
+        <h3>🏛 A · 控制類型</h3>
+        <div class="axis-sub">對應 ISO 27001 Annex A 面向</div>
+        <ul>
+          <li><b>治理</b> — 政策、目標、管理審查、法規遵循</li>
+          <li><b>管理</b> — 風險評鑑、資產盤點、人資、供應商、教育訓練、文件</li>
+          <li><b>技術</b> — 存取控制、密碼、加密、系統開發、弱點、備份、網路、監控</li>
+          <li><b>實體</b> — 機房、門禁、環控、佈纜、設備汰除</li>
+        </ul>
+        <p class="axis-sub" style="margin-top:14px">👉 給 <b>報告分類</b> 用,主管最愛看</p>
+      </div>
+      <div class="axis">
+        <h3>🔍 B · 查核方式</h3>
+        <div class="axis-sub">依題目應該用什麼方式蒐集證據</div>
+        <ul>
+          <li><b>文件審查</b> — 檢查政策、紀錄、表單</li>
+          <li><b>訪談</b> — 問負責人 / 管理階層</li>
+          <li><b>技術檢測</b> — 看系統、設定、log</li>
+          <li><b>實地觀察</b> — 到機房走一圈</li>
+        </ul>
+        <p class="axis-sub" style="margin-top:14px">👉 給 <b>執行排程</b> 用,誰要做、怎麼做一目了然</p>
+      </div>
+      <div class="axis">
+        <h3>🎯 C · 風險衝擊</h3>
+        <div class="axis-sub">題目失效後的影響程度</div>
+        <ul>
+          <li><b style="color:var(--high)">高</b> — 失效直接導致營運中斷、資料外洩、法遵裁罰 (例:備份、機房門禁、存取權限)</li>
+          <li><b style="color:var(--mid)">中</b> — 影響管理有效性,但有補償性控制 (例:訓練、文件版本)</li>
+          <li><b style="color:var(--low)">低</b> — 行政性質、例行公事 (例:每年政策審議)</li>
+        </ul>
+        <p class="axis-sub" style="margin-top:14px">👉 給 <b>優先順序</b> 用,先做紅色的</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="dist">
+    <h2>分布圖 <span class="num">80 題 (本次內稽)</span></h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px">
+      <div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:6px">控制類型</div>
+        <div id="distCtrl"></div>
+      </div>
+      <div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:6px">風險衝擊</div>
+        <div id="distRisk"></div>
+      </div>
+    </div>
+    <div style="font-size:12px; color:var(--muted); margin-top:12px; line-height:1.7">
+      <b>查核方式</b> (一題可多選):文件審查 60 · 技術檢測 21 · 訪談 13 · 實地觀察 5 · 另有 4 題多方式組合<br>
+      <b>完整題庫 158 題</b> 分布:控制類型 管理 83 / 技術 43 / 治理 17 / 實體 15,風險 高 37 / 中 112 / 低 9
+    </div>
+  </section>
+
+  <section id="lookup">
+    <h2>題目速查 <span class="num">80 題</span></h2>
+    <div class="toolbar">
+      <input id="search" type="text" placeholder="🔎 搜尋題目、適用性聲明..." />
+      <label>控制</label>
+      <select id="fCtrl">
+        <option value="">全部</option>
+        <option>治理</option><option>管理</option><option>技術</option><option>實體</option>
+      </select>
+      <label>風險</label>
+      <select id="fRisk">
+        <option value="">全部</option>
+        <option>高</option><option>中</option><option>低</option>
+      </select>
+      <label>方式</label>
+      <select id="fMethod">
+        <option value="">全部</option>
+        <option>文件審查</option><option>訪談</option>
+        <option>技術檢測</option><option>實地觀察</option>
+      </select>
+      <span class="spacer"></span>
+      <span class="count" id="count"></span>
+    </div>
+    <div id="list"></div>
+  </section>
+
+  <section id="high">
+    <h2>高風險題 22 題 <span class="num">建議優先排程</span></h2>
+    <p style="font-size:13px; color:var(--muted); margin:-6px 0 12px">🔴 失效會直接導致營運中斷、資料外洩或法遵裁罰。先做這些。</p>
+    <div id="highList"></div>
+  </section>
+
+  <section id="files">
+    <h2>相關文件 <span class="num">本機路徑</span></h2>
+    <ul style="line-height:1.9">
+      <li><b>Excel 題庫</b>: <code>~/Downloads/2026audit2.xlsx</code> (含 80 題 V 標記 + 4 欄分類 + Word 題號)<br>
+        <code>~/Downloads/2026audit3.xlsx</code> (完整 158 題分類)</li>
+      <li><b>Word 檢查表</b>: <code>~/Downloads/FMP-ISMS-202607內部稽核檢查表.docx</code> (依 控制類型 → 審查方式 排序,4 大類共 80 題)</li>
+      <li><b>Word 範本 (去年)</b>: <code>~/Downloads/FMP-ISMS-202507內部稽核檢查表.docx</code></li>
+    </ul>
+  </section>
+
+  <footer>
+    由 Hermes 自動整理 · 資料來源 2026audit3.xlsx · 更新於 2026-07<br>
+    樞紐分析表在三個工作表:<code>控制類型</code> · <code>查核方式</code> · <code>風險衝擊</code>
+  </footer>
+</main>
+
+<script>
+const ITEMS = [{"no": 82, "appl": "A.8.9 組態管理", "q": "是否保留構型異動紀錄？", "ctrl": "技術", "method": "文件審查", "risk": "中", "suggest": "抽構型異動申請單與異動紀錄,確認所有變更皆留有軌跡。", "is_v": true}, {"no": 2, "appl": "A.5.1 資訊安全政策", "q": "資訊安全政策是否修訂?若有修訂，是否經資安管理委員會核准並進行版本更新？", "ctrl": "治理", "method": "文件審查+訪談", "risk": "中", "suggest": "查政策修訂紀錄與資安委員會核准簽核,確認版本更新流程。", "is_v": false}, {"no": 89, "appl": "A.8.31 開發、測試與運作環境之區隔", "q": "開發環境時是否保留舊版的軟體，以作為緊急應變措施之用並至少保留前一版穩定之程式碼，且進行版本控制。", "ctrl": "技術", "method": "文件審查", "risk": "中", "suggest": "查版本控制系統,確認至少保留前一版穩定程式碼以利緊急回復。", "is_v": true}, {"no": 4, "appl": "A.5.37 書面紀錄之運作程序", "q": "文件頁首是否註明機密等級、文件名稱、文件編號、版本等資訊。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽樣文件,核對頁首標示機密等級/文件名稱/編號/版本完整。", "is_v": false}, {"no": 5, "appl": "A.5.13 資訊的標示", "q": "其他部門因公必須借用機密等級的文件時，是否經權責單位主管同意並完成借閱申請。", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "查文件借閱紀錄,訪權責單位確認主管同意流程落實。", "is_v": false}, {"no": 6, "appl": "A.5.37 書面紀錄之運作程序", "q": "文件相關之表單編號編碼是否依規定編號。", "ctrl": "管理", "method": "文件審查", "risk": "低", "suggest": "抽文件表單編號,核對是否依編碼規則編號。", "is_v": false}, {"no": 7, "appl": "A.5.13 資訊的標示", "q": "請提供「機密」或「敏感」的兩份文件供檢查 1.儲存位置 2.文件檔名是否已一致地依規定加上了等級標示？", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "請提供兩份機密/敏感文件,核對儲存位置與檔名標示一致性。", "is_v": false}, {"no": 8, "appl": "A.5.37 書面紀錄之運作程序", "q": "ISMS文件需修訂時，是否填寫「文件制修訂、廢止申請單」，提出變更原因並依照核決權限表審查。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查文件制修訂申請單與核決權限表簽核流程是否完整。", "is_v": false}, {"no": 9, "appl": "A.5.37 書面紀錄之運作程序", "q": "文件已過時無效時，文件權責單位是否依照核決權限表審查，核准後交由文件管理人員公告廢止。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查文件廢止公告紀錄,確認權責單位與文件管理人員簽核齊備。", "is_v": false}, {"no": 109, "appl": "A.7.12 佈纜安全", "q": "是否新增設備或網路變動？架構變動是否經資訊部主管核准？", "ctrl": "技術", "method": "文件審查", "risk": "中", "suggest": "查網路架構圖異動紀錄與主管核准簽核,確認變更皆經授權。", "is_v": true}, {"no": 79, "appl": "A.8.26 應用系統安全要求事項", "q": "系統設計與開發的過程中，系統內的供應商是否具備ISO27001認證?", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查供應商ISO27001證書與合約安全條款,確認認證仍在有效期。", "is_v": true}, {"no": 12, "appl": "A.5.13 資訊的標示", "q": "敏感等級的文件資料是否必須經權責單位主管審核後，並進行加密方可攜出或傳送。", "ctrl": "管理", "method": "文件審查+訪談", "risk": "高", "suggest": "抽敏感文件攜出/傳送紀錄,訪權責主管確認加密程序落實。", "is_v": false}, {"no": 13, "appl": "A.5.13 資訊的標示", "q": "機密文件與資料是否經資訊安全管理委員會管代表核准，統一由＜文件管理＞人員造冊銷毀。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "查機密文件銷毀造冊,確認資安委員會核准與文件管理員簽收。", "is_v": false}, {"no": 84, "appl": "A.8.25 安全開發生命週期 A.8.26 應用系統安全要求事項", "q": "加值系統建置人員應在接獲需求單位之需求後，是否有進行系統安全需求分析，並將安全需求納入需求規格相關文件中。", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查系統安全需求分析文件,確認安全需求已納入需求規格書。", "is_v": true}, {"no": 15, "appl": "A.5.12 資產之分類分級", "q": "使用自編流水號的資產，如何確保這些流水號是「三碼」且「不重複」？是否有一個管理機制或列表來記錄已使用的自編碼，以避免重複？", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "查自編流水號管理機制與已用編碼清單,訪負責人確認控管流程。", "is_v": false}, {"no": 16, "appl": "A.5.12 資產之分類分級", "q": "A.核准後,是否啟用新的資產編號\nB.程序書修訂核准後，是否啟用新的資產編號\nC.資產編號是否與程序書相符", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "核對程序書資產編號與啟用紀錄是否一致,新編號是否合規。", "is_v": false}, {"no": 86, "appl": "A.8.7 防範惡意軟體", "q": "是否定期對加值中心系統執行弱點掃描？請說明掃描的頻率、使用的工具，並提供近期的弱點掃描報告。對於報告中發現的高風險項目，是否有追蹤處理的紀錄？", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查近三期弱點掃描報告與高風險追蹤紀錄,確認有處理軌跡。", "is_v": true}, {"no": 87, "appl": "A.8.7 防範惡意軟體", "q": "如何確保加值中心系統所使用的作業系統與軟體是「通過安全認證」的？是否有相關的採購政策、核准使用的軟體清單，或針對上線前軟體的安全性評估紀錄？", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查採購政策、核准軟體清單、上線前安全評估紀錄是否齊備。", "is_v": true}, {"no": 149, "appl": "A.8.8 技術脆弱性管理", "q": "是否定期有進行弱點掃描，並於弱點補強後檢視是否已完成修補。", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查弱點掃描報告與補強追蹤表,確認高風險項目已修補。", "is_v": true}, {"no": 20, "appl": "A.7.14 設備汰除或重新使用之安全", "q": "列為汰除(備援)設備,是否於重要資產目錄表中註記用途", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查重要資產目錄表,確認汰除/備援設備有用途註記。", "is_v": false}, {"no": 21, "appl": "A.5.11 資產之歸還", "q": "因工作需要借用設備是否依規定填寫「資訊用品異動申請表」。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽資訊用品異動申請表,確認設備借用依規定填寫。", "is_v": false}, {"no": 153, "appl": "A.8.8 技術脆弱性管理", "q": "資訊小組人員是否對弱點檢測報告中之高風險弱點項目評估，並依據「矯正與預防措施程序」填寫「問題反映／改善措施報告單」後，執行補強。", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查問題反映/改善措施報告單,確認高風險弱點有評估補強。", "is_v": true}, {"no": 23, "appl": "A.7.8 設備安置和保護", "q": "組織採取了哪些技術或管理措施，來防止員工私自外借或拷貝公司軟體？\n（例如：使用者權限設定、禁用USB儲存裝置、員工保密協議等）", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "訪資訊組確認外借/拷貝軟體防範措施,查相關技術設定。", "is_v": false}, {"no": 24, "appl": "A.7.8 設備安置和保護", "q": "有無依合約提供自行開發系統工具給外部單位的案例？\n有無正式的流程，用於審核及提供「自行開發的加值中心系統工具」給外部單位？", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查自開發系統工具外部提供流程與審核紀錄是否完備。", "is_v": false}, {"no": 154, "appl": "A.8.34 稽核測試期間資訊系統之保護", "q": "執行弱點改善方案前是否執行系統備份或設備設定組態的備份，以使失敗的改善方案回復到改善前的狀態。", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查改善方案前備份紀錄,確認失敗時可回復至原狀態。", "is_v": true}, {"no": 26, "appl": "A.5.9 資訊及其他相關聯資產之清冊", "q": "抽查資訊資產，是否與資產清冊內容一致？", "ctrl": "實體", "method": "實地觀察+文件審查", "risk": "中", "suggest": "抽10%資訊資產,實地核對與資產清冊內容一致性。", "is_v": false}, {"no": 97, "appl": "A.8.23 網頁過濾", "q": "防火牆是否有異動?若有，是否經資訊安全組代表核准?", "ctrl": "技術", "method": "文件審查+技術檢測", "risk": "中", "suggest": "查防火牆異動申請單,並比對現行設定與核准紀錄是否一致。", "is_v": true}, {"no": 28, "appl": "A.5.7 威脅情資", "q": "是否有系統化流程，用以蒐集、分析和應用內外部的威脅情資？是否有相關的文件化程序（例如：程序書、辦法）可供查閱？", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查威脅情資蒐集流程文件化程序,確認有系統化作業。", "is_v": false}, {"no": 102, "appl": "A.8.22 網路區隔", "q": "加值中心客戶是否提供公用IP並登記於防火牆白名單。", "ctrl": "技術", "method": "文件審查+技術檢測", "risk": "中", "suggest": "請網管展示防火牆白名單與客戶IP清單,核對是否一致。", "is_v": true}, {"no": 83, "appl": "A.8.9 組態管理", "q": "組織如何確保組態備份的有效性，以及系統管理人員具備成功還原系統至最近組態的能力？", "ctrl": "技術", "method": "文件審查+技術檢測", "risk": "高", "suggest": "請系統管理員實際演示備份還原流程,驗證還原成功機率。", "is_v": true}, {"no": 101, "appl": "A.5.15 存取控制", "q": "公司同仁因專案需要在公司外部存取內部資源時，是否依系統存取控制管理說明書之規定，提出遠端連線申請。", "ctrl": "技術", "method": "文件審查+訪談", "risk": "中", "suggest": "查遠距連線申請單與遠距人員清單,訪IT確認審核流程。", "is_v": true}, {"no": 32, "appl": "A.5.12 資產之分類分級", "q": "是否每年針對加值中心存在風險進行檢討且制定改善方案。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查風險檢討紀錄與改善方案,確認每年定期執行。", "is_v": false}, {"no": 33, "appl": "A.5.12 資產之分類分級", "q": "去年度有無重大資產異動，是否有進行風險評估。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查重大資產異動風險評估紀錄,確認有風險評估作為。", "is_v": false}, {"no": 34, "appl": "A.5.12 資產之分類分級", "q": "是否訂定可接受的風險水準，並針對資訊安全風險評估表之項目進行適當之安全管制措施。", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "查可接受風險水準定義,確認風險評估表對應安全管制措施。", "is_v": false}, {"no": 35, "appl": "A.5.12 資產之分類分級", "q": "是否針對管制項目擬定風險處理計畫，並將風險處理計畫與再評估之結果填入「資訊安全風險評估表」，並保留各版本記錄。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查風險處理計畫與評估表各版本,確認皆保留紀錄。", "is_v": false}, {"no": 36, "appl": "A.5.12 資產之分類分級", "q": "風險處理計畫實施是否有提交資訊安全管理委員會審查?", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "查風險處理計畫是否送資安委員會審查並留有會議紀錄。", "is_v": false}, {"no": 37, "appl": "A.5.4 管理階層責任", "q": "每年是否完成內部稽核後召開一次管理審查會議。", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "查管理審查會議召開紀錄,確認每年內稽後召開一次。", "is_v": false}, {"no": 38, "appl": "A.5.4 管理階層責任", "q": "管理審查會議輸出是否包含程序書指定之項目之結論與措施。", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "查管審會議輸出項目,確認包含程序書指定之結論與措施。", "is_v": false}, {"no": 78, "appl": "A.8.25 安全開發生命週期", "q": "當要對「加值中心系統」進行維護或更新作業時，是否有標準作業程序（SOP）？請提供最近一次的維護，是否確實執行了備份、是否已通知相關使用者單位，以及維護過程與結果是否有被完整記錄下來？", "ctrl": "技術", "method": "文件審查+訪談", "risk": "高", "suggest": "查維護SOP、最近一次維護紀錄與備份通知單,訪談作業人員。", "is_v": true}, {"no": 60, "appl": "A.8.21 網路服務之安全", "q": "公司內部 IP 分配事宜是否持續進行管理,以利隨時追蹤使用者及 IP 的使用情況。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "查IP分配管理系統/表單,抽10個IP追溯到使用者與使用目的。", "is_v": true}, {"no": 41, "appl": "A.5.36 資訊安全政策、規則及標準之遵循性", "q": "「問題反映／改善措施報告單」是否依規呈送直屬主管核准，再送資訊安全管理委員會編號、登錄、列管、追蹤。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽問題反映/改善措施報告單,確認依規呈送與編號列管。", "is_v": false}, {"no": 42, "appl": "A.5.36 資訊安全政策、規則及標準之遵循性", "q": "「問題反映／改善措施報告單」是否經專人驗證，填上驗證日期並簽名後送資訊安全管理委員會正式銷案。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽報告單,確認驗證人簽名驗證日期與資安委員會銷案紀錄。", "is_v": false}, {"no": 65, "appl": "A.5.32 智慧財產權（IPR）", "q": "同仁使用的軟體是否在公告之「同意安裝軟體清單」的範圍中", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "隨機抽3-5台同仁電腦,比對安裝軟體與公告清單是否一致。", "is_v": true}, {"no": 44, "appl": "A.5.24 資訊安全事故管理規劃及準備", "q": "當主機服務中斷時，是否依照程序書之規範進行並留下文件。", "ctrl": "管理", "method": "訪談+文件審查", "risk": "高", "suggest": "訪現場人員演練主機中斷處置,確認SOP符合文件規範。", "is_v": false}, {"no": 90, "appl": "A.8.23 網頁過濾", "q": "防火牆是否開啟紀錄功能，紀錄連線狀況。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "實際登入防火牆確認log功能開啟、儲存空間足夠且可回查。", "is_v": true}, {"no": 46, "appl": "A.6.8 資訊安全事件通報", "q": "是否完成事件復原並確認系統恢復正常？", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "查事件復原紀錄,確認系統恢復正常並有完整紀錄。", "is_v": false}, {"no": 93, "appl": "A.8.9 組態管理", "q": "對重要資產的組態設定進行「定期審視」。請問審視的頻率為何？審視的內容包含哪些項目（例如：規則、權限設定）？是否能提供最近一次的審視紀錄以茲證明？", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "實際登入防火牆確認log功能開啟、儲存空間足夠且可回查。", "is_v": true}, {"no": 94, "appl": "A.8.23 網頁過濾", "q": "防火牆過濾規則是否有指定 IP 位址登入特定服務。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "請網管登入防火牆展示過濾規則,確認重要服務綁定特定IP。", "is_v": true}, {"no": 96, "appl": "A.8.23 網頁過濾", "q": "是否有設定網頁過濾原則，保護使用者不慎使用不當的網站。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "實際展示網頁過濾政策與黑/白名單,測試不當網站是否被阻擋。", "is_v": true}, {"no": 50, "appl": "A.5.30 營運持續之 ICT備妥性", "q": "是否更新營運持續計畫，並測試及演練。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "查營運持續計畫更新紀錄與演練報告,確認定期測試演練。", "is_v": false}, {"no": 99, "appl": "A.8.23 網頁過濾", "q": "辦公室個人電腦是否定期掃描潛在的病毒或惡意程式。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "抽3台同仁電腦執行掃毒,確認排程掃描與即時防護皆啟用。", "is_v": true}, {"no": 52, "appl": "A.6.6 機密性或保密協議", "q": "同仁於到職時是否簽署「個人資安責任保密同意書」。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽資訊部門員工到職保密同意書,確認到職時皆已簽署。", "is_v": false}, {"no": 105, "appl": "A.8.9 組態管理", "q": "事件紀錄（log）是否至少保存一年。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "查log保存設定,並抽樣log檔確認保存期≥1年、未被竄改。", "is_v": true}, {"no": 54, "appl": "A.6.2 聘用條款和條件", "q": "新人報到程序中，已要求特定學歷或專業證照的職位，新進同仁必須在報到時繳交相關證明文件？請提供相關程序文件或新人報到檢核表（Onboarding Checklist）。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查新人報到檢核表,確認要求特定學歷/證照職位有繳交證明。", "is_v": false}, {"no": 55, "appl": "A.6.2 聘用條款和條件", "q": "對於有要求特定學歷或證照的職位，其要求是如何被定義並傳達給應聘者的？是否能在職位說明書（Job Description）或招聘公告中找到相關要求？", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "查職位說明書,訪HR確認證照要求如何傳達給應聘者。", "is_v": false}, {"no": 56, "appl": "A.6.2 聘用條款和條件", "q": "請抽查近期（例如：過去一年內）到職，且其職位要求特定學歷或證照的員工。檢查是否留存相關的證明文件影本？", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽近期到職員工證明文件影本,確認符合職位要求。", "is_v": false}, {"no": 122, "appl": "A.5.32 智慧財產權（IPR）", "q": "是否有同仁申請安裝不在「同意安裝軟體清單」之軟體？是否經資訊人員確認不存在違法或無資安風險？", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "抽5台同仁電腦比對軟體清單,查例外申請單與資安風險評估。", "is_v": true}, {"no": 58, "appl": "A.6.3 資訊安全認知及教育訓練", "q": "接受外部資訊安全訓練結束後，是否繳交結業證書、講義或課程報告做為課程紀錄。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查外部訓練結業證書/講義/報告,確認課程紀錄完整性。", "is_v": false}, {"no": 59, "appl": "A.6.3 資訊安全認知及教育訓練", "q": "是否針對加值中心相關人員定期進行資訊安全教育訓練。", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "查加值中心人員資安教育訓練紀錄,訪同仁確認實質參與。", "is_v": false}, {"no": 106, "appl": "A.8.17 鐘訊同步", "q": "組織內部的伺服器、個人電腦及網路設備等，是如何確保其時間設定皆與內部的 NTP 伺服器同步？是否有透過自動化方式（如：網域群組原則 GPO）進行統一設定？", "ctrl": "技術", "method": "技術檢測", "risk": "低", "suggest": "查AD GPO NTP原則,並抽3台設備確認時間與NTP伺服器同步。", "is_v": true}, {"no": 61, "appl": "A.8.7 防範惡意軟體", "q": "機房伺服器的電腦與是否有安裝防毒軟體。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "實際登入機房伺服器確認防毒軟體安裝與運作狀態。", "is_v": false}, {"no": 43, "appl": "A.5.24 資訊安全事故管理規劃及準備", "q": "主要透過何種方式偵測到重要資產的無預警故障？", "ctrl": "技術", "method": "技術檢測+訪談", "risk": "高", "suggest": "請維運登入監控系統展示告警設定,並訪談故障偵測流程。", "is_v": true}, {"no": 62, "appl": "A.8.22 網路區隔", "q": "無線網路的管理機制為何？是否控管並與內網網路區隔？", "ctrl": "技術", "method": "訪談+技術檢測", "risk": "中", "suggest": "訪談網管並實際登入無線控制器,確認SSID、認證與VLAN區隔。", "is_v": true}, {"no": 103, "appl": "A.8.6 容量管理", "q": "為確保資訊處理設備的有效性和效率，避免出現性能瓶頸或過載情況，組織如何在第一時間獲知，並加以處理。", "ctrl": "技術", "method": "訪談+技術檢測", "risk": "中", "suggest": "請維運展示監控儀表板告警,容量異常通知與處理SOP。", "is_v": true}, {"no": 76, "appl": "A.8.25 安全開發生命週期", "q": "是否建立與正式環境隔離的「測試環境」？系統或應用程式在實際上線前，是否會先部署到測試環境進行完整的測試？", "ctrl": "技術", "method": "實地觀察+訪談", "risk": "高", "suggest": "走訪測試環境,訪開發與維運確認測試→正式環境部署流程。", "is_v": true}, {"no": 66, "appl": "A.7.10 儲存媒體", "q": "可攜式設備及儲存媒體中，若儲存敏感級以上的資料時，是否使用密碼保護資料、檔案。", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "訪經手敏感資料員工,確認USB隨身碟檔案加密實務做法。", "is_v": false}, {"no": 67, "appl": "A.8.1 使用者端點裝置", "q": "要求員工在行動裝置或行動儲存媒體上儲存「敏感級以上」的資料時，必須對檔案進行密碼保護，組織是否有提供建議的加密工具或操作指南？", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查行動裝置加密工具清單與操作指南,確認有提供建議工具。", "is_v": false}, {"no": 68, "appl": "A.8.1 使用者端點裝置", "q": "資料若以可攜式媒體保存時，該媒體是否存放於安全設備或處所；敏感等級以上儲存媒體是否放置於上鎖之儲存櫃中，專人管理。", "ctrl": "實體", "method": "實地觀察", "risk": "中", "suggest": "走訪辦公區,確認敏感等級儲存媒體放置於上鎖儲存櫃。", "is_v": false}, {"no": 69, "appl": "A.8.1 使用者端點裝置", "q": "詢問會經手處理敏感資料的員工（例如：人資、秘書）？請他們說明，當需要將一份被歸類為「敏感級」的檔案存放到 USB 隨身碟帶離公司時，他們實際會如何操作以確保檔案安全？", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "訪會經手敏感資料員工,確認USB攜出敏感檔案的實際操作。", "is_v": false}, {"no": 70, "appl": "A.7.10 儲存媒體", "q": "屬於重要資產之可攜式設備及儲存媒體，不堪使用要報廢時，是否依「資產分類與管理作業程序」作業。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查可攜式設備報廢紀錄,確認依資產管理作業程序執行。", "is_v": false}, {"no": 71, "appl": "A.5.35 資訊安全的獨立評審", "q": "是否完成「資訊安全目標管理查核表」，並於管理審查會議中審查通過。", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "查資安目標管理查核表與管審會會議資料,確認審查通過。", "is_v": false}, {"no": 1, "appl": "A.5.1 資訊安全政策", "q": "「資訊安全政策」是否每年定期審議?", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "索取年度政策審議會議紀錄,核對日期、簽到與決議事項。", "is_v": true}, {"no": 3, "appl": "A.5.1 資訊安全政策", "q": "請提供近半年重要會議紀錄（例如：管理審查會議），及其對應的簽到表以供查驗", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "抽近半年管審會議紀錄及簽到表,確認議題追蹤與文件保存完整。", "is_v": true}, {"no": 11, "appl": "A.5.31 法律、法令、法規及合約要求事項", "q": "法令法規之列表是否更新。", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "核對法令法規一覽表更新日期與權責單位簽核,確認新法已列入。", "is_v": true}, {"no": 75, "appl": "A.8.25 安全開發生命週期", "q": "在「加值中心系統」的需求規劃或系統開發初期，是否有進行資訊安全需求分析？這些被識別出來的安全需求（例如：身份驗證、存取控制、日誌記錄等）是如何被正式記錄在需求規格書或相關開發文件中的？", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查需求規格書,確認安全需求有被正式記錄與分析。", "is_v": false}, {"no": 40, "appl": "A.5.4 管理階層責任", "q": "會議紀錄中對於前次議題的「處理狀況」描述是否清晰？有明確標示「已完成」、「持續進行中」還是「延遲」？", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "抽近三次管審紀錄,核對議題處理狀態、完成/持續/延遲標示清楚。", "is_v": true}, {"no": 77, "appl": "A.8.25 安全開發生命週期", "q": "如何決定一個功能「有需要」進行滲透測試或安全審核？是否能提供最近一次的滲透測試報告，以及針對報告中發現問題的改善追蹤紀錄？", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查最近一次滲透測試報告與改善追蹤紀錄,確認高風險有處理。", "is_v": false}, {"no": 64, "appl": "A.5.32 智慧財產權（IPR）", "q": "是否每年定期盤點具有智慧財產權的軟體與授權數量?", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "查年度軟體盤點紀錄與授權數量比對表,確認授權合規。", "is_v": true}, {"no": 72, "appl": "A.5.1 資訊安全政策", "q": "上一年度的監控目標是否達到，若無，是否己找到問題所在、擬出可行的矯正方式。", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "查監控目標查核表,未達標者是否有根因分析與矯正措施紀錄。", "is_v": true}, {"no": 80, "appl": "A.8.27 安全系統架構及工程原則", "q": "在系統設計時，是否有採用模組化的設計方法，將系統切分為較小、獨立且可重複使用的組件？", "ctrl": "技術", "method": "文件審查+訪談", "risk": "中", "suggest": "查系統架構圖與設計文件,訪開發確認模組化設計實務。", "is_v": false}, {"no": 81, "appl": "A.8.9 組態管理", "q": "維護或異動前，是否有明確定義當異動失敗時的「還原計畫」？", "ctrl": "技術", "method": "文件審查", "risk": "高", "suggest": "查還原計畫文件,確認異動前明確定義失敗時的還原步驟。", "is_v": false}, {"no": 73, "appl": "A.5.7 威脅情資", "q": "是否將內外部議題及相關方需求納入管理審查？", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "查內外部議題清單,確認已納入管審會議討論並有決議紀錄。", "is_v": true}, {"no": 121, "appl": "A.5.32 智慧財產權（IPR）", "q": "資訊安全管理委員會是否明列並公告「同意安裝軟體清單」，並要求同仁定期審視工作電腦內的軟體是否符合規範。", "ctrl": "治理", "method": "文件審查", "risk": "中", "suggest": "查公告之同意安裝軟體清單,確認有公告並要求同仁定期審視。", "is_v": true}, {"no": 63, "appl": "A.5.32 智慧財產權（IPR）", "q": "是否訂定使用授權軟體與遵守著作權規範?", "ctrl": "治理", "method": "文件審查", "risk": "低", "suggest": "查軟體授權管理規範公告,確認已訂定並周知同仁。", "is_v": true}, {"no": 85, "appl": "A.8.25 安全開發生命週期 A.8.26 應用系統安全要求事項", "q": "資訊系統建置、變更或測試需安裝上線時，是否有\n需求單位填寫「資訊服務申請表」及「資訊系統上線作業紀錄表」，經核可後始得辦理。", "ctrl": "技術", "method": "文件審查", "risk": "中", "suggest": "抽資訊服務申請表與上線作業紀錄表,確認依規填寫核可。", "is_v": false}, {"no": 39, "appl": "A.5.4 管理階層責任", "q": "管理審查會議之會議紀錄是否依文件與記錄管理作業程序之規定保管。", "ctrl": "治理", "method": "文件審查", "risk": "高", "suggest": "抽管理審查會議紀錄,逐項核對前次議題處理狀態是否標示完整。", "is_v": true}, {"no": 74, "appl": "A.5.7 威脅情資", "q": "資訊安全管理委員會資訊安全官是否每年定期召集相關部門主管擬定當前相關方並討論相關方之需求與期望，並記錄與彙整於「相關方需求調查表」進行討論與分析。", "ctrl": "治理", "method": "文件審查+訪談", "risk": "中", "suggest": "查相關方需求調查表,訪資安官確認每年定期召開並彙整紀錄。", "is_v": true}, {"no": 88, "appl": "A.8.7 防範惡意軟體", "q": "加值中心系統是否已安裝防毒程式？請展示防毒軟體管理主控台的畫面，以證明該系統的防毒引擎與病毒碼維持在最新狀態，且防護功能為啟用狀態。", "ctrl": "技術", "method": "技術檢測", "risk": "高", "suggest": "展示防毒主控台畫面,確認引擎/病毒碼最新且防護啟用。", "is_v": false}, {"no": 128, "appl": "A.7.2 實體進入控制", "q": "廠商(外來人員)進出機房是否有紀錄。", "ctrl": "實體", "method": "文件審查", "risk": "中", "suggest": "抽廠商進出機房登記表,確認皆有陪同與進出時間紀錄。", "is_v": true}, {"no": 130, "appl": "A.7.13 設備維護", "q": "資訊安全委員會資安組，每季是否檢核「機房紀錄表」有否異常之進出紀錄，並於檢核完成後於上述表單中簽名。", "ctrl": "實體", "method": "文件審查", "risk": "中", "suggest": "查機房紀錄表檢核簽名,確認每季皆由資安組進行檢核。", "is_v": true}, {"no": 91, "appl": "A.8.9 組態管理", "q": "防火牆日誌紀錄是否每日由＜資訊安全組＞人員進行查核。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查防火牆log每日查核紀錄,確認資安組人員定期執行。", "is_v": false}, {"no": 92, "appl": "A.8.9 組態管理", "q": "機房管理人員是否每周將防火牆之 config 轉出存放於備份機器上，並記錄於「每日備份檢查紀錄表」。", "ctrl": "技術", "method": "技術檢測+文件審查", "risk": "中", "suggest": "查每日備份檢查紀錄表,確認防火牆config每週轉出備份。", "is_v": false}, {"no": 126, "appl": "A.7.8 設備安置和保護", "q": "辦公區域之實體設備進出是否填寫「資訊用品異動登記表」。", "ctrl": "實體", "method": "文件審查", "risk": "低", "suggest": "抽資訊用品異動登記表,確認辦公區域設備進出皆有填寫。", "is_v": true}, {"no": 133, "appl": "A.7.5 防護實體及環境威脅", "q": "每年執行資訊安全風險評估時，是否重新檢視機房、辦公室及環境所面臨之天然災害風險，以及現行防護措施是否仍足以因應。", "ctrl": "實體", "method": "文件審查+訪談", "risk": "中", "suggest": "查威脅情資評估表,訪資安組確認每年風險評估已重新檢視。", "is_v": true}, {"no": 95, "appl": "A.8.23 網頁過濾", "q": "限定期間需求之防火牆政策是否於需求結束後關閉。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "抽樣限定期間防火牆政策,確認需求結束後已關閉。", "is_v": false}, {"no": 148, "appl": "A.8.13 資訊備份", "q": "是否有每日檢查Turnkey的運作正常。", "ctrl": "實體", "method": "技術檢測", "risk": "高", "suggest": "查Turnkey運作紀錄,並現場確認系統運作狀態指示燈正常。", "is_v": true}, {"no": 132, "appl": "A.7.13 設備維護 A.7.4 實體安全監視", "q": "電腦機房CCTV系統是否能正常運作。", "ctrl": "實體", "method": "實地觀察", "risk": "中", "suggest": "實際測試CCTV錄影回放與保存狀況,確認監控範圍無死角。", "is_v": true}, {"no": 98, "appl": "A.6.8 資訊安全事件通報", "q": "＜資訊安全組＞人員一經發現或接獲通報發生網路安全事件，是否依據「資訊安全事件通報管理作業程序」辦理。", "ctrl": "管理", "method": "文件審查+訪談", "risk": "高", "suggest": "查事件通報紀錄,訪資安組確認依SOP程序辦理。", "is_v": false}, {"no": 129, "appl": "A.7.2 實體進入控制", "q": "設備進出機房是否有實行進出管理及紀錄。", "ctrl": "實體", "method": "實地觀察+文件審查", "risk": "中", "suggest": "查機房設備進出紀錄,並走訪現場確認門禁管制落實情形。", "is_v": true}, {"no": 100, "appl": "A.8.22 網路區隔", "q": "是否有變更無線網路接取點原廠設定之 SSID，並經由帳號與 SSID 及密碼限制保護，禁止未經授權存取。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "登入無線控制器確認SSID變更與帳號密碼保護設定。", "is_v": false}, {"no": 147, "appl": "A.8.13 資訊備份", "q": "是否每日檢查加值中心相關硬體設備。", "ctrl": "實體", "method": "實地觀察+文件審查", "risk": "中", "suggest": "抽機房每日檢查紀錄,現場核對硬體狀態與紀錄一致性。", "is_v": true}, {"no": 14, "appl": "A.5.9 資訊及其他相關聯資產之清冊", "q": "資訊部門是否編製「重要資產目錄表」並交予指定之專人保管。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "索取重要資產目錄表,檢核保管人指派與更新頻率是否合規。", "is_v": true}, {"no": 22, "appl": "A.7.8 設備安置和保護", "q": "人員的電腦是否有安裝防毒軟體。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "索取年度盤點紀錄與風險評估表,確認盤點範圍含加值中心設備。", "is_v": true}, {"no": 104, "appl": "A.8.9 組態管理", "q": "監控主機之系統是否有事件日誌紀錄，事件應包含系統狀態與錯誤警示記錄，作為分析資訊安全事件之資料來源。", "ctrl": "技術", "method": "技術檢測+文件審查", "risk": "中", "suggest": "查監控主機事件日誌設定,確認系統狀態與錯誤皆有記錄。", "is_v": false}, {"no": 29, "appl": "A.5.7 威脅情資", "q": "組織是否已將影響電腦機房及辦公室運作的實體威脅（如：天災、公共設施故障、意外事件等）納入威脅情資的蒐集範圍？", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查威脅情資分析評估表,確認有分析過程與對應處置結論。", "is_v": true}, {"no": 30, "appl": "A.5.7 威脅情資", "q": "是否分析威脅情資？請提供「威脅情資分析評估表」。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查資訊安全風險評估表,確認資產分類與風險值計算依程序完成。", "is_v": true}, {"no": 107, "appl": "A.8.17 鐘訊同步", "q": "根據規範，內部 NTP 伺服器應建置於防火牆或網域伺服器上。請問目前的架構是否符合此要求？", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "查NTP伺服器架構圖,確認建置於防火牆或網域伺服器。", "is_v": false}, {"no": 108, "appl": "A.8.17 鐘訊同步", "q": "人員的電腦與機房伺服器，實際檢查其當前的時間同步狀態，以驗證其時間確實與內部 NTP 伺服器保持一致？", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "抽3台同仁電腦與機房伺服器,實際檢查時間同步狀態。", "is_v": false}, {"no": 47, "appl": "A.5.27 由資訊安全事件中學習", "q": "資安事件統計分析表其分析結果是否呈報管理審查會議。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查管審會議資料中是否含資安事件統計分析表與趨勢說明。", "is_v": true}, {"no": 51, "appl": "A.6.6 機密性或保密協議", "q": "資訊部門員工是否簽有保密協定。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽資訊部門員工保密協定,確認全員皆已簽署且在有效期內。", "is_v": true}, {"no": 53, "appl": "A.6.6 機密性或保密協議", "q": "委外廠商支援人員於本支援公司資訊系統相關業務時，是否簽署「個人資安責任保密同意書」。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查委外廠商支援人員名單,逐一核對保密同意書簽署狀態。", "is_v": true}, {"no": 110, "appl": "A.6.3 資訊安全認知及教育訓練", "q": "年度資安教育訓練是否依相關規定辦理及保存文件及檔案。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查年度資安教育訓練計畫、簽到、測驗與錄影檔是否完整保存。", "is_v": true}, {"no": 113, "appl": "A.8.5 安全鑑別", "q": "客戶帳號異動與刪除是否有申請單並取得權責單位主管核准後由系統管理者處理。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽客戶帳號異動申請單,確認權責主管核准後由系統管理者處理。", "is_v": false}, {"no": 112, "appl": "A.8.5 安全鑑別", "q": "新客戶申請本公司電子發票加值中心之帳號時是否填寫「電子發票加值中心申請表暨意向書」，並完成合約相關事項 後，再由應用程式管理者開通帳號。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽新客戶申請表,確認申請→合約→開通流程依程序執行。", "is_v": true}, {"no": 115, "appl": "A.5.16 身份管理 A.5.18 存取權限", "q": "約聘技術及顧問人員因業務需要申請帳號時，是否填具資訊系統使用申請／異動單，經權責單位主管核准後交由系統管理者設定。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽約聘/顧問帳號申請單,確認權責主管核准後由系統管理者設定。", "is_v": false}, {"no": 114, "appl": "A.5.16 身份管理 A.5.18 存取權限", "q": "新進員工報到時是否填寫「新進人員到職相關需求清單」，經主管核可後，由資訊部之系統管理者進行設定與開通。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽新進人員到職清單,核對帳號開通時點與HR報到日是否吻合。", "is_v": true}, {"no": 117, "appl": "A.5.18 存取權限", "q": "過去半年內是否有職務異動的員工？其權限是否異動？若有異動，是否填具「資訊系統使用權限申請／異動單」，經單位主管的核准簽章或電子簽核，資訊部依此設定權限異動。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽半年內職務異動員工權限申請單,確認主管核准後執行設定。", "is_v": false}, {"no": 118, "appl": "A.5.18 存取權限", "q": "過去半年內是否有離職的員工？離職手續請單經權責單位主管核准經資訊部系統管理者完成設定與權限異動。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽半年內離職手續單,確認資訊部依單完成權限移除。", "is_v": false}, {"no": 119, "appl": "A.8.5 安全鑑別", "q": "密碼遺忘時，是否填寫申請單，經權單位主管審核後，由系統管理者重設。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽密碼重設申請單,確認權責主管審核後由系統管理者重設。", "is_v": false}, {"no": 120, "appl": "A.8.5 安全鑑別", "q": "使用者密碼是否定期變更、密碼長度或限制是否有依公司規定辦理。", "ctrl": "技術", "method": "技術檢測", "risk": "中", "suggest": "查密碼政策設定,確認定期變更、長度、複雜度皆合規。", "is_v": false}, {"no": 116, "appl": "A.6.7 遠端工作", "q": "需要家遠距工作之需求者是否經主管同意後提供可識別的網路資訊，完整紀錄在「遠距工作人員清單」。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查遠距人員清單與申請單,確認經主管同意並定期更新。", "is_v": true}, {"no": 155, "appl": "A.5.23 使用雲端服務之資訊安全", "q": "雲服務之供應商是否具備ISO 27001或相似的資訊安全要求?", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查雲服務供應商ISO27001證書,確認認證有效且涵蓋服務範圍。", "is_v": true}, {"no": 123, "appl": "A.7.3 保全辦公室、房間及設施", "q": "新進內部員工是否依規定填寫「新進人員到職相關需求單」向財務部提出公司門禁卡申請，領用門禁進出管制卡。", "ctrl": "實體", "method": "文件審查", "risk": "中", "suggest": "抽新進員工門禁卡申請單,確認依規定向財務部提出。", "is_v": false}, {"no": 124, "appl": "A.7.3 保全辦公室、房間及設施", "q": "外部人員臨時或短時間進入公司時，是否由公司接待同仁／實際受訪者陪同，未私自進入辦公室區域內。", "ctrl": "實體", "method": "文件審查+實地觀察", "risk": "中", "suggest": "查臨時卡登記簿,走訪現場確認外部人員皆由同仁陪同。", "is_v": false}, {"no": 125, "appl": "A.7.3 保全辦公室、房間及設施", "q": "外部人員因業務需求，需自行進出本公司辦公區域，是否由實際受訪負責人員至財務部填寫「臨時卡使用登記簿」領用公司門禁臨時卡。", "ctrl": "實體", "method": "文件審查", "risk": "中", "suggest": "抽臨時卡使用登記簿,確認外部人員皆依規定領用臨時卡。", "is_v": false}, {"no": 157, "appl": "A.5.20 於供應方協議中闡明資訊安全 A.6.6 機密性或保密協議", "q": "供應商或委外人員是否簽訂保密契約（廠商）。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽委外合約,確認保密契約條款與簽署皆完備。", "is_v": true}, {"no": 127, "appl": "A.7.7 桌面淨空及螢幕淨空", "q": "當員工個人電腦或終端機不使用時，是否關閉螢幕或啟動螢幕保護程式。螢幕保護程式是否設定若該電腦未使用之時間超過 10 分 鐘（含）即自動啟動。", "ctrl": "實體", "method": "技術檢測", "risk": "中", "suggest": "抽3台電腦測試螢幕保護啟動時間,確認10分鐘內自動啟動。", "is_v": false}, {"no": 10, "appl": "A.5.37 書面紀錄之運作程序", "q": "文件管理人員是否以公司內部管理系統、E-mail公告最新文件版本。", "ctrl": "管理", "method": "文件審查", "risk": "低", "suggest": "查文件管理系統公告紀錄與E-mail備忘,確認版本通知到位。", "is_v": true}, {"no": 18, "appl": "A.7.14 設備汰除或重新使用之安全", "q": "重要資產之異動是否依規定填寫「資產異動單」。", "ctrl": "管理", "method": "文件審查", "risk": "低", "suggest": "抽新進資產驗收紀錄,確認一週內完成驗收、編號黏貼齊備。", "is_v": true}, {"no": 135, "appl": "A.5.33 保護組織的紀錄", "q": "網站公告之文件是否為最新文件版本，且與紙本相符。", "ctrl": "管理", "method": "文件審查", "risk": "低", "suggest": "抽網站公告文件與紙本,核對版本一致性與發布紀錄。", "is_v": true}, {"no": 131, "appl": "A.7.13 設備維護", "q": "機房冷氣、防火防災設備、電力、UPS等設備，是否足夠、是否有備援、是否定期維護紀錄。", "ctrl": "實體", "method": "文件審查+實地觀察", "risk": "中", "suggest": "查機房每日檢查紀錄,現場核對冷氣/防災/電力/UPS狀態。", "is_v": false}, {"no": 31, "appl": "A.5.12 資產之分類分級", "q": "是否完成「資訊安全風險評估表」。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "抽管理審查紀錄,核對前次議題處理狀態標示明確、未有遺漏追蹤。", "is_v": true}, {"no": 48, "appl": "A.5.28 證據的收集", "q": "資訊安全事件發時生，是否保護所有證據材料的完整性。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "查事件調查報告、Log、截圖佐證,確認證據完整性未被竄改。", "is_v": true}, {"no": 134, "appl": "A.5.33 保護組織的紀錄", "q": "ISMS相關文件是否依規定發行。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查ISMS文件發行紀錄,確認依規定發行與版本控管。", "is_v": false}, {"no": 49, "appl": "A.5.30 營運持續之 ICT備妥性", "q": "是否規劃與實施「應急響應演練計畫」與「資訊服務持續性管理計畫」，請提供計畫與結果報告。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "索取持續性計畫與演練紀錄,核對演練頻率、結果與改善追蹤。", "is_v": true}, {"no": 136, "appl": "A.5.33 保護組織的紀錄", "q": "文件之修訂，三、四階文件是否有權責單位主管核定後發行。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽三、四階文件,確認權責單位主管核定後發行。", "is_v": false}, {"no": 137, "appl": "A.5.33 保護組織的紀錄", "q": "文件之修訂，一、二階文件是否有資訊安全委會員核定後發行。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽一、二階文件,確認資安委員會核定後發行。", "is_v": false}, {"no": 138, "appl": "A.5.33 保護組織的紀錄", "q": "資訊安全紀錄保存年限是否至少1年。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "查資安紀錄保存設定,確認至少保存1年。", "is_v": false}, {"no": 111, "appl": "A.5.15 存取控制 A.5.16 身份管理 A.5.17 鑑別資訊 A.5.18 存取權限 A.8.2 特殊存取權限 A.8.4 對程式原始碼的存取", "q": "帳號review\n(1)\t員工帳號\n(2)\t加值中心平台的顧客帳號", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "依帳號檢核表抽10%帳號,核對在職狀態與權限是否合理。", "is_v": true}, {"no": 140, "appl": "A.5.33 保護組織的紀錄", "q": "逾保存期限之紀錄，負責人員是否簽報＜資訊安全官＞同意，予以銷毀(紙本)或刪除(電子媒體)。", "ctrl": "管理", "method": "文件審查", "risk": "中", "suggest": "抽逾保存期限銷毀/刪除紀錄,確認資安官核准程序。", "is_v": false}, {"no": 141, "appl": "A.8.13 資訊備份", "q": "客戶的來檔是否有備份。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "查每日備份紀錄與備份原則,確認客戶來檔皆有備份軌跡。", "is_v": true}, {"no": 151, "appl": "A.8.13 資訊備份", "q": "備份復原測試是否選定任一 VM 或資料庫進行復原測試，測試備份 VM、備份資料庫、及復原程序的有效性，並依「復原測試計畫」查核。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "抽復原測試紀錄,核對測試範圍、程序與結果是否符合計畫。", "is_v": true}, {"no": 17, "appl": "A.5.12 資產之分類分級", "q": "是否區分資產因敏感性差異而具有不同重要等級。", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "抽資產異動單,比對目錄表變更,訪談保管人確認流程落實。", "is_v": true}, {"no": 144, "appl": "A.8.13 資訊備份", "q": "是否有每日檢查前一日客戶的來檔並與財政部提供的歷史存證檢核表相同。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "查每日檢查紀錄,確認客戶來檔與財政部存證檢核筆數一致。", "is_v": false}, {"no": 145, "appl": "A.8.13 資訊備份", "q": "電腦機房備份設備損壞或需要維修是否記錄於「機房每日檢查紀錄表」，並依資產管理作業說明書，進行後續維修、更新或報廢作業。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "查機房每日檢查紀錄,確認備份設備損壞/維修皆有記錄與後續。", "is_v": false}, {"no": 146, "appl": "A.8.13 資訊備份", "q": "是否每日檢查加值中心設備所處機房環境。", "ctrl": "管理", "method": "文件審查+實地觀察", "risk": "高", "suggest": "查機房每日檢查紀錄,現場核對機房環境檢查項目。", "is_v": false}, {"no": 27, "appl": "A.5.13 資訊的標示", "q": "機房內的資產是否於明顯處標示設備編號與資產名稱?", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "訪談資安組並索取威脅情資來源清單,涵蓋天災與公共設施面向。", "is_v": true}, {"no": 57, "appl": "A.6.3 資訊安全認知及教育訓練", "q": "資訊部是否對同仁定期進行資訊安全教育訓練或參加外部辦理之專業資安課程。", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "抽教育訓練紀錄,訪談同仁確認實質參與並非僅簽到形式。", "is_v": true}, {"no": 158, "appl": "A.5.22 供應方服務之監控、審查及變更管理", "q": "相關負責人是否填寫供應商評估表，並定期檢視供應商之服務水準是否滿足公司需求。", "ctrl": "管理", "method": "文件審查+訪談", "risk": "中", "suggest": "查供應商評估表,訪負責人確認定期檢視服務水準落實情形。", "is_v": true}, {"no": 150, "appl": "A.8.13 資訊備份", "q": "是否每日檢查備份狀態並記錄於「機房每日檢查紀錄表」與「每日備份檢查紀錄表」。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "查備份狀態檢查紀錄,確認每日皆有記錄於兩份表單。", "is_v": false}, {"no": 45, "appl": "A.5.26 資訊安全事件之回應", "q": "發生資訊安全事件時，是否按照SOP處理、通報並留下紀錄。", "ctrl": "管理", "method": "文件審查+訪談", "risk": "高", "suggest": "抽資安事件通報單,訪談資安組確認SOP通報時效與紀錄完整性。", "is_v": true}, {"no": 152, "appl": "A.8.13 資訊備份", "q": "執行復原程序前是否訂有該次的「復原測試計畫」。", "ctrl": "管理", "method": "文件審查", "risk": "高", "suggest": "查復原測試計畫文件,確認執行復原前訂有計畫。", "is_v": false}, {"no": 19, "appl": "A.5.10 可接受使用資訊及其他相關資 產", "q": "新獲得的重要硬體資產是否於一週內完成驗收測試並黏貼新財產編號?", "ctrl": "管理", "method": "技術檢測", "risk": "中", "suggest": "隨機抽查同仁電腦掃毒狀態、防毒軟體運作與病毒碼更新日期。", "is_v": true}, {"no": 139, "appl": "A.5.33 保護組織的紀錄", "q": "CCTV錄影紀錄是否至少保存1個月。", "ctrl": "管理", "method": "技術檢測", "risk": "中", "suggest": "查CCTV錄影儲存設定,並回放抽樣確認保存期≥1個月。", "is_v": true}, {"no": 142, "appl": "A.8.13 資訊備份", "q": "加值中心系統(VM、資料庫、資料)是否每日備份?是否定期備份設定組態?", "ctrl": "管理", "method": "技術檢測", "risk": "高", "suggest": "查備份設定與執行紀錄,確認VM/DB/設定檔每日備份到位。", "is_v": true}, {"no": 156, "appl": "A.5.19 供應方關係中的資訊安全", "q": "本公司是否有建立「常用供應商清單」，提供權責人員於需要時聯絡廠商。", "ctrl": "管理", "method": "文件審查", "risk": "低", "suggest": "查常用供應商清單,確認已建立並可供權責人員聯絡。", "is_v": false}, {"no": 143, "appl": "A.8.13 資訊備份", "q": "備份資料需再存一份到遠端或異地雲端，請說明是備份到哪個遠端據點或雲端服務，並展示相關設定或傳輸紀錄。", "ctrl": "管理", "method": "技術檢測+文件審查", "risk": "高", "suggest": "展示異地/雲端備份傳輸設定與紀錄,確認3-2-1原則落實。", "is_v": true}, {"no": 25, "appl": "A.5.9 資訊及其他相關聯資產之清冊", "q": "是否每年進行加值中心重要設備盤點，並進行風險評估。", "ctrl": "管理", "method": "實地觀察", "risk": "低", "suggest": "走訪機房檢視設備標示是否清晰、與資產目錄表一致。", "is_v": true}];
+const STATS = {"total": 158, "v_count": 80, "all_ctrl": {"技術": 43, "治理": 17, "管理": 83, "實體": 15}, "all_risk": {"中": 112, "低": 9, "高": 37}, "all_method": {"文件審查": 129, "訪談": 25, "實地觀察": 10, "技術檢測": 31}, "v_ctrl": {"技術": 29, "治理": 11, "實體": 8, "管理": 32}, "v_risk": {"中": 51, "高": 22, "低": 7}};
+
+// === KPI strip ===
+(function(){
+  const v = STATS.v_count, t = STATS.total;
+  const high = STATS.v_risk['高'] || 0;
+  const ctrlCount = Object.keys(STATS.v_ctrl).length;
+  const strip = document.getElementById('kpiStrip');
+  strip.innerHTML = [
+    ['80', '今年內稽 V 題數'],
+    [String(t - v), '待下次內稽'],
+    [String(t), '題庫總題數'],
+    [String(high), '高風險題數'],
+  ].map(([n,l])=>`<div class="kpi"><div class="kpi-num">${n}</div><div class="kpi-lbl">${l}</div></div>`).join('');
+})();
+
+// === Distribution bars ===
+const CTRL_ORDER = ['治理','管理','技術','實體'];
+const CTRL_CLS = {'治理':'gov','管理':'mgmt','技術':'tech','實體':'phy'};
+const RISK_CLS = {'高':'high','中':'mid','低':'low'};
+const RISK_EMOJI = {'高':'🔴','中':'🟡','低':'🟢'};
+
+function renderBars(targetId, order, data, clsMap, swatchMode){
+  const max = Math.max(...Object.values(data), 1);
+  const target = document.getElementById(targetId);
+  target.innerHTML = order.filter(k => data[k]).map(k => {
+    const n = data[k], pct = (n/max*100).toFixed(1);
+    return `<div class="dist-row">
+      <div class="lbl"><span class="swatch" style="background:var(--${clsMap[k]})"></span>${k}</div>
+      <div class="bar-track"><div class="bar-fill ${clsMap[k]}" style="width:${pct}%"></div></div>
+      <div class="val">${n}</div>
+    </div>`;
+  }).join('');
+}
+renderBars('distCtrl', CTRL_ORDER, STATS.v_ctrl, CTRL_CLS);
+renderBars('distRisk', ['高','中','低'], STATS.v_risk, RISK_CLS);
+
+// === Item list (search + filter) ===
+const V_ITEMS = ITEMS.filter(x => x.is_v);
+
+function renderList(){
+  const q = (document.getElementById('search').value || '').trim().toLowerCase();
+  const fC = document.getElementById('fCtrl').value;
+  const fR = document.getElementById('fRisk').value;
+  const fM = document.getElementById('fMethod').value;
+
+  let list = V_ITEMS;
+  if (q) list = list.filter(x => x.q.toLowerCase().includes(q) || x.appl.toLowerCase().includes(q));
+  if (fC) list = list.filter(x => x.ctrl === fC);
+  if (fR) list = list.filter(x => x.risk === fR);
+  if (fM) list = list.filter(x => x.method.split('+').includes(fM));
+
+  // 排序: 控制類型 → 風險(高>中>低) → 編號
+  const cR = {治理:1,管理:2,技術:3,實體:4};
+  const rR = {高:1,中:2,低:3};
+  list = [...list].sort((a,b)=>(cR[a.ctrl]-cR[b.ctrl]) || (rR[a.risk]-rR[b.risk]) || (a.no-b.no));
+
+  document.getElementById('count').textContent = `${list.length} / ${V_ITEMS.length} 題`;
+
+  const target = document.getElementById('list');
+  if (!list.length) {
+    target.innerHTML = '<div class="empty">沒有符合條件的題目</div>';
+    return;
+  }
+  target.innerHTML = list.map(x => {
+    const mTags = x.method.split('+').map(m => `<span class="t method">${m}</span>`).join('');
+    return `<div class="item">
+      <div class="no">#${x.no}</div>
+      <div class="q">${escapeHtml(x.q)}</div>
+      <div class="tags">
+        <span class="t ${CTRL_CLS[x.ctrl]}">${x.ctrl}</span>
+        <span class="t ${RISK_CLS[x.risk]}">${RISK_EMOJI[x.risk]}${x.risk}</span>
+        ${mTags}
+      </div>
+      <div class="suggest">📋 <b>稽核建議</b>:${escapeHtml(x.suggest)}</div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+['search','fCtrl','fRisk','fMethod'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderList);
+  document.getElementById(id).addEventListener('change', renderList);
+});
+renderList();
+
+// === High-risk list (固定 22 題) ===
+(function(){
+  const high = V_ITEMS.filter(x => x.risk === '高');
+  high.sort((a,b) => a.no - b.no);
+  const target = document.getElementById('highList');
+  target.innerHTML = high.map(x => {
+    return `<div class="item">
+      <div class="no">#${x.no}</div>
+      <div class="q">${escapeHtml(x.q)}</div>
+      <div class="tags">
+        <span class="t ${CTRL_CLS[x.ctrl]}">${x.ctrl}</span>
+        <span class="t high">🔴高</span>
+      </div>
+      <div class="suggest">📋 <b>稽核建議</b>:${escapeHtml(x.suggest)}</div>
+    </div>`;
+  }).join('');
+})();
+</script>
+</body>
+</html>
