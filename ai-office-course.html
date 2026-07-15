@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <title>AI 替你上班｜零代碼打造 AI 自動化辦公室（課程整理）</title>
+  <meta name="description" content="股股學院《AI 替你上班：零代碼打造 AI 自動化辦公室》課程整理：5 大篇章、30 短影片、12 工具、5 AI 角色，NT$ 1,880 早鳥。" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --soft: #a8a29e;
+      --card: #ffffff; --bd: #e7e5e4; --bd2: #d6d3d1;
+      --accent: #44403c; --accent2: #78716c;
+      --hot: #dc2626; --warn: #d97706; --good: #16a34a;
+      --tag-bg: #e7e5e4; --tag-fg: #44403c;
+      --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --soft: #57534e;
+        --card: #1c1917; --bd: #292524; --bd2: #44403c;
+        --accent: #e7e5e4; --accent2: #d6d3d1;
+        --hot: #f87171; --warn: #fbbf24; --good: #4ade80;
+        --tag-bg: #292524; --tag-fg: #d6d3d1;
+        --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.35);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI",
+            "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 920px; margin: 0 auto; padding: 48px 24px 80px; }
+    .back { font-size: 13px; color: var(--muted); text-decoration: none; }
+    .back:hover { color: var(--accent); }
+    header { margin-bottom: 32px; }
+    h1 { font-size: 28px; margin: 14px 0 8px; letter-spacing: -0.02em; font-weight: 700; }
+    h2 { font-size: 22px; margin: 40px 0 14px; letter-spacing: -0.01em; font-weight: 700; }
+    h3 { font-size: 17px; margin: 0 0 8px; font-weight: 600; }
+    h4 { font-size: 15px; margin: 16px 0 6px; font-weight: 600; color: var(--accent2); }
+    p { margin: 0 0 10px; }
+    p.tag { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
+    a { color: var(--accent); }
+    a:hover { text-decoration: underline; }
+
+    .hero {
+      background: linear-gradient(135deg, var(--card) 0%, var(--tag-bg) 100%);
+      border: 1px solid var(--bd); border-radius: 12px; padding: 28px;
+      margin-bottom: 8px; box-shadow: var(--shadow);
+    }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 18px; }
+    .stat { background: var(--card); border: 1px solid var(--bd); border-radius: 10px; padding: 14px; text-align: center; }
+    .stat .num { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .stat .desc { font-size: 12.5px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+      padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+    }
+    .card .muted { color: var(--muted); font-size: 13.5px; }
+
+    .pill {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 500; background: var(--tag-bg); color: var(--tag-fg);
+    }
+    .pill.hot { background: rgba(220,38,38,.12); color: var(--hot); }
+    .pill.warn { background: rgba(217,119,6,.12); color: var(--warn); }
+    .pill.good { background: rgba(22,163,74,.12); color: var(--good); }
+
+    /* 6-step circular flow */
+    .flow {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      margin-top: 14px;
+    }
+    .step {
+      background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+      padding: 16px; position: relative;
+    }
+    .step .num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent); color: var(--card);
+      font-weight: 700; font-size: 14px; margin-bottom: 8px;
+    }
+    .step h4 { margin: 0 0 6px; color: var(--fg); font-size: 14.5px; }
+    .step p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* Persona cards */
+    .persona { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
+    .persona .row {
+      display: grid; grid-template-columns: 160px 1fr; gap: 12px;
+      padding: 12px 14px; border: 1px solid var(--bd); border-radius: 8px;
+      background: var(--card);
+    }
+    .persona .name { font-weight: 600; font-size: 14px; }
+    .persona .name .code { color: var(--muted); font-weight: 400; font-size: 12.5px; margin-left: 6px; }
+    .persona .desc { font-size: 13px; color: var(--muted); }
+    .persona .meta { font-size: 12px; color: var(--soft); margin-top: 4px; }
+
+    /* Tool chips */
+    .tools { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 12px; }
+    .tool {
+      padding: 12px 14px; border: 1px solid var(--bd); border-radius: 8px;
+      background: var(--card); font-size: 13px;
+    }
+    .tool .name { font-weight: 600; margin-bottom: 4px; }
+    .tool .role { color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+
+    /* Compare table */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--bd); vertical-align: top; }
+    th { background: var(--tag-bg); font-weight: 600; font-size: 13px; color: var(--muted); }
+    tr:last-child td { border-bottom: none; }
+
+    /* Persona target list */
+    .targets { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 10px; }
+    .target {
+      padding: 12px 14px; border: 1px solid var(--bd); border-radius: 8px;
+      background: var(--card); font-size: 13.5px;
+    }
+    .target .who { font-weight: 600; margin-bottom: 4px; font-size: 13px; }
+    .target .why { color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+
+    .price-box {
+      background: var(--card); border: 2px solid var(--hot); border-radius: 12px;
+      padding: 20px; text-align: center; margin: 14px 0;
+    }
+    .price-box .old { font-size: 14px; color: var(--muted); text-decoration: line-through; }
+    .price-box .new { font-size: 36px; font-weight: 700; color: var(--hot); margin: 4px 0; }
+    .price-box .save { font-size: 13px; color: var(--good); margin-bottom: 8px; }
+    .price-box .meta { font-size: 12.5px; color: var(--muted); }
+
+    .cta {
+      display: inline-block; padding: 10px 22px; background: var(--hot); color: white;
+      text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;
+      margin-top: 10px;
+    }
+    .cta:hover { opacity: 0.9; text-decoration: none; }
+
+    footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--bd); color: var(--muted); font-size: 13px; }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .stats, .flow { grid-template-columns: repeat(2, 1fr); }
+      .persona .row { grid-template-columns: 1fr; }
+      .persona .name .code { display: block; margin-left: 0; margin-top: 2px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← 回首頁</a>
+  <header>
+    <h1>🤖 AI 替你上班｜零代碼打造 AI 自動化辦公室</h1>
+    <p class="tag">股股學院｜講師 Danny Yang｜5 大篇章・30 短影片・3 小時｜本頁面為課程內容整理，非官方頁</p>
+  </header>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero">
+    <p style="margin: 0 0 4px;"><strong>一句話：</strong>把 AI 從「輔助工具」升級成「執行端」，教你用 0 代碼打造一整個由 AI 角色組成的辦公室。</p>
+    <p style="margin: 0; color: var(--muted); font-size: 13.5px;">把報表、簡報、回信、客戶管理、合約比對這些重複工作交給 AI 助理群協作。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">5</div><div class="desc">大篇章</div></div>
+      <div class="stat"><div class="num">30</div><div class="desc">短影片單元</div></div>
+      <div class="stat"><div class="num">3 hr</div><div class="desc">總時長</div></div>
+      <div class="stat"><div class="num">12+</div><div class="desc">工具教學</div></div>
+    </div>
+  </section>
+
+  <!-- ========== 為什麼 ========== -->
+  <h2>📊 為什麼這堂課現在學？</h2>
+  <section class="card">
+    <div class="stats" style="margin-top: 0;">
+      <div class="stat"><div class="num">40%</div><div class="desc">Block 的裁員比例</div></div>
+      <div class="stat"><div class="num">50 萬小時</div><div class="desc">TELUS 透過 AI Agent 省下的合約比對工時</div></div>
+      <div class="stat"><div class="num">67%</div><div class="desc">有裁員規劃的企業</div></div>
+      <div class="stat"><div class="num">81%</div><div class="desc">企業招聘看重 AI 能力</div></div>
+    </div>
+  </section>
+
+  <!-- ========== 適合誰 ========== -->
+  <h2>🎯 適合誰</h2>
+  <section class="targets">
+    <div class="target">
+      <div class="who">👔 上班族</div>
+      <div class="why">想讓報表、簡報、回信這些重複工作交給 AI，把時間拿回來。</div>
+    </div>
+    <div class="target">
+      <div class="who">🧑‍💻 自由接案 / 1 人公司</div>
+      <div class="why">不靠加班、多請人，用 AI 副手提高產能。</div>
+    </div>
+    <div class="target">
+      <div class="who">🎬 內容創作者</div>
+      <div class="why">穩定產出內容，開始用 AI 做影片。</div>
+    </div>
+    <div class="target">
+      <div class="who">🌱 AI 初學者</div>
+      <div class="why">不知道從哪開始，想要一條走得完的路線。</div>
+    </div>
+    <div class="target">
+      <div class="who">💰 AI 副業探索者</div>
+      <div class="why">不亂踩雷，搞清楚哪些路真的走得通。</div>
+    </div>
+  </section>
+
+  <!-- ========== 思維對照 ========== -->
+  <h2>🧠 電商時代 vs AI 時代思維</h2>
+  <section class="card">
+    <table>
+      <thead>
+        <tr><th>面向</th><th>電商時代</th><th>AI 時代</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>成長邏輯</td><td>衝流量、堆人力</td><td>流程化、自動優化</td></tr>
+        <tr><td>團隊運作</td><td>講究組織分工</td><td>講究功能建置</td></tr>
+        <tr><td>核心目標</td><td>擴大經營</td><td>複製產能</td></tr>
+        <tr><td>效率觀念</td><td>拼量拼效率</td><td>自動迭代</td></tr>
+        <tr><td>真正差異</td><td>用時間換成果</td><td>用方法與系統換成果</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 14px; padding: 12px; background: var(--tag-bg); border-radius: 8px; font-size: 13.5px;">
+      💡 <strong>核心觀念：</strong>AI 不是工具升級，而是經營邏輯升級。從「更快做完」變成「下次不用重做」。
+    </p>
+  </section>
+
+  <!-- ========== 6 步流程 ========== -->
+  <h2>🔄 AI 能力建立 6 步流程</h2>
+  <div class="flow">
+    <div class="step"><div class="num">1</div><h4>建立 AI 思維</h4><p>學習設計工作流程的底層邏輯，讓 AI 去調用所有工具。</p></div>
+    <div class="step"><div class="num">2</div><h4>建立個人工具包</h4><p>整理適合自己工作型態的 AI 工具、用法與任務分配。</p></div>
+    <div class="step"><div class="num">3</div><h4>自動化提升效率</h4><p>從重複工作開始，讓 AI 穩定接手日常任務。</p></div>
+    <div class="step"><div class="num">4</div><h4>建立 AI 助理群</h4><p>讓不同 AI 透過角色設定、知識配置各自分工。</p></div>
+    <div class="step"><div class="num">5</div><h4>建立自動化流程</h4><p>把工具、任務與分工串成可持續運作的工作系統。</p></div>
+    <div class="step"><div class="num">6</div><h4>持續迭代優化</h4><p>讓 AI 根據結果自行調整、持續優化成精準的作業系統。</p></div>
+  </div>
+
+  <!-- ========== AI 辦公室角色 ========== -->
+  <h2>👥 範例：AI 辦公室角色</h2>
+  <p class="tag">課程示範：拆任務、分工、整合輸出，組成可運作的辦公流程</p>
+  <section class="card">
+    <div class="persona">
+      <div class="row">
+        <div><div class="name">CEO<span class="code">Jarvis</span></div><div class="desc">任務中樞與流程控制</div></div>
+        <div><div>負責拆解任務、分派工作並整合結果</div><div class="meta">模型：主管型 / Claude Opus</div></div>
+      </div>
+      <div class="row">
+        <div><div class="name">DEV<span class="code">Turing</span></div><div class="desc">技術執行者</div></div>
+        <div><div>負責開發功能、修復問題與完成技術任務</div><div class="meta">模型：程式型 / OpenAI Codex</div></div>
+      </div>
+      <div class="row">
+        <div><div class="name">RESEARCH<span class="code">Bond</span></div><div class="desc">資訊研究員</div></div>
+        <div><div>負責資料蒐集、驗證與重點整理</div><div class="meta">模型：研究型 / OpenAI Codex</div></div>
+      </div>
+      <div class="row">
+        <div><div class="name">CONTENT<span class="code">The Bard</span></div><div class="desc">內容生產者</div></div>
+        <div><div>負責撰寫文章、文案與對外內容</div><div class="meta">模型：創意型 / Claude Opus / OpenAI GPT</div></div>
+      </div>
+      <div class="row">
+        <div><div class="name">RESEARCH<span class="code">Marco Polo</span></div><div class="desc">探索型研究員</div></div>
+        <div><div>負責找主題、趨勢與市場機會</div><div class="meta">模型：探索型 / Google Gemini</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 工具清單 ========== -->
+  <h2>🛠️ 課程教的 12 個工具</h2>
+  <section class="tools">
+    <div class="tool"><div class="name">Claude Code <span class="pill hot">主力</span></div><div class="role"># 自動化工作流程。本課程的主要工具，一套設定能調用所有工具。</div></div>
+    <div class="tool"><div class="name">NotebookLM</div><div class="role"># 分析 # 管理。整理資料、做分析、讀文件、生成報表與提案架構。</div></div>
+    <div class="tool"><div class="name">Codex</div><div class="role"># 內容自動化。處理社群、自媒體、短影音、文章產出的自動化流程。</div></div>
+    <div class="tool"><div class="name">Notion</div><div class="role"># 企劃 / PM。整理知識、建立工作資料庫、統整任務流程。</div></div>
+    <div class="tool"><div class="name">Canva</div><div class="role"># 企劃 / 設計 Agent。快速完成簡報、社群素材，AI 幫你美化設計。</div></div>
+    <div class="tool"><div class="name">OpenClaw <span class="pill">(小龍蝦)</span></div><div class="role"># AI 助理團隊協作。打造 AI 助理團隊，分工協作與全自動工作流程。</div></div>
+    <div class="tool"><div class="name">Hermes Agent</div><div class="role"># 個人助理。運用記憶系統優勢，打造最了解你的個人助理。</div></div>
+    <div class="tool"><div class="name">ChatGPT</div><div class="role"># 指令 # 應用程式。如何選 AI 工具，如何下正確指令。</div></div>
+    <div class="tool"><div class="name">Gemini</div><div class="role"># 設計 # 調研。做簡報、影音、圖片，產出高品質內容。</div></div>
+    <div class="tool"><div class="name">NotebookLM Plus</div><div class="role">進階版資料處理與分析。</div></div>
+    <div class="tool"><div class="name">Gamma</div><div class="role">AI 簡報生成。</div></div>
+    <div class="tool"><div class="name">Perplexity</div><div class="role">AI 搜尋引擎，用於研究與資料查證。</div></div>
+  </section>
+
+  <!-- ========== 課程章節 ========== -->
+  <h2>📚 課程結構</h2>
+  <section class="card">
+    <h3>5 大篇章・30 短影片單元・3 小時</h3>
+    <p class="muted">具體每篇章章節名未在銷售頁公開（需購買後解鎖），已知包含：</p>
+    <ul style="margin: 8px 0; padding-left: 20px; font-size: 14px; color: var(--muted);">
+      <li>課程介紹影片（3:31）</li>
+      <li>課程實戰案例影片：什麼是 AI Agent（7:38）</li>
+      <li>示範課程影片：打造你專屬的 AI 辦公室（8:08）</li>
+      <li>5 大篇章 × 30 短影片單元</li>
+      <li>附加直播陪跑</li>
+    </ul>
+    <p class="muted" style="margin-top: 10px;">學習方式：手機及電腦皆可、<strong>可永久觀看</strong>、分期 0 利率、附講師配置下載。</p>
+  </section>
+
+  <!-- ========== 講師 ========== -->
+  <h2>👨‍🏫 講師：Danny Yang</h2>
+  <section class="card">
+    <p style="margin: 0 0 6px;"><strong>Danny Yang</strong> — Founder of GUGU · Serial Entrepreneur · AI Automation Specialist</p>
+    <p style="margin: 0; color: var(--muted); font-size: 14px;">
+      股股創辦人・連續創業家・AI 自動化實戰者。新事業操盤、企業顧問與經理人經驗，曾獲美國矽谷創投 SOSV 天使資金支持。
+    </p>
+    <p style="margin: 12px 0 0; padding: 12px; background: var(--tag-bg); border-radius: 8px; font-size: 13.5px;">
+      🏆 <strong>真實成果：</strong>將 <strong>30 人公司重整為 3 人 + 30 個 AI Agents</strong>，透過 AI 與自動化系統，做到支出下降 70%、收入成長 4 倍。
+    </p>
+  </section>
+
+  <!-- ========== 價格 ========== -->
+  <h2>💰 價格與方案</h2>
+  <section class="price-box">
+    <div class="old">實體課程售價 NT$ 7,800</div>
+    <div class="new">NT$ 1,880</div>
+    <div class="save">超早鳥 24 折 · 達標 958 / 80 人（1,198%）</div>
+    <div class="meta">課程共 3 小時 · 可永久觀看 · 手機及電腦學習 · 附加直播陪跑 · 分期 0 利率</div>
+    <a class="cta" href="https://school.gugu.fund/p/L010004" target="_blank" rel="noopener">立即購買 →</a>
+    <p style="margin-top: 12px; font-size: 11.5px; color: var(--muted);">（優惠倒數計時於抓取時顯示：~2 天 14 小時，實際以官方頁為準）</p>
+  </section>
+
+  <!-- ========== 自我評估 ========== -->
+  <h2>🧭 值不值得買？快速自評</h2>
+  <section class="card">
+    <table>
+      <thead><tr><th>你是</th><th>建議</th></tr></thead>
+      <tbody>
+        <tr><td>每天做報表 / 回信 / 客戶管理 1 小時以上</td><td><span class="pill good">很划算</span> 3 小時學完省下的工時遠超 NT$ 1,880</td></tr>
+        <tr><td>已是 Hermes / Claude / Cursor 使用者</td><td><span class="pill warn">中等</span> 概念你已熟悉，但 5 角色協作框架值得學</td></tr>
+        <tr><td>純技術背景，已熟悉 AI Agent 概念</td><td><span class="pill warn">中等</span> 比較像「商管」而非「技術」，可跳過基礎章節</td></tr>
+        <tr><td>完全沒用過 AI 工具</td><td><span class="pill good">很適合</span> 從 0 開始的學習路徑</td></tr>
+        <tr><td>想找 AI 副業機會</td><td><span class="pill good">適合</span> 課程有「AI 助理團隊」商業模式案例</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ========== 名人推薦 ========== -->
+  <h2>💬 名人推薦</h2>
+  <section class="card">
+    <p><strong>自由女神邱沁宜（財經主持人、內容創作者）：</strong></p>
+    <blockquote style="margin: 0; padding: 12px 16px; background: var(--tag-bg); border-left: 3px solid var(--accent); border-radius: 4px; font-size: 13.5px;">
+      「真正該學的不是單一工具，而是讓 AI 進入工作流程、放大產值的能力。」
+    </blockquote>
+    <p style="margin-top: 12px;"><strong>薔薔（知名藝人）：</strong></p>
+    <blockquote style="margin: 0; padding: 12px 16px; background: var(--tag-bg); border-left: 3px solid var(--accent); border-radius: 4px; font-size: 13.5px;">
+      「AI 時代的殘酷真相？上班族也能建立自己的 AI 員工，讓 AI 替自己上班？」
+    </blockquote>
+  </section>
+
+  <footer>
+    <p>📝 整理者：Joe · 資料來源：<a href="https://school.gugu.fund/p/L010004">股股學院《AI 替你上班：零代碼打造 AI 自動化辦公室》</a></p>
+    <p style="margin-top: 6px;">⚠️ 本頁面為內容整理筆記，非官方銷售頁。價格、章節、優惠以官方頁面為準。</p>
+    <p style="margin-top: 6px;">整理日期：2026-07-15</p>
+  </footer>
+</main>
+</body>
+</html>
