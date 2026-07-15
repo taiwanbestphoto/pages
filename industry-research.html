@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <title>產業研究工作流｜Hermes × Gemini × NotebookLM 等效方法論</title>
+  <meta name="description" content="不花 999 也能跑出 VK 七步驟產業研究：用 Hermes、Gemini Deep Research、NotebookLM 的等效替代方案。" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --soft: #a8a29e;
+      --card: #ffffff; --bd: #e7e5e4; --bd2: #d6d3d1;
+      --accent: #44403c; --accent2: #78716c;
+      --good: #16a34a; --warn: #d97706; --bad: #dc2626;
+      --tag-bg: #e7e5e4; --tag-fg: #44403c;
+      --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+      --step-bg: #f5f5f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --soft: #57534e;
+        --card: #1c1917; --bd: #292524; --bd2: #44403c;
+        --accent: #e7e5e4; --accent2: #d6d3d1;
+        --good: #4ade80; --warn: #fbbf24; --bad: #f87171;
+        --tag-bg: #292524; --tag-fg: #d6d3d1;
+        --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.35);
+        --step-bg: #1c1917;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI",
+            "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+    header { margin-bottom: 32px; }
+    .back { font-size: 13px; color: var(--muted); text-decoration: none; }
+    .back:hover { color: var(--accent); }
+    h1 { font-size: 30px; margin: 14px 0 8px; letter-spacing: -0.02em; font-weight: 700; }
+    p.tag { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 4px; border-bottom: 1px solid var(--bd);
+      margin-bottom: 28px; flex-wrap: wrap;
+    }
+    .tab {
+      padding: 10px 18px; cursor: pointer; font-size: 14px; font-weight: 500;
+      color: var(--muted); border: none; background: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab:hover { color: var(--accent); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel { display: none; animation: fade 0.2s ease; }
+    .panel.active { display: block; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Cards */
+    .card {
+      background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+      padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow);
+    }
+    .card h3 { margin: 0 0 10px; font-size: 17px; }
+    .card p { margin: 0 0 8px; color: var(--fg); }
+    .muted { color: var(--muted); font-size: 13.5px; }
+    .code {
+      background: var(--step-bg); border: 1px solid var(--bd); border-radius: 6px;
+      padding: 10px 12px; font: 13px/1.55 ui-monospace, "SF Mono", Menlo, monospace;
+      overflow-x: auto; white-space: pre; margin: 8px 0;
+    }
+
+    /* Workflow */
+    .step {
+      display: grid; grid-template-columns: 48px 1fr; gap: 16px;
+      background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+      padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow);
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .step:hover { border-color: var(--bd2); }
+    .step .num {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--accent); color: var(--card);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px;
+    }
+    .step .body h3 { margin: 0 0 6px; font-size: 16px; }
+    .step .body p.tag { margin: 0; font-size: 13px; }
+    .step .detail { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--bd); }
+    .step.open .detail { display: block; }
+    .step .chevron { color: var(--soft); font-size: 13px; margin-left: auto; }
+
+    /* Comparison table */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--bd); vertical-align: top; }
+    th { background: var(--step-bg); font-weight: 600; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    tr:last-child td { border-bottom: none; }
+    .pill {
+      display: inline-block; padding: 2px 9px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 500;
+    }
+    .pill.good { background: rgba(22,163,74,.12); color: var(--good); }
+    .pill.warn { background: rgba(217,119,6,.12); color: var(--warn); }
+    .pill.bad  { background: rgba(220,38,38,.12); color: var(--bad); }
+    .pill.neutral { background: var(--tag-bg); color: var(--tag-fg); }
+
+    /* Decision tree */
+    .q { background: var(--card); border: 1px solid var(--bd); border-radius: 10px; padding: 18px; margin-bottom: 12px; }
+    .q h4 { margin: 0 0 12px; font-size: 15px; }
+    .opt {
+      display: inline-block; padding: 8px 14px; margin: 4px 6px 4px 0;
+      border: 1px solid var(--bd); border-radius: 8px; cursor: pointer;
+      background: var(--card); font-size: 13.5px; transition: all 0.15s;
+    }
+    .opt:hover { border-color: var(--accent); background: var(--step-bg); }
+    .opt.sel { background: var(--accent); color: var(--card); border-color: var(--accent); }
+    .recommend {
+      background: var(--card); border: 2px solid var(--good); border-radius: 10px;
+      padding: 20px; margin-top: 18px; display: none;
+    }
+    .recommend.show { display: block; }
+    .recommend h3 { margin: 0 0 12px; color: var(--good); font-size: 17px; }
+
+    footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--bd); color: var(--muted); font-size: 13px; }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 24px; }
+      .step { grid-template-columns: 36px 1fr; }
+      .step .num { width: 32px; height: 32px; font-size: 14px; }
+      .tab { padding: 8px 12px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← 回首頁</a>
+  <header>
+    <h1>📊 產業研究工作流</h1>
+    <p class="tag">不花 999 也能跑出 VK 七步驟 — Hermes × Gemini × NotebookLM 等效方法論</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-panel="workflow">🔄 工作流視覺化</button>
+    <button class="tab" data-panel="tools">🛠️ 工具比較</button>
+    <button class="tab" data-panel="tree">🌳 決策樹</button>
+  </nav>
+
+  <!-- ============ TAB 1: WORKFLOW ============ -->
+  <section class="panel active" id="workflow">
+    <p class="muted" style="margin-bottom: 18px;">
+      點任一步展開細節。每一對應 VK《NotebookLM 產業研究工作流》付費課的 Step 0~6，
+      但用 <strong>Hermes web_search / web_extract</strong> 跑等效流程。
+    </p>
+
+    <div class="step" data-step="0">
+      <div class="num">0</div>
+      <div class="body">
+        <h3>Step 0｜決定你的研究主角</h3>
+        <p class="tag">定義邊界 + 寫下 3 個你真正想回答的問題</p>
+        <div class="detail">
+          <p><strong>做什麼：</strong>鎖定一家公司 / 一個產業 / 一個技術，<u>不要貪心</u>。寫下三個核心問題，後面所有搜尋都圍繞這三題。</p>
+          <p><strong>範例：</strong></p>
+          <div class="code">主題：Figure AI（人形機器人）
+Q1: 誰出錢給他們？估值 / 投資人結構？
+Q2: 商業模式是租賃還是賣斷？客戶誰？
+Q3: 技術護城河在硬體還是 AI 模型？</div>
+          <p><strong>Hermes 怎麼幫：</strong>直接對話框輸入主題＋三題，後面所有步驟就鎖住這範圍。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-step="1">
+      <div class="num">1</div>
+      <div class="body">
+        <h3>Step 1｜用 Deep Research 開始</h3>
+        <p class="tag">平行搜尋 5+ 視角：公司 / 技術 / 市場 / 競爭 / 財務</p>
+        <div class="detail">
+          <p><strong>等效替代：</strong>沒有 Gemini Deep Research API，就用 Hermes <code>web_search</code> 並行 5 個不同視角的 query。</p>
+          <p><strong>5 個視角的 query 範本：</strong></p>
+          <div class="code">1. "{公司名} funding investors valuation"     → 投資 / 估值
+2. "{公司名} technology architecture patent"   → 技術
+3. "{公司名} customers revenue model"           → 商業模式
+4. "{產業} market size competitors 2026"        → 市場
+5. "{公司名} risks criticism controversies"     → 風險 / 反面</div>
+          <p><strong>提示：</strong>至少跑 2 輪（中文 + 英文）才不會漏掉在地觀點。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-step="2">
+      <div class="num">2</div>
+      <div class="body">
+        <h3>Step 2｜篩選來源 + 補資料</h3>
+        <p class="tag">可信度排序；缺什麼補什麼</p>
+        <div class="detail">
+          <p><strong>可信度光譜（高→低）：</strong></p>
+          <div class="code">1. 監管文件 (SEC 10-K, S-1, 台灣年報)
+2. 公司官網 (Investor Relations, 新聞稿)
+3. 主流財經媒體 (Bloomberg, Reuters, 經濟日報)
+4. 專業媒體 (TechCrunch, The Information)
+5. 部落格 / 個人分析</div>
+          <p><strong>補資料技巧：</strong>看到「該公司 N 年前由 X 創立」→ 立刻搜「X founder background」順藤摸瓜；看到關鍵人物 → 搜 LinkedIn。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-step="3">
+      <div class="num">3</div>
+      <div class="body">
+        <h3>Step 3｜掌握關鍵字</h3>
+        <p class="tag">建立 domain vocabulary — 中英對照 + 同義詞</p>
+        <div class="detail">
+          <p><strong>為什麼：</strong>沒有 domain vocabulary 你會一直撞牆，搜不到對的東西也讀不懂原文。</p>
+          <p><strong>做法：</strong>把搜到的 30 篇材料快速掃一遍，<strong>圈出 20~30 個反覆出現的術語</strong>，列成中英對照表。</p>
+          <div class="code">例如機器人產業：
+  Foundation Model → 基礎模型
+  End-to-end neural policy → 端到端神經策略
+  Teleoperation → 遠端操作
+  VLA (Vision-Language-Action) → 視覺語言動作模型
+  ...</div>
+          <p><strong>這一步 Notion / Obsidian 做表比較好整理。</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-step="4">
+      <div class="num">4</div>
+      <div class="body">
+        <h3>Step 4｜掌握資料全局觀</h3>
+        <p class="tag">一頁式產業地圖：玩家 / 上中下游 / 價值鏈 / 護城河</p>
+        <div class="detail">
+          <p><strong>產出格式建議：</strong></p>
+          <div class="code">【產業地圖 v1】
+上游：晶片 / 感測器 / 馬達 → 主要玩家：Nvidia, RealSense, Maxon
+中游：本體製造 → 主要玩家：Figure, Tesla Optimus, 1X, Apptronik
+下游：應用場景 → 倉儲 / 製造 / 醫療 / 居家
+護城河：資料飛輪 / 模型規模 / 客戶 lock-in</div>
+          <p><strong>Hermes 怎麼幫：</strong>把上面這份草稿丟給我，我幫你補玩家+補對標。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-step="5">
+      <div class="num">5</div>
+      <div class="body">
+        <h3>Step 5｜用顆粒度三連問深入</h3>
+        <p class="tag">大 → 中 → 小，三層往下挖</p>
+        <div class="detail">
+          <p><strong>範例：</strong></p>
+          <div class="code">大：人形機器人市場未來 5 年多大？
+中：Figure AI 在這市場市占率預估？
+小：Figure 02 比 Figure 01 多了什麼 sensor？
+     訓練資料量？token 數？</div>
+          <p><strong>訣竅：</strong>每一層都要回答了才往下一層走；中途卡住就回上一層重看。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-step="6">
+      <div class="num">6</div>
+      <div class="body">
+        <h3>Step 6｜輸出（NotebookLM 強項）</h3>
+        <p class="tag">Podcast / 報告 / 簡報 — 這步換 NotebookLM 比較划算</p>
+        <div class="detail">
+          <p><strong>為什麼這步用 NotebookLM：</strong>它能直接把你前面整理的資料轉成對話/音檔，且有來源引用，比 Hermes 強。</p>
+          <p><strong>上傳資料到 NotebookLM：</strong></p>
+          <div class="code">- 你 Step 2~5 整理的 MD/PDF（最準）
+- 該公司的 IR PDF / 10-K
+- 5~10 篇關鍵報導</div>
+          <p><strong>NotebookLM 輸出建議：</strong></p>
+          <ul>
+            <li>「音頻摘要」→ Podcast 草稿</li>
+            <li>「簡報大綱」→ 簡報骨架</li>
+            <li>「FAQ 模式」→ 自問自答確認你真的懂</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 2: TOOLS COMPARISON ============ -->
+  <section class="panel" id="tools">
+    <p class="muted" style="margin-bottom: 18px;">
+      把「VK 七步驟」對照到三個工具，看哪一步在哪裡跑最划算。
+      <br/><span class="pill good">✓ 推薦</span> 表示該步用這個工具效益最高。
+    </p>
+
+    <div class="card">
+      <h3>📋 步驟 × 工具 對照表</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>步驟</th>
+            <th>Hermes (web_search + AI)</th>
+            <th>Gemini Deep Research</th>
+            <th>NotebookLM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Step 0</strong><br/>決定主角</td>
+            <td><span class="pill good">✓ 推薦</span><br/>直接在對話框定義問題</td>
+            <td><span class="pill warn">可</span><br/>要自己先寫 prompt</td>
+            <td><span class="pill bad">不適合</span><br/>它是接收方</td>
+          </tr>
+          <tr>
+            <td><strong>Step 1</strong><br/>Deep Research</td>
+            <td><span class="pill good">✓ 推薦</span><br/>5 query 平行搜尋 + 摘要</td>
+            <td><span class="pill good">✓ 推薦</span><br/>原生支援，5~10 分鐘跑完</td>
+            <td><span class="pill bad">不適合</span><br/>要你先餵資料</td>
+          </tr>
+          <tr>
+            <td><strong>Step 2</strong><br/>篩選 + 補資料</td>
+            <td><span class="pill good">✓ 推薦</span><br/>針對單篇 web_extract 深入讀</td>
+            <td><span class="pill neutral">可</span><br/>但來源白名單控制較弱</td>
+            <td><span class="pill bad">不適合</span></td>
+          </tr>
+          <tr>
+            <td><strong>Step 3</strong><br/>關鍵字</td>
+            <td><span class="pill good">✓ 推薦</span><br/>直接請 AI 整理術語表</td>
+            <td><span class="pill good">✓ 推薦</span><br/>一輪就抓得到</td>
+            <td><span class="pill bad">不適合</span></td>
+          </tr>
+          <tr>
+            <td><strong>Step 4</strong><br/>全局觀</td>
+            <td><span class="pill good">✓ 推薦</span><br/>表格化、地圖化最好</td>
+            <td><span class="pill good">✓ 推薦</span><br/>但結構要自己 review</td>
+            <td><span class="pill warn">可</span><br/>上傳後問它畫</td>
+          </tr>
+          <tr>
+            <td><strong>Step 5</strong><br/>顆粒度追問</td>
+            <td><span class="pill good">✓ 推薦</span><br/>對話式三連問最直覺</td>
+            <td><span class="pill warn">可</span><br/>但要分次 prompt</td>
+            <td><span class="pill good">✓ 推薦</span><br/>針對已上傳資料追問最準</td>
+          </tr>
+          <tr>
+            <td><strong>Step 6</strong><br/>輸出</td>
+            <td><span class="pill neutral">可</span><br/>出 MD / 表格</td>
+            <td><span class="pill neutral">可</span><br/>出長報告</td>
+            <td><span class="pill good">✓ 推薦</span><br/>Podcast / 簡報大綱原生強</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>⚡ 三個工具的硬限制</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>工具</th>
+            <th>需要什麼</th>
+            <th>免費額度</th>
+            <th>主要限制</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Hermes</strong></td>
+            <td>本機執行 + API key</td>
+            <td>看你用什麼 provider</td>
+            <td>搜尋引擎品質受限於 ddgs；單次搜尋有限</td>
+          </tr>
+          <tr>
+            <td><strong>Gemini Deep Research</strong></td>
+            <td>Google 帳號 + Gemini Advanced</td>
+            <td>有，但有 quota</td>
+            <td>來源引用有時對不上；中文資料覆蓋弱</td>
+          </tr>
+          <tr>
+            <td><strong>NotebookLM</strong></td>
+            <td>Google 帳號</td>
+            <td>免費但有 notebook 數量限制</td>
+            <td>只能基於你上傳的資料；不會主動搜尋</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>🎯 最佳組合策略</h3>
+      <p><strong>不花錢方案：</strong>全程用 Hermes，跑完 7 步驟自己整理 MD，再決定要不要輸出。</p>
+      <p><strong>半付費方案：</strong>Step 1 用 Gemini Deep Research 省時間 → 結果丟 Hermes 整理 + 質疑 → 最後丟 NotebookLM 出 Podcast。</p>
+      <p><strong>全付費方案：</strong>（VK 課）三個工具都用，加上提示詞清單，省下摸索時間 = 999。</p>
+    </div>
+  </section>
+
+  <!-- ============ TAB 3: DECISION TREE ============ -->
+  <section class="panel" id="tree">
+    <p class="muted" style="margin-bottom: 18px;">
+      回答幾個問題，我會推薦你的工具組合。點選切換選擇。
+    </p>
+
+    <div class="q">
+      <h4>Q1. 你的研究主題範圍？</h4>
+      <span class="opt" data-q="q1" data-v="narrow">一家公司</span>
+      <span class="opt" data-q="q1" data-v="mid">一個產業 / 賽道</span>
+      <span class="opt" data-q="q1" data-v="broad">技術趨勢 / 多產業橫切</span>
+    </div>
+
+    <div class="q">
+      <h4>Q2. 你有 Gemini 帳號嗎？</h4>
+      <span class="opt" data-q="q2" data-v="yes">有 / 願意登入</span>
+      <span class="opt" data-q="q2" data-v="no">沒有 / 不要登第三方</span>
+    </div>
+
+    <div class="q">
+      <h4>Q3. 最終想輸出什麼？</h4>
+      <span class="opt" data-q="q3" data-v="md">MD 筆記 / 自己讀</span>
+      <span class="opt" data-q="q3" data-v="podcast">Podcast / 音檔</span>
+      <span class="opt" data-q="q3" data-v="deck">簡報 / 報告</span>
+      <span class="opt" data-q="q3" data-v="data">資料結構化（表格 / JSON）</span>
+    </div>
+
+    <div class="q">
+      <h4>Q4. 你願意花多少時間？</h4>
+      <span class="opt" data-q="q4" data-v="short">&lt; 1 小時</span>
+      <span class="opt" data-q="q4" data-v="mid">1~3 小時</span>
+      <span class="opt" data-q="q4" data-v="long">&gt; 3 小時</span>
+    </div>
+
+    <button id="recommendBtn" style="margin-top: 16px; padding: 10px 22px; background: var(--accent); color: var(--card); border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+      🎯 給我看推薦
+    </button>
+
+    <div class="recommend" id="recommend">
+      <h3 id="recTitle">推薦組合</h3>
+      <div id="recBody"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>📝 整理者：Joe · 資料來源：<a href="https://vktechread.kaik.io/courses/nblm-industry">VK 科技閱讀時間《NotebookLM 產業研究工作流》</a>（課程大綱公開摘錄）</p>
+    <p style="margin-top: 8px;">本頁面用 Hermes 自動產生；本機驗證於 2026-07-07。</p>
+  </footer>
+</main>
+
+<script>
+  // ===== Tabs =====
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // ===== Steps expand =====
+  document.querySelectorAll('.step').forEach(step => {
+    step.addEventListener('click', () => step.classList.toggle('open'));
+  });
+
+  // ===== Decision tree =====
+  const answers = {};
+  document.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const q = opt.dataset.q;
+      document.querySelectorAll(`[data-q="${q}"]`).forEach(o => o.classList.remove('sel'));
+      opt.classList.add('sel');
+      answers[q] = opt.dataset.v;
+    });
+  });
+
+  document.getElementById('recommendBtn').addEventListener('click', () => {
+    const missing = ['q1','q2','q3','q4'].filter(k => !answers[k]);
+    if (missing.length) {
+      alert('請回答所有問題（剩 ' + missing.length + ' 題）');
+      return;
+    }
+    const rec = recommend(answers);
+    document.getElementById('recTitle').textContent = rec.title;
+    document.getElementById('recBody').innerHTML = rec.html;
+    document.getElementById('recommend').classList.add('show');
+    document.getElementById('recommend').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  function recommend(a) {
+    // 預設邏輯
+    const hasGemini = a.q2 === 'yes';
+    const wantsAudio = a.q3 === 'podcast';
+    const timeShort = a.q4 === 'short';
+
+    const lines = [];
+
+    // Step 1 主力
+    if (hasGemini && timeShort) {
+      lines.push('<p><strong>Step 1 主力 → Gemini Deep Research</strong>：最快，最少人力。</p>');
+    } else {
+      lines.push('<p><strong>Step 1 主力 → Hermes web_search</strong>：跑 5 個 query，附帶摘要。</p>');
+    }
+
+    // Step 2-4
+    lines.push('<p><strong>Step 2~4 → Hermes 整理</strong>：無論有沒有 Gemini，整理 + 全局觀都建議用 Hermes，比較好即時對話修正。</p>');
+
+    // Step 6
+    if (wantsAudio) {
+      lines.push('<p><strong>Step 6 輸出 → NotebookLM</strong>：你要音檔，這是它的強項。把你整理的 MD/PDF 上傳，請它出 Podcast 大綱。</p>');
+    } else if (a.q3 === 'deck') {
+      lines.push('<p><strong>Step 6 輸出 → NotebookLM「簡報大綱」</strong>：上傳整理資料，請它出 slide 結構。</p>');
+    } else {
+      lines.push('<p><strong>Step 6 輸出 → 直接用 Hermes</strong>：你要 MD / 結構化，沒必要繞 NotebookLM。</p>');
+    }
+
+    // 範圍建議
+    const scope = {narrow: '窄 (一家公司)', mid: '中 (一個產業)', broad: '寬 (多產業)'}[a.q1];
+    lines.push(`<p style="margin-top:14px;"><span class="pill neutral">範圍 ${scope}</span> &nbsp; <span class="pill neutral">${hasGemini ? '有 Gemini' : '無 Gemini'}</span> &nbsp; <span class="pill neutral">時間 ${timeShort ? '短' : '充裕'}</span></p>`);
+
+    // 估時
+    const eta = timeShort ? '45 分鐘' : (a.q4 === 'mid' ? '2 小時' : '4 小時+');
+    lines.push(`<p style="margin-top:10px;">⏱️ 預估完成時間：<strong>${eta}</strong></p>`);
+
+    // 是否值得買課
+    const worthIt = !hasGemini || timeShort;
+    lines.push(`<p style="margin-top:14px; padding:12px; background: var(--step-bg); border-radius:8px;">💡 <strong>${worthIt ? '你可能不需要買課</strong> — 用 Hermes 跑一輪就夠了，把 999 拿去買 NotebookLM Plus 或 Gemini Pro 一年。' : '你條件比較進階，999 課程可以省你摸索提示詞的時間，但仍可先用 Hermes 試跑一輪再決定。'}</p>`);
+
+    return {
+      title: a.q1 === 'narrow' ? '🏢 公司深度研究組合' : (a.q1 === 'mid' ? '🛣️ 產業研究組合' : '🌐 跨領域技術研究組合'),
+      html: lines.join('')
+    };
+  }
+</script>
+</body>
+</html>
