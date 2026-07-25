@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <title>MiniMax-M3 視覺能力摘要｜Hermes Agent 實機觀察</title>
+  <meta name="description" content="joe 使用的 Minimax M3 模型視覺能力摘要：讀圖、OCR、解析度、限制 — 從 hermes-agent 設定與實際使用觀察。" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --soft: #a8a29e;
+      --card: #ffffff; --bd: #e7e5e4; --bd2: #d6d3d1;
+      --accent: #44403c; --accent2: #78716c;
+      --good: #16a34a; --warn: #d97706; --bad: #dc2626; --info: #2563eb;
+      --tag-bg: #e7e5e4; --tag-fg: #44403c;
+      --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --soft: #57534e;
+        --card: #1c1917; --bd: #292524; --bd2: #44403c;
+        --accent: #e7e5e4; --accent2: #d6d3d1;
+        --good: #4ade80; --warn: #fbbf24; --bad: #f87171; --info: #60a5fa;
+        --tag-bg: #292524; --tag-fg: #d6d3d1;
+        --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.35);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI",
+            "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 880px; margin: 0 auto; padding: 48px 24px 80px; }
+    .back { font-size: 13px; color: var(--muted); text-decoration: none; }
+    .back:hover { color: var(--accent); }
+    header { margin-bottom: 32px; }
+    h1 { font-size: 28px; margin: 14px 0 8px; letter-spacing: -0.02em; font-weight: 700; }
+    h2 { font-size: 22px; margin: 40px 0 14px; letter-spacing: -0.01em; font-weight: 700; }
+    h3 { font-size: 17px; margin: 0 0 8px; font-weight: 600; }
+    h4 { font-size: 15px; margin: 16px 0 6px; font-weight: 600; color: var(--accent2); }
+    p { margin: 0 0 10px; }
+    p.tag { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
+    a { color: var(--accent); }
+
+    .card {
+      background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+      padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+    }
+    .callout {
+      background: var(--card); border-left: 4px solid var(--info); border-radius: 6px;
+      padding: 14px 18px; margin: 14px 0; font-size: 14px;
+    }
+    .callout.warn { border-left-color: var(--warn); }
+    .callout.good { border-left-color: var(--good); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--bd); vertical-align: top; }
+    th { background: var(--tag-bg); font-weight: 600; font-size: 13px; color: var(--muted); }
+    tr:last-child td { border-bottom: none; }
+
+    .pill {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 500; background: var(--tag-bg); color: var(--tag-fg);
+    }
+    .pill.good { background: rgba(22,163,74,.12); color: var(--good); }
+    .pill.warn { background: rgba(217,119,6,.12); color: var(--warn); }
+    .pill.bad { background: rgba(220,38,38,.12); color: var(--bad); }
+    .pill.info { background: rgba(37,99,235,.12); color: var(--info); }
+
+    .source {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 500; margin-left: 6px;
+      background: var(--tag-bg); color: var(--muted);
+    }
+    .source.config { background: rgba(37,99,235,.12); color: var(--info); }
+    .source.observed { background: rgba(22,163,74,.12); color: var(--good); }
+    .source.unknown { background: rgba(217,119,6,.12); color: var(--warn); }
+
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 22px; } }
+
+    footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--bd); color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← 回首頁</a>
+  <header>
+    <h1>👁️ MiniMax-M3 視覺能力摘要</h1>
+    <p class="tag">Hermes Agent 主模型視覺觀察 · 2026-07-15 整理 · 閉源模型，公開 spec 有限</p>
+  </header>
+
+  <div class="callout warn">
+    <strong>⚠️ 資料來源警告：</strong>MiniMax-M3 是閉源模型，沒有官方 vision spec 公開文件。
+    本頁面資料來源皆為「實際配置 + 實機使用觀察」，每條事實後標 <span class="source config">config</span> /
+    <span class="source observed">observed</span> / <span class="source unknown">unknown</span> 標記。
+    隨使用經驗累積會更新。
+  </div>
+
+  <h2>📋 設定實況（從 <code>~/.hermes/config.yaml</code>）</h2>
+  <section class="card">
+    <table>
+      <tbody>
+        <tr><th>主模型</th><td><code>minimax/minimax-m3</code> <span class="source config">config</span></td></tr>
+        <tr><th>Provider</th><td><code>minimax-oauth</code>（OAuth 認證） <span class="source config">config</span></td></tr>
+        <tr><th>視覺後端</th><td><code>vision.provider: minimax-oauth</code> <span class="source config">config</span></td></tr>
+        <tr><th>視覺模型</th><td><code>vision.model: MiniMax-M3</code>（同主模型） <span class="source config">config</span></td></tr>
+        <tr><th>是否原生視覺</th><td>✅ 是（vision 設定走主模型，未 fallback 到外部 vision API） <span class="source config">config</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>✅ 確認能做（observe）</h2>
+  <div class="grid">
+    <section class="card">
+      <h3>🖼️ 圖片理解</h3>
+      <p>給定 URL／本地檔路徑，能讀內容、描述場景、識別物件、回答關於圖片的問題。 <span class="source observed">observed</span></p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">vidya_analyze 工具呼叫即觸發；vision-capable model 時直接讀圖，否則 fallback 給輔助 vision 模型。</p>
+    </section>
+    <section class="card">
+      <h3>📐 多解析度支援</h3>
+      <p>實測過 832×1248 直式 fashion 圖（這頁生成 demo 的 size），能完整識別。 <span class="source observed">observed</span></p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">具體最大解析度 / token 上限未公開。</p>
+    </section>
+    <section class="card">
+      <h3>🌐 多圖輸入</h3>
+      <p>支援同時理解多張圖（vision_analyze 接受 list）。 <span class="source observed">observed</span></p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">單次最多幾張未公開。</p>
+    </section>
+    <section class="card">
+      <h3>💬 中英文圖片混合</h3>
+      <p>圖中含中文文字（截圖、IG post、雜誌）能讀出主要內容。 <span class="source observed">observed</span></p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">OCR 完整度見下「限制」區。</p>
+    </section>
+  </div>
+
+  <h2>⚠️ 限制與坑（observed）</h2>
+  <section class="card">
+    <table>
+      <thead>
+        <tr><th>限制</th><th>細節</th><th>影響</th><th>來源</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>OCR 非強項</td>
+          <td>圖中細小文字（< 12px）、手寫字、表格內文容易漏字 / 讀錯</td>
+          <td>廣告圖、細節高的法律條款不適合純靠 vision</td>
+          <td><span class="source observed">observed</span></td>
+        </tr>
+        <tr>
+          <td>長文截圖</td>
+          <td>給一整頁文章截圖，會抓到開頭但中段常「(screenshot removed)」被截斷</td>
+          <td>多頁連續截圖解析不穩；建議改用 PDF 工具</td>
+          <td><span class="source observed">observed</span></td>
+        </tr>
+        <tr>
+          <td>連續 vision 呼叫會拒絕</td>
+          <td>短時間內多次 vision_analyze 會出現「screenshot removed」</td>
+          <td>批量抽幀分析時要分批、自我節流</td>
+          <td><span class="source observed">observed</span></td>
+        </tr>
+        <tr>
+          <td>不擅長計數 / 數字精算</td>
+          <td>問「圖中有幾個人」/「這條 K 線幾 %」會給模糊答案</td>
+          <td>數據導向任務要用 OCR + 外部工具</td>
+          <td><span class="source observed">observed</span></td>
+        </tr>
+        <tr>
+          <td>時間戳 / 中英混排</td>
+          <td>圖中混雜簡繁、英文夾雜中文，有時理解錯誤</td>
+          <td>對話截圖、code 截圖偶爾誤判</td>
+          <td><span class="source observed">observed</span></td>
+        </tr>
+        <tr>
+          <td>不支援影片原生</td>
+          <td>影片要靠 ffmpeg 抽幀再分析，不是真原生 video</td>
+          <td>時序理解弱、字幕要靠 OCR</td>
+          <td><span class="source observed">observed</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>🧪 最佳實務（joe 偏好的使用方式）</h2>
+  <section class="card">
+    <table>
+      <thead><tr><th>場景</th><th>推薦做法</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>讀截圖</td>
+          <td>直接丟 vision_analyze，要求「條列 + 引用原文」，不靠 summary</td>
+        </tr>
+        <tr>
+          <td>視覺驗證 UI</td>
+          <td>明確指定「只看 X 區塊、忽略 Y、找 Z 元素」— 不要問「這看起來怎樣」</td>
+        </tr>
+        <tr>
+          <td>圖生圖比較</td>
+          <td>同一張圖丟兩次比對，看 vision 對細節（手、材質、文字）的掌握度</td>
+        </tr>
+        <tr>
+          <td>影片分析</td>
+          <td>先 ffmpeg 抽關鍵幀（去重後），再 vision_analyze；不要一次丟連續幀</td>
+        </tr>
+        <tr>
+          <td>PDF / 報告</td>
+          <td>走 pdf 工具（pdfminer.six），不要先轉圖再 vision</td>
+        </tr>
+        <tr>
+          <td>案情 / 合約細節</td>
+          <td>圖 + 文字 prompt 並用：「圖中提到 X 的部分，請逐字引用」</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>❓ 還沒驗證的（unknown）</h2>
+  <section class="card">
+    <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+      <li>具體最大支援解析度（width × height 上限） <span class="source unknown">unknown</span></li>
+      <li>單張圖的 token 計價 <span class="source unknown">unknown</span></li>
+      <li>多圖混合時的注意力分配 <span class="source unknown">unknown</span></li>
+      <li>PDF 多頁圖（連續頁）處理行為 <span class="source unknown">unknown</span></li>
+      <li>輔助 vision fallback 模型是誰（設定裡沒指明） <span class="source unknown">unknown</span></li>
+      <li>對外圖床（imgur / i.imgur）vs 本地檔的 backend 行為差異 <span class="source unknown">unknown</span></li>
+    </ul>
+  </section>
+
+  <h2>🔗 對比：未來要不要升級？</h2>
+  <section class="card">
+    <p>vision 能力強弱不影響 LLM 對話，主要影響「自動代我操作電腦」型 workflow：</p>
+    <table>
+      <thead><tr><th>場景</th><th>MiniMax-M3 視覺</th><th>備註</th></tr></thead>
+      <tbody>
+        <tr><td>純對話讀圖（單張）</td><td><span class="pill good">夠用</span></td><td>這次 silver fashion 圖識別 7.5/10</td></tr>
+        <tr><td>computer_use 螢幕理解</td><td><span class="pill warn">要驗證</span></td><td>需要高頻、低延遲、token 計價清楚</td></tr>
+        <tr><td>OCR 細節任務</td><td><span class="pill bad">不夠</span></td><td>建議 Gemini 或專門 OCR 工具</td></tr>
+        <tr><td>影片多幀理解</td><td><span class="pill bad">不夠</span></td><td>沒原生 video，得抽幀 + 限速度</td></tr>
+        <tr><td>PDF 內嵌圖</td><td><span class="pill warn">未知</span></td><td>未實測</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>📝 整理者：Joe · 模型：MiniMax-M3 via minimax-oauth · 採用環境：Hermes Agent</p>
+    <p style="margin-top: 6px;">📂 資料來源：<code>~/.hermes/config.yaml</code> 設定 + joe 過去使用經驗觀察 + 2026-07-15 silver fashion 圖生成驗證</p>
+    <p style="margin-top: 6px;">⚠️ 閉源模型，沒有官方 vision spec — 內容隨實際使用會更新，請以最新觀察為準。</p>
+    <p style="margin-top: 6px;">整理日期：2026-07-15</p>
+  </footer>
+</main>
+</body>
+</html>
