@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <title>楊梅 & 鄰近載客車司機招募整理 · Joe</title>
+  <meta name="description" content="楊梅、埔心、平鎮、中壢一帶的計程車行、合法租賃車行（附駕駛）、機場接送司機招募清單；含法規提醒與聯絡方式。" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --soft: #a8a29e;
+      --card: #ffffff; --bd: #e7e5e4; --bd2: #d6d3d1;
+      --accent: #44403c; --accent2: #78716c;
+      --tag-bg: #e7e5e4; --tag-fg: #44403c;
+      --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+      --warn-bg: #fef3c7; --warn-fg: #78350f; --warn-bd: #fcd34d;
+      --danger-bg: #fee2e2; --danger-fg: #7f1d1d; --danger-bd: #fca5a5;
+      --ok-bg: #dcfce7; --ok-fg: #14532d; --ok-bd: #86efac;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --soft: #57534e;
+        --card: #1c1917; --bd: #292524; --bd2: #44403c;
+        --accent: #e7e5e4; --accent2: #d6d3d1;
+        --tag-bg: #292524; --tag-fg: #d6d3d1;
+        --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.35);
+        --warn-bg: #422006; --warn-fg: #fde68a; --warn-bd: #78350f;
+        --danger-bg: #450a0a; --danger-fg: #fecaca; --danger-bd: #991b1b;
+        --ok-bg: #052e16; --ok-fg: #bbf7d0; --ok-bd: #14532d;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI",
+            "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 920px; margin: 0 auto; padding: 56px 24px 80px; }
+    a.back {
+      display: inline-block; margin-bottom: 24px; font-size: 14px;
+      color: var(--muted); text-decoration: none;
+    }
+    a.back:hover { color: var(--accent); }
+    h1 { font-size: 30px; margin: 0 0 8px; letter-spacing: -0.02em; font-weight: 700; }
+    p.subtitle { margin: 0 0 32px; color: var(--muted); font-size: 15px; }
+
+    .notice {
+      padding: 16px 18px; border-radius: 10px; margin: 0 0 28px;
+      border: 1px solid;
+      font-size: 14.5px; line-height: 1.65;
+    }
+    .notice h3 { margin: 0 0 8px; font-size: 15px; font-weight: 700; }
+    .notice ul { margin: 6px 0 0; padding-left: 20px; }
+    .notice.danger { background: var(--danger-bg); color: var(--danger-fg); border-color: var(--danger-bd); }
+    .notice.warn   { background: var(--warn-bg);   color: var(--warn-fg);   border-color: var(--warn-bd); }
+    .notice.ok     { background: var(--ok-bg);     color: var(--ok-fg);     border-color: var(--ok-bd); }
+
+    h2 {
+      font-size: 20px; margin: 36px 0 14px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--bd); letter-spacing: -0.01em;
+    }
+    h2 .badge {
+      display: inline-block; margin-left: 8px; padding: 2px 8px;
+      background: var(--tag-bg); color: var(--tag-fg);
+      border-radius: 999px; font-size: 11.5px; vertical-align: middle;
+    }
+
+    .shop {
+      background: var(--card); border: 1px solid var(--bd);
+      border-radius: 10px; padding: 18px 20px; margin: 0 0 14px;
+      box-shadow: var(--shadow);
+    }
+    .shop-head {
+      display: flex; align-items: baseline; gap: 10px;
+      flex-wrap: wrap; margin-bottom: 8px;
+    }
+    .shop-name { font-size: 17px; font-weight: 700; }
+    .shop-area {
+      font-size: 12px; color: var(--muted);
+      background: var(--tag-bg); padding: 2px 8px; border-radius: 999px;
+    }
+    .shop-recruit {
+      font-size: 13px; font-weight: 600; padding: 2px 8px;
+      background: var(--ok-bg); color: var(--ok-fg); border-radius: 6px;
+    }
+    .shop-row { display: flex; gap: 6px 18px; flex-wrap: wrap; font-size: 14px; margin: 4px 0; }
+    .shop-row b { color: var(--muted); font-weight: 600; min-width: 4.5em; display: inline-block; }
+    .shop-desc { font-size: 14px; color: var(--muted); margin: 6px 0 0; }
+
+    table.compare {
+      width: 100%; border-collapse: collapse; margin: 12px 0 0;
+      font-size: 14px;
+    }
+    table.compare th, table.compare td {
+      padding: 10px 12px; text-align: left;
+      border-bottom: 1px solid var(--bd);
+    }
+    table.compare th {
+      background: var(--tag-bg); color: var(--tag-fg);
+      font-weight: 600; font-size: 13px;
+    }
+    table.compare td.bad { color: var(--danger-fg); }
+    table.compare td.ok  { color: var(--ok-fg); font-weight: 600; }
+
+    .actions {
+      display: flex; gap: 8px; flex-wrap: wrap; margin: 28px 0 0;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 16px; background: var(--accent); color: var(--bg);
+      border-radius: 8px; font-size: 14px; font-weight: 600;
+      text-decoration: none; border: none; cursor: pointer;
+    }
+    .btn.secondary {
+      background: var(--card); color: var(--fg);
+      border: 1px solid var(--bd2);
+    }
+    .btn:hover { opacity: 0.85; }
+
+    footer {
+      margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--bd);
+      font-size: 13px; color: var(--muted); text-align: center;
+    }
+
+    @media print {
+      a.back, .actions { display: none; }
+      .shop { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="./">← 回首頁</a>
+
+    <h1>🚖 楊梅 &amp; 鄰近載客車司機招募整理</h1>
+    <p class="subtitle">在地車行、合法租賃車（附駕駛）、機場接送 · 2026-07-26 更新</p>
+
+    <div class="notice danger">
+      <h3>⚠️ 重要：白牌車在台灣是違法的</h3>
+      公路法 §77 規定：未經核准經營汽車運輸業而違規載客，處 <b>新台幣 10 萬 ~ 2,500 萬元</b>罰鍰。
+      真正合法的載客只有：<b>計程車</b>（黃色 / 多元化）、<b>計程車客運業</b>、<b>計程車運輸合作社</b>、<b>合法租賃車（附駕駛）</b>。
+      本頁只整理<strong>合法車行</strong>與「已標註風險」的少數白牌刊登。
+    </div>
+
+    <div class="notice warn">
+      <h3>💼 找工作前先確認 3 件事</h3>
+      <ul>
+        <li><b>是否需職業駕照</b>：合法載客（小客車）必須持「職業小客車駕照」，一般自用駕照不行</li>
+        <li><b>靠行 vs 派遣</b>：靠行制每月繳靠行費（1,500~3,000 元）換車行資源；派遣制由車隊派單</li>
+        <li><b>靠行費 / 油資 / 保險誰出</b>：白牌陷阱常見「油錢自付、保險自己保、罰單自己吞」</li>
+      </ul>
+    </div>
+
+    <h2>🟢 楊梅在地車行 <span class="badge">強烈建議先打這幾家</span></h2>
+
+    <div class="shop">
+      <div class="shop-head">
+        <span class="shop-name">浩克計程車行</span>
+        <span class="shop-area">楊梅區四維二路 86 號（埔心）</span>
+        <span class="shop-recruit">急徵大量司機</span>
+      </div>
+      <div class="shop-row"><b>叫車專線</b> 03-431-3131（24H）</div>
+      <div class="shop-row"><b>支付方式</b> LINE Pay / 街口 / 信用卡</div>
+      <div class="shop-row"><b>特色</b> 楊梅→桃園機場優惠 $50；埔心楊梅主場</div>
+      <div class="shop-desc">資料來源：楊梅埔心人 Facebook 群組，2024-07 貼文仍 active。屬傳統計程車隊靠行制。</div>
+    </div>
+
+    <div class="shop">
+      <div class="shop-head">
+        <span class="shop-name">成功車行</span>
+        <span class="shop-area">服務範圍：桃園 / 中壢 / 平鎮 / 楊梅 / 龍潭 / 新屋</span>
+        <span class="shop-recruit">誠徵司機</span>
+      </div>
+      <div class="shop-row"><b>叫車專線</b> 03-4396600 / 0917-495858</div>
+      <div class="shop-row"><b>上班地點</b> 平鎮區</div>
+      <div class="shop-row"><b>條件</b> 無經驗可、年齡不限、男女不限、需有駕照</div>
+      <div class="shop-desc">官網：taxi-4396600.blogspot.com</div>
+    </div>
+
+    <h2>🟢 鄰近合法租賃車行 <span class="badge">附駕駛 · 機場接送</span></h2>
+
+    <div class="shop">
+      <div class="shop-head">
+        <span class="shop-name">上馬租車</span>
+        <span class="shop-area">桃園機場 / 台中機場 / 花蓮火車站 / 台中豐原</span>
+      </div>
+      <div class="shop-row"><b>業務</b> 自駕 + 附駕駛（合法租賃車）</div>
+      <div class="shop-row"><b>司機資格</b> 領有職業駕照的專業司機群</div>
+      <div class="shop-row"><b>合作駕駛入口</b> shangma.com.tw「合作駕駛」</div>
+    </div>
+
+    <div class="shop">
+      <div class="shop-head">
+        <span class="shop-name">天佑租車</span>
+        <span class="shop-area">桃園中壢</span>
+      </div>
+      <div class="shop-row"><b>業務</b> 附駕駛小客車租賃、接送接駁</div>
+      <div class="shop-row"><b>黃頁</b> web66.com.tw/CW54/-B54429.html</div>
+    </div>
+
+    <div class="shop">
+      <div class="shop-head">
+        <span class="shop-name">喜雀租車（pic a 98）</span>
+        <span class="shop-area">全台</span>
+        <span class="shop-recruit">誠徵合作駕駛</span>
+      </div>
+      <div class="shop-row"><b>業務</b> 含附駕駛租車</div>
+      <div class="shop-row"><b>駕駛登入</b> pica98.com</div>
+    </div>
+
+    <div class="shop">
+      <div class="shop-head">
+        <span class="shop-name">騏鴻小客車租賃</span>
+        <span class="shop-area">桃園以北為主</span>
+        <span class="shop-recruit">誠徵機場接送司機</span>
+      </div>
+      <div class="shop-row"><b>條件</b> 需職業駕照</div>
+      <div class="shop-row"><b>招募管道</b> 104 人力銀行「機場接送司機」職缺</div>
+    </div>
+
+    <h2>🟡 求職平台上的楊梅司機職缺 <span class="badge">2026-07 統計</span></h2>
+    <table class="compare">
+      <thead>
+        <tr><th>平台</th><th>職缺數</th><th>備註</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>104 人力銀行</td><td>185 個「司機」</td><td>多含貨運、堆高機；篩「計程車 / 多元」+ 桃園較精準</td></tr>
+        <tr><td>104 人力銀行</td><td>143 個「小客車 / 計程車 / 小貨車」</td><td>其中計程車司機職缺少，建議直接打車行電話</td></tr>
+        <tr><td>1111 人力銀行</td><td>多筆</td><td>楊梅區多為娃娃車代理、宅配，非載客</td></tr>
+        <tr><td>518 熊班</td><td>上千筆</td><td>多為倉儲 / 堆高機，載客類型少</td></tr>
+        <tr><td>Indeed</td><td>兼職 25+ 筆</td><td>可搜「租賃車駕駛」「機場接送」+ 桃園</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🔴 純白牌刊登 <span class="badge">風險高</span></h2>
+    <div class="notice warn">
+      <h3>常見的「白牌」招募管道（請自行評估）</h3>
+      <ul>
+        <li><b>PRO360 達人網「楊梅白牌車」</b>：個人司機刊登接案，非車行招募，多為自用車攬客</li>
+        <li><b>FB「楊梅區找工作跨加啦」</b>：徵人貼文雜，常混白牌 / 直銷 / 詐騙，篩選需小心</li>
+        <li><b>LINE 群組叫車</b>：前輩公開呼籲不要去——保險空窗、<b>車禍理賠吃虧</b>、<b>執法風險</b>三位一體</li>
+      </ul>
+    </div>
+
+    <h2>🎯 建議行動</h2>
+    <table class="compare">
+      <thead>
+        <tr><th>目標</th><th>建議對象</th><th>聯絡</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>月入穩定、有保障</td><td>浩克計程車行 / 成功車行</td><td>問靠行細節（靠行費、拆帳、是否需職業駕照）</td></tr>
+        <tr><td>想跑機場接送 / 包車，薪水高</td><td>上馬租車 / 喜雀租車 / 騏鴻</td><td>直接從官網「合作駕駛」登入投履歷</td></tr>
+        <tr><td>想多比幾家</td><td>104「計程車司機」+ 桃園 / Indeed「租賃車駕駛」</td><td>線上篩選後直接電洽</td></tr>
+        <tr><td>免費媒合</td><td>楊梅就業服務臺（區公所 5F）</td><td>03-485-6886，可現場問</td></tr>
+      </tbody>
+    </table>
+
+    <div class="actions">
+      <a class="btn" href="tel:034313131">📞 浩克計程車 03-431-3131</a>
+      <a class="btn secondary" href="tel:034396600">📞 成功車行 03-4396600</a>
+      <a class="btn secondary" href="./">← 回首頁</a>
+    </div>
+
+    <footer>
+      整理時間：2026-07-26 · 資料來源：104、1111、518、Indeed、PRO360、Facebook 公開群組、車行官網。<br/>
+      本頁僅整理公開資訊，不為任何車行背書；實際招募條件以車行現場說明為準。
+    </footer>
+  </main>
+</body>
+</html>
