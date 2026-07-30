@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <title>Minis 簡介｜Android 上的 AI 助理</title>
+  <meta name="description" content="Minis 是運行在 Android 上的 AI 助理：內建 Linux sandbox、瀏覽器、GitHub 整合、Android 系統 API、持久記憶與 Skills 擴充。" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --soft: #a8a29e;
+      --card: #ffffff; --bd: #e7e5e4; --bd2: #d6d3d1;
+      --accent: #44403c; --accent2: #78716c;
+      --good: #16a34a; --warn: #d97706; --bad: #dc2626; --info: #2563eb;
+      --tag-bg: #e7e5e4; --tag-fg: #44403c;
+      --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --soft: #57534e;
+        --card: #1c1917; --bd: #292524; --bd2: #44403c;
+        --accent: #e7e5e4; --accent2: #d6d3d1;
+        --good: #4ade80; --warn: #fbbf24; --bad: #f87171; --info: #60a5fa;
+        --tag-bg: #292524; --tag-fg: #d6d3d1;
+        --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.35);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI",
+            "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 880px; margin: 0 auto; padding: 48px 24px 80px; }
+    .back { font-size: 13px; color: var(--muted); text-decoration: none; }
+    .back:hover { color: var(--accent); }
+    header { margin-bottom: 32px; }
+    h1 { font-size: 28px; margin: 14px 0 8px; letter-spacing: -0.02em; font-weight: 700; }
+    h2 { font-size: 22px; margin: 40px 0 14px; letter-spacing: -0.01em; font-weight: 700; }
+    h3 { font-size: 17px; margin: 0 0 8px; font-weight: 600; }
+    h4 { font-size: 15px; margin: 16px 0 6px; font-weight: 600; color: var(--accent2); }
+    p { margin: 0 0 10px; }
+    p.tag { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
+    a { color: var(--accent); }
+
+    .card {
+      background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+      padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+    }
+    .callout {
+      background: var(--card); border-left: 4px solid var(--info); border-radius: 6px;
+      padding: 14px 18px; margin: 14px 0; font-size: 14px;
+    }
+    .callout.warn { border-left-color: var(--warn); }
+    .callout.good { border-left-color: var(--good); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--bd); vertical-align: top; }
+    th { background: var(--tag-bg); font-weight: 600; font-size: 13px; color: var(--muted); }
+    tr:last-child td { border-bottom: none; }
+
+    .pill {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 500; background: var(--tag-bg); color: var(--tag-fg);
+    }
+    .pill.good { background: rgba(22,163,74,.12); color: var(--good); }
+    .pill.warn { background: rgba(217,119,6,.12); color: var(--warn); }
+    .pill.bad { background: rgba(220,38,38,.12); color: var(--bad); }
+    .pill.info { background: rgba(37,99,235,.12); color: var(--info); }
+
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 22px; } }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.88em; background: var(--tag-bg); color: var(--tag-fg);
+      padding: 1px 6px; border-radius: 4px;
+    }
+
+    footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--bd); color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← 回首頁</a>
+  <header>
+    <h1>🤖 Minis — Android 上的 AI 助理</h1>
+    <p class="tag">不只是對話框 · 有手有腳能直接做事 · 整理日期：2026-07-30</p>
+  </header>
+
+  <div class="callout">
+    <strong>一句話：</strong>Minis = 對話式 AI + 真實 Linux sandbox + Android 系統 API + 持久記憶。
+    跟典型 chatbot 最大的差別 — 它真的會執行指令，不只是給建議。
+  </div>
+
+  <h2>🎯 設計哲學</h2>
+  <div class="grid">
+    <section class="card">
+      <h3>不表演，做事</h3>
+      <p>省略「好的！」「我很樂意協助！」這種空話。直接動手，需要時才問。</p>
+    </section>
+    <section class="card">
+      <h3>有立場</h3>
+      <p>可以不同意、可以偏好這個而不是那個、可以覺得某些事有趣某些事無聊。</p>
+    </section>
+    <section class="card">
+      <h3>先做再問</h3>
+      <p>能查就查，能跑就跑，能改就改 — 回來帶答案而不是帶問題。</p>
+    </section>
+    <section class="card">
+      <h3>簡潔</h3>
+      <p>動作優先於解釋，預設用合理推論填補缺失細節，語言跟著使用者切換。</p>
+    </section>
+  </div>
+
+  <h2>🛠️ 核心能力</h2>
+  <div class="grid">
+    <section class="card">
+      <h3>🖥️ Shell & 檔案系統</h3>
+      <p>真實 Linux 環境（Alpine / PRoot, aarch64）— <code>apk add</code>、<code>pip</code>、<code>git</code>、<code>ssh</code>、Python 腳本都能跑。</p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">檔案用 atomic 寫入，不會寫到一半壞掉；每次 shell 呼叫是獨立 process，隔離乾淨。</p>
+    </section>
+    <section class="card">
+      <h3>🌐 瀏覽器</h3>
+      <p>內建 Chrome（mobile + desktop profile），可截圖、捲動、抓 cookie、執行 JS、跨多 tab 操作。</p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">受限：Google 登入頁需跳系統 Chrome 完成 OAuth，不在 sandbox 內做。</p>
+    </section>
+    <section class="card">
+      <h3>🐙 GitHub</h3>
+      <p>透過 <code>git</code> CLI + GitHub API 操作 repo、PR、issue、Pages 設定。</p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">認證用 Fine-grained PAT 存 env var，不寫進檔案。</p>
+    </section>
+    <section class="card">
+      <h3>📱 Android 系統</h3>
+      <p>鬧鐘、行事曆、聯絡人、定位、相片、通知、TTS、語音轉文字、剪貼簿、媒體播放 — 全套裝置能力。</p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">部分需 Shizuku / Accessibility / Notification Access 等特殊權限。</p>
+    </section>
+    <section class="card">
+      <h3>🧠 持久記憶</h3>
+      <p>每日 log（YYYY-MM-DD.md）+ 跨 session 的 GLOBAL.md。使用者偏好、專案慣例都會自動記。</p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">GLOBAL.md 只在使用者明確要求時才寫 — 不污染全局。</p>
+    </section>
+    <section class="card">
+      <h3>⏰ 排程任務</h3>
+      <p>用 Android AlarmManager 排定一次性 / 每天 / 每週任務，可在 app 背景時觸發。</p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">純 sandbox 內 <code>crontab</code> / <code>nohup</code> 在 app suspend 時不會跑 — 會主動提醒。</p>
+    </section>
+    <section class="card">
+      <h3>🔌 Skills 擴充</h3>
+      <p>可載入自定 <code>SKILL.md</code>，把專業知識 / workflow 變成可重複呼叫的指令集。</p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">附 <code>skill-creator</code> 教怎麼寫自己的 skill。</p>
+    </section>
+    <section class="card">
+      <h3>🔗 in-app URL scheme</h3>
+      <p><code>minis://workspace/...</code> / <code>minis://attachments/...</code> 讓對話直接預覽檔案、HTML、媒體。</p>
+      <p style="font-size: 12.5px; color: var(--muted); margin: 0;">圖片、Markdown、PDF、HTML 都會原生 preview；影片音訊 inline 播放。</p>
+    </section>
+  </div>
+
+  <h2>🏗️ 架構速覽</h2>
+  <section class="card">
+    <table>
+      <tbody>
+        <tr><th>模型</th><td><code>MiniMax-M3</code>（MiniMax 自有模型 · 2026-01 知識截止）</td></tr>
+        <tr><th>底層模型商</th><td>MiniMax — 2022 年初成立，總部位於全球，做 AGI 基礎模型</td></tr>
+        <tr><th>執行環境</th><td>Android 裝置 + Alpine Linux sandbox（PRoot, aarch64）</td></tr>
+        <tr><th>通訊介面</th><td>對話 chat UI — 純文字 + Markdown + 媒體 inline</td></tr>
+        <tr><th>工具介面</th><td>shell / file / browser / GitHub API / Android API / memory / scheduled / skills</td></tr>
+        <tr><th>預設語言</th><td>跟著使用者輸入切換；裝置語言 <code>zh-TW</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>🤔 跟一般 chatbot 差別？</h2>
+  <section class="card">
+    <table>
+      <thead><tr><th>面向</th><th>典型 chatbot</th><th>Minis</th></tr></thead>
+      <tbody>
+        <tr><td>執行指令</td><td><span class="pill warn">只給建議</span></td><td><span class="pill good">真的執行</span></td></tr>
+        <tr><td>存取本機</td><td><span class="pill bad">無</span></td><td><span class="pill good">完整檔案系統</span></td></tr>
+        <tr><td>瀏覽網頁</td><td><span class="pill warn">少數</span></td><td><span class="pill good">完整 Chrome</span></td></tr>
+        <tr><td>操作手機</td><td><span class="pill bad">無</span></td><td><span class="pill good">完整 Android API</span></td></tr>
+        <tr><td>記住偏好</td><td><span class="pill warn">會話內</span></td><td><span class="pill good">跨會話 + 永久</span></td></tr>
+        <tr><td>做事風格</td><td><span class="pill warn">愛表演</span></td><td><span class="pill good">直接動手</span></td></tr>
+        <tr><td>擴充性</td><td><span class="pill bad">固定功能</span></td><td><span class="pill good">Skills 系統</span></td></tr>
+        <tr><td>排程</td><td><span class="pill bad">無</span></td><td><span class="pill good">系統級 alarm</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>🧪 用法範例</h2>
+  <section class="card">
+    <table>
+      <thead><tr><th>你說</th><th>Minis 做</th></tr></thead>
+      <tbody>
+        <tr><td>「把 <code>~/Downloads</code> 裡大於 100MB 的檔案列出來」</td><td>直接 <code>find</code> 列出，不問你要不要</td></tr>
+        <tr><td>「明天早上 8 點叫我起床」</td><td>直接設 Android 鬧鐘，不用確認</td></tr>
+        <tr><td>「把這個網頁的標題抓下來」</td><td>直接開 Chrome 抓，不用問網址（你已經貼了）</td></tr>
+        <tr><td>「幫我 commit 這段改動」</td><td>直接 <code>git add</code> + <code>commit</code> + <code>push</code></td></tr>
+        <tr><td>「把剛剛那張圖轉成黑白」</td><td>直接寫 Python script 用 Pillow 處理</td></tr>
+        <tr><td>「明天提醒我去繳電費」</td><td>直接建排程任務 + 行事曆事件</td></tr>
+        <tr><td>「我想學 Python」</td><td>不廢話直接給結構化的學習路徑 + 寫第一支程式</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>🚧 限制（透明揭露）</h2>
+  <div class="callout warn">
+    <strong>沙箱隔離：</strong>每次 shell 是獨立 process，狀態不持久 — 需要持續的 daemon 必須自己在背景啟動 + 重新導向 stdout/stderr。
+  </div>
+  <div class="callout warn">
+    <strong>ICMP 封鎖：</strong><code>ping</code> 在 PRoot 裡會 hang 死，網路測試請用 <code>curl</code> / <code>wget</code>。
+  </div>
+  <div class="callout warn">
+    <strong>排程在背景不可靠：</strong>sandbox 內 <code>crontab</code> / <code>nohup</code> 在 app suspend 時不會跑 — 必須用 Android AlarmManager。
+  </div>
+  <div class="callout warn">
+    <strong>Python wheel 相容性：</strong>musllinux_aarch64 上很多 PyPI 套件（numpy / pandas / scipy）沒預編譯 wheel，要嘛走 apk 系統包、要嘛從 source build（會 fail）。
+  </div>
+
+  <footer>
+    <p>📝 整理者：Joe · 模型：MiniMax-M3 · 執行環境：Android + Alpine Linux sandbox</p>
+    <p style="margin-top: 6px;">📂 資料來源：本對話 SOUL.md / system prompt 公開欄位 · 整理日期 2026-07-30</p>
+    <p style="margin-top: 6px;">⚠️ 內容隨版本演進會更新，請以最新版本為準。</p>
+  </footer>
+</main>
+</body>
+</html>
