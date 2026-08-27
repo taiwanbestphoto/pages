@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <title>智慧通膨 Intelligence Inflation｜台灣 × 歐美觀念對照</title>
+  <meta name="description" content="智慧通膨（Intelligence Inflation）整理：程世嘉/iKala 的台灣視角、Tyler Cowen / Sam Altman / Peter Thiel 的歐美觀點、中英文圈論述對照、升值貶值能力清單。" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --soft: #a8a29e;
+      --card: #ffffff; --bd: #e7e5e4; --bd2: #d6d3d1;
+      --accent: #44403c; --accent2: #78716c;
+      --hot: #dc2626; --warn: #d97706; --good: #16a34a; --info: #2563eb;
+      --tag-bg: #e7e5e4; --tag-fg: #44403c;
+      --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --soft: #57534e;
+        --card: #1c1917; --bd: #292524; --bd2: #44403c;
+        --accent: #e7e5e4; --accent2: #d6d3d1;
+        --hot: #f87171; --warn: #fbbf24; --good: #4ade80; --info: #60a5fa;
+        --tag-bg: #292524; --tag-fg: #d6d3d1;
+        --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.35);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI",
+            "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 920px; margin: 0 auto; padding: 48px 24px 80px; }
+    .back { font-size: 13px; color: var(--muted); text-decoration: none; }
+    .back:hover { color: var(--accent); }
+    header { margin-bottom: 32px; }
+    h1 { font-size: 28px; margin: 14px 0 8px; letter-spacing: -0.02em; font-weight: 700; }
+    h2 { font-size: 22px; margin: 40px 0 14px; letter-spacing: -0.01em; font-weight: 700; }
+    h3 { font-size: 17px; margin: 0 0 8px; font-weight: 600; }
+    h4 { font-size: 15px; margin: 16px 0 6px; font-weight: 600; color: var(--accent2); }
+    p { margin: 0 0 10px; }
+    p.tag { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
+    a { color: var(--accent); }
+    a:hover { text-decoration: underline; }
+    code { background: var(--tag-bg); padding: 1px 6px; border-radius: 4px; font-size: 13.5px; }
+
+    .hero {
+      background: linear-gradient(135deg, var(--card) 0%, var(--tag-bg) 100%);
+      border: 1px solid var(--bd); border-radius: 12px; padding: 28px;
+      margin-bottom: 8px; box-shadow: var(--shadow);
+    }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 18px; }
+    .stat { background: var(--card); border: 1px solid var(--bd); border-radius: 10px; padding: 14px; text-align: center; }
+    .stat .num { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .stat .desc { font-size: 12.5px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+      padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+    }
+    .card .muted { color: var(--muted); font-size: 13.5px; }
+
+    .pill {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 500; background: var(--tag-bg); color: var(--tag-fg);
+      margin-right: 4px; margin-bottom: 4px;
+    }
+    .pill.hot { background: rgba(220,38,38,.12); color: var(--hot); }
+    .pill.warn { background: rgba(217,119,6,.12); color: var(--warn); }
+    .pill.good { background: rgba(22,163,74,.12); color: var(--good); }
+    .pill.info { background: rgba(37,99,235,.12); color: var(--info); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--bd); vertical-align: top; }
+    th { background: var(--tag-bg); font-weight: 600; font-size: 13px; color: var(--muted); }
+    tr:last-child td { border-bottom: none; }
+
+    /* 兩欄對照 */
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    .compare > div {
+      background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+      padding: 16px;
+    }
+    .compare h4 { margin: 0 0 8px; font-size: 14.5px; color: var(--fg); }
+    .compare .who { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+    .compare ul { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.55; }
+    .compare li { margin-bottom: 4px; }
+
+    /* 升值貶值清單 */
+    .skills { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+    .skills .col {
+      background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+      padding: 16px;
+    }
+    .skills .col h4 { margin: 0 0 10px; font-size: 14.5px; color: var(--fg); display: flex; align-items: center; gap: 6px; }
+    .skills ul { margin: 0; padding-left: 0; list-style: none; font-size: 13.5px; }
+    .skills li { padding: 8px 0; border-bottom: 1px solid var(--bd); }
+    .skills li:last-child { border-bottom: none; }
+    .skills .name { font-weight: 600; display: block; margin-bottom: 2px; }
+    .skills .why { color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+
+    /* 觀點引用 */
+    .quote {
+      background: var(--bg); border-left: 3px solid var(--accent); padding: 14px 16px;
+      margin: 10px 0; font-style: italic; font-size: 14px; color: var(--muted);
+    }
+    .quote .attr { display: block; margin-top: 6px; font-style: normal; font-size: 12.5px; color: var(--soft); }
+
+    /* 連結區塊 */
+    .ref-list { display: grid; gap: 10px; margin-top: 10px; }
+    .ref {
+      display: grid; grid-template-columns: 1fr auto; gap: 8px;
+      padding: 12px 14px; border: 1px solid var(--bd); border-radius: 8px;
+      background: var(--card); font-size: 13.5px; text-decoration: none; color: inherit;
+    }
+    .ref:hover { border-color: var(--accent2); }
+    .ref .title { font-weight: 600; }
+    .ref .src { color: var(--muted); font-size: 12px; }
+    .ref .arrow { color: var(--muted); align-self: center; }
+
+    .callout {
+      background: var(--tag-bg); border-radius: 8px; padding: 12px 14px;
+      font-size: 13.5px; margin: 14px 0;
+    }
+
+    footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--bd); color: var(--muted); font-size: 13px; }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .compare, .skills { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← 回首頁</a>
+  <header>
+    <h1>🧠 智慧通膨 Intelligence Inflation</h1>
+    <p class="tag">台灣 × 歐美觀念對照｜程世嘉 / Tyler Cowen / Sam Altman / Peter Thiel｜2026</p>
+  </header>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero">
+    <p style="margin: 0 0 4px;"><strong>一句話：</strong>當 AI 讓「智慧」的供應量爆炸性成長（類似貨幣供應過多），<strong>單位智慧的邊際價值就會暴跌</strong> —— 就像錢印太多會通膨一樣。</p>
+    <p style="margin: 0; color: var(--muted); font-size: 13.5px;">這是台灣 iKala 程世嘉在 2025-26 推廣的概念；歐美其實有更早、分散在好幾條支線上的對應說法。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">150×</div><div class="desc">兩年內 AI 推論成本降幅（Peter Thiel 引用）</div></div>
+      <div class="stat"><div class="num">3 層</div><div class="desc">歐美版拆解：供給端 / 知識商品化 / 身份重排</div></div>
+      <div class="stat"><div class="num">2×</div><div class="desc">Wharton 實驗：知識工作者用 AI 後生產力倍增</div></div>
+      <div class="stat"><div class="num">6</div><div class="desc">已驗證會「升值」的反稀缺能力（後述）</div></div>
+    </div>
+  </section>
+
+  <!-- ========== 核心類比 ========== -->
+  <h2>📐 核心邏輯：錢 vs. 智慧</h2>
+  <section class="card">
+    <table>
+      <thead>
+        <tr><th>維度</th><th>傳統通貨膨脹</th><th>智慧通膨</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>供給端</td><td>央行印鈔 / 信用擴張</td><td>GPU 算力 + 模型能力指數成長</td></tr>
+        <tr><td>標的物</td><td>貨幣（錢）</td><td>智慧 / 知識 / 推理產出</td></tr>
+        <tr><td>結果</td><td>錢不值錢</td><td>「聰明」不值錢</td></tr>
+        <tr><td>受衝擊者</td><td>持有現金的人</td><td>純賣腦力的白領</td></tr>
+        <tr><td>政策解方</td><td>升息 / 縮表</td><td>（沒有央行的角色；個體得自己 re-skill）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ========== 為什麼是真的 ========== -->
+  <h2>💥 為什麼是真的（不只是修辭）</h2>
+  <section class="card">
+    <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+      <li><strong>算力成本暴跌：</strong>同樣 GPT-4 等級的能力，現在 API 報價幾個月掉一個零；Peter Thiel 引用數據是「智慧成本兩年降 150×」。</li>
+      <li><strong>模型能力民主化：</strong>以前要博士才能做的分析，現在 prompt 一句話搞定。</li>
+      <li><strong>生產力倍增有實證：</strong>Wharton 的 Mollick 團隊「Jagged Frontier」實驗顯示，知識工作者用 AI 後生產力提升約 <strong>2 倍</strong>，但「會用」與「不會用」的差距正在拉大。</li>
+      <li><strong>換得速度：</strong>黃仁勳叫年輕人「去當水電工」——不是玩笑，是公開承認「AI 寫程式後，水電工這種動手做實事的人比純寫程式的人更稀缺」。</li>
+    </ul>
+  </section>
+
+  <!-- ========== 台灣 vs 歐美對照 ========== -->
+  <h2>🌏 中英文圈視角對照</h2>
+  <p class="tag">程世嘉把歐美分散的論述打包成一個詞；觀點深度犧牲但論述效率高</p>
+  <div class="compare">
+    <div>
+      <h4>🇹🇼 台灣（智慧通膨 · 程世嘉/iKala）</h4>
+      <div class="who">產業喊話式 · 個人生存焦慮</div>
+      <ul>
+        <li>主調：緊迫、淘汰感</li>
+        <li>關切：個人會不會被淘汰、AI 素養、商業模式轉型</li>
+        <li>解方：成為會用 AI 的人、GEO/Agent 轉型</li>
+        <li>對「泡沫論」態度：直接反駁——「智慧通膨根本反泡沫」</li>
+      </ul>
+    </div>
+    <div>
+      <h4>🇺🇸 歐美（分散支線）</h4>
+      <div class="who">冷靜、學術、辯論式</div>
+      <ul>
+        <li>主調：階級流動、身份危機、宏觀通縮</li>
+        <li>關切：制度調整、再分配、教育改革</li>
+        <li>解方：政策層介入 + 個人品味/判斷力投資</li>
+        <li>對「泡沫論」態度：兩派對立（Altman 樂觀 vs. LeCun 質疑）</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ========== 歐美對應概念譜系 ========== -->
+  <h2>🧬 歐美對應概念譜系</h2>
+  <p class="tag">同一件事的不同切面；歐美沒有單一對應詞</p>
+  <section class="card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 26%;">概念 / 詞</th>
+          <th style="width: 20%;">代表人物</th>
+          <th>核心說法</th>
+          <th>對應到智慧通膨的哪一段</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Cheap AI / Intelligence too cheap to meter</strong></td>
+          <td>Sam Altman（OpenAI）、Dario Amodei（Anthropic）</td>
+          <td>智慧的成本暴跌到接近水電等級</td>
+          <td><span class="pill info">供給端爆炸</span></td>
+        </tr>
+        <tr>
+          <td><strong>Knowledge work becomes a commodity</strong></td>
+          <td>Tyler Cowen（Marginal Revolution）</td>
+          <td>AI 把知識工作變成商品，看起來聰明的人滿街都是</td>
+          <td><span class="pill warn">結果：專業身分通膨</span></td>
+        </tr>
+        <tr>
+          <td><strong>Race Against / With the Machine</strong></td>
+          <td>Erik Brynjolfsson、Andrew McAfee（MIT）</td>
+          <td>人類要跟機器「賽跑」才不會被邊緣化</td>
+          <td><span class="pill good">個體策略：跑贏或搭便車</span></td>
+        </tr>
+        <tr>
+          <td><strong>Cognitive arbitrage / outsourcing of intelligence</strong></td>
+          <td>學術圈（2024 起的 paper）</td>
+          <td>把思考外包給 AI 賺取認知價差</td>
+          <td><span class="pill good">個體紅利：早期套利窗口</span></td>
+        </tr>
+        <tr>
+          <td><strong>Taste, judgment, agency 才是新的稀缺</strong></td>
+          <td>Marc Andreessen（a16z）、Paul Graham</td>
+          <td>程式碼會被 AI 寫，但「知道該寫什麼」更值錢</td>
+          <td><span class="pill info">升值的那一邊</span></td>
+        </tr>
+        <tr>
+          <td><strong>Commoditize your complement</strong></td>
+          <td>Joel Spolsky（經典軟體策略）</td>
+          <td>把你供應鏈裡的某個東西變便宜，你就從中獲利</td>
+          <td><span class="pill good">策略面：會用 AI ＝ 把互補品變便宜</span></td>
+        </tr>
+        <tr>
+          <td><strong>Intelligence deflation（宏觀版）</strong></td>
+          <td>經濟學家討論 AI 通縮效應</td>
+          <td>AI 讓服務成本暴跌，整體物價下行壓力</td>
+          <td><span class="pill hot">宏觀：落到 GDP 就是通縮</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ========== 三大代表性觀點 ========== -->
+  <h2>🎯 三大代表性歐美觀點</h2>
+
+  <h3>1. Tyler Cowen —「AI 不是要讓你失業，是要讓你掉階」</h3>
+  <section class="card">
+    <div class="quote">
+      When some people go up in status, and some go down in status... those who lose suffer more psychologically than those who gain.
+      <span class="attr">— Tyler Cowen, 2026 Fortune 訪談</span>
+    </div>
+    <p>Cowen 的角度：AI 不會帶來大規模失業，<strong>真正的痛苦是階級重排</strong>。律師、顧問、分析師原本在社會頂端，AI 把他們拉到中間，<strong>身份危機比失業更深</strong>。對應程世嘉的「重新定義有價值者」。</p>
+  </section>
+
+  <h3>2. Sam Altman / Dario Amodei —「便宜的智慧 = 經濟奇蹟的前提」</h3>
+  <section class="card">
+    <div class="quote">
+      Powerful AI will be cheap enough that giving everyone an education, healthcare, legal advice becomes affordable.
+      <span class="attr">— Sam Altman，多次公開演講</span>
+    </div>
+    <p>樂觀派認為，<strong>智慧通膨 = 解決貧富不均的解方</strong>，把原本被菁英壟斷的智力服務下放到每一個人。反對者（Yann LeCun 等）：你會得到一堆「看起來像答案的東西」。</p>
+  </section>
+
+  <h3>3. Peter Thiel —「STEM 安全網也破了」</h3>
+  <section class="card">
+    <div class="quote">
+      If crypto is libertarian, AI is communist.
+      <span class="attr">— Peter Thiel & Tyler Cowen, 2024</span>
+    </div>
+    <p>反主流觀點：<strong>連寫程式這種 STEM 神技也會被 AI 貶值</strong>，未來更安全的是「會問問題、會做判斷、敢承擔風險」的人。對應 a16z 那套「taste &gt; execution」。</p>
+  </section>
+
+  <!-- ========== 升值 vs 貶值 ========== -->
+  <h2>⚖️ 智慧通膨後，什麼變貴？什麼變便宜？</h2>
+  <div class="skills">
+    <div class="col">
+      <h4>📉 貶值（智慧通膨受害者）</h4>
+      <ul>
+        <li><span class="name">純背誦 / 標準答案輸出</span><span class="why">LLM 一秒產出十種寫法</span></li>
+        <li><span class="name">基礎程式碼撰寫</span><span class="why">Cursor / Copilot / Codex 把生產者拉到接近 0 成本</span></li>
+        <li><span class="name">翻譯 / 摘要 / 文書格式化</span><span class="why">GPT-4 級別以下的人力工作直接被吃</span></li>
+        <li><span class="name">基礎設計 / 模板產出</span><span class="why">Midjourney / Canva AI 取代大量初階設計</span></li>
+        <li><span class="name">「我懂這領域」當賣點的純諮詢</span><span class="why">看起來聰明的人滿街都是</span></li>
+      </ul>
+    </div>
+    <div class="col">
+      <h4>📈 升值（智慧通膨後的稀缺）</h4>
+      <ul>
+        <li><span class="name">判斷力 / 品味</span><span class="why">AI 給你 10 個方案，但要知道哪個值得做</span></li>
+        <li><span class="name">問對問題的能力</span><span class="why">答案變便宜，「會問」才值錢</span></li>
+        <li><span class="name">承擔責任 / 決策</span><span class="why">AI 不能簽名、不能坐牢</span></li>
+        <li><span class="name">動手實作（工地 / 維修 / 廚藝 / 醫療操作）</span><span class="why">機器人最後一哩尚未自動化</span></li>
+        <li><span class="name">信任 / 人際關係</span><span class="why">人與人之間的連結無法 prompt 化</span></li>
+        <li><span class="name">會駕馭 AI 的人（AI 素養）</span><span class="why">會組 workflow、懂 GEO/Agent 的人反而身價飆</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ========== 連帶效應 ========== -->
+  <h2>🔗 連帶效應（已在發生）</h2>
+  <section class="card">
+    <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.7;">
+      <li><strong>行銷：SEO → GEO</strong>（Generative Engine Optimization）：消費者開始問 ChatGPT / Gemini / Perplexity 而非 Google，品牌要讓自己被 AI 提到。</li>
+      <li><strong>商業模式：B2C / B2B → B2Agent</strong>：讓 AI Agent 來採購你的商品（iKala 強調的轉型方向）。</li>
+      <li><strong>教育：背誦型知識全面貶值</strong>；蘇格拉底式對話、實作、AI 素養變核心。</li>
+      <li><strong>勞動市場：STEM 安全網破了</strong>（Thiel 觀點），連工程師都得重新思考自己的不可替代性。</li>
+    </ul>
+  </section>
+
+  <!-- ========== 延伸思考 ========== -->
+  <h2>💡 延伸思考（給你 / 給我自己的提問）</h2>
+  <section class="card">
+    <ol style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.75;">
+      <li>你現在的工作裡，<strong>哪 20% 是「智慧通膨會貶值」的</strong>、<strong>哪 20% 是「會升值」的</strong>？3 個月後哪一塊會先被你看到訊號？</li>
+      <li>「Commoditize your complement」這套老策略：<strong>你的互補品是什麼</strong>？怎麼用 AI 把它變便宜，來放大你自己的價值？</li>
+      <li>台灣版 vs. 歐美版的語境差異：<strong>程世嘉強調「個人生存」、Cowen 強調「階級流動」</strong>——你在哪一邊？</li>
+      <li>LeCun 等反對者的質疑：當 AI 給的「看起來像答案」的東西太多，<strong>什麼時候會出現「智慧通縮」</strong>（大家不相信 AI 的反彈）？</li>
+    </ol>
+  </section>
+
+  <!-- ========== 來源 / 延伸閱讀 ========== -->
+  <h2>📚 來源 / 延伸閱讀</h2>
+  <div class="ref-list">
+    <a class="ref" href="https://www.bnext.com.tw/article/91733/intelligence-inflation-ai-3-0">
+      <div>
+        <div class="title">程世嘉：智慧通膨重新定義「有價值的人」</div>
+        <div class="src">數位時代 BusinessNext</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+    <a class="ref" href="https://www.bnext.com.tw/article/89752/intelligence-inflation">
+      <div>
+        <div class="title">AI 不太可能是泡沫？一張圖看懂全球算力「指數級成長」</div>
+        <div class="src">數位時代 BusinessNext</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+    <a class="ref" href="https://marginalrevolution.com/marginalrevolution/2024/12/artificial-intelligence-in-the-knowledge-economy.html">
+      <div>
+        <div class="title">Artificial Intelligence in the Knowledge Economy（論文）</div>
+        <div class="src">Tyler Cowen · Marginal Revolution</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+    <a class="ref" href="https://fortune.com/article/peter-thiel-ai-skills-creative-thinking-technical/">
+      <div>
+        <div class="title">Peter Thiel warns AI is a bigger threat to technical roles than to creative thinkers</div>
+        <div class="src">Fortune · 2026</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+    <a class="ref" href="https://fortune.com/2026/05/22/tyler-cowen-ai-economy-not-mass-unemployment-adjustment/">
+      <div>
+        <div class="title">Tyler Cowen on the biggest problem of the AI age: adjusting to a new reality</div>
+        <div class="src">Fortune · 2026/05</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+    <a class="ref" href="https://www.cnbc.com/2025/10/07/generative-ai-knowledge-learning-jobs-education-skills-wharton-ethan-mollick.html">
+      <div>
+        <div class="title">Ethan Mollick: 'No one knows anything' about AI jobs predictions</div>
+        <div class="src">CNBC · Wharton</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+    <a class="ref" href="https://sloanreview.mit.edu/article/winning-the-race-with-ever-smarter-machines/">
+      <div>
+        <div class="title">Winning the Race With Ever-Smarter Machines</div>
+        <div class="src">MIT Sloan Management Review · Brynjolfsson & McAfee</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+  </div>
+
+  <div class="callout">
+    💡 <strong>個人結論：</strong>英文圈把這現象拆成「智慧的 cost curve（供給）」+「知識工作的商品化（需求）」+「身份階級重排（社會後果）」三層；程世嘉把三層壓成「<strong>智慧通膨</strong>」一個詞，論述效率高，但犧牲了一些辯論深度。兩套語言都值得會。
+  </div>
+
+  <footer>
+    📅 整理：2026-08-28 · Joe 個人備忘筆記（非商業）<br>
+    🔗 本站其他相關頁面：<a href="./ai-office-course.html">AI 替你上班（課程整理）</a> · <a href="./industry-research.html">產業研究工作流</a>
+  </footer>
+</main>
+</body>
+</html>
