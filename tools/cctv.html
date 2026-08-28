@@ -30,6 +30,19 @@
     .sub a { color: var(--accent2); text-decoration: none; }
     .sub a:hover { text-decoration: underline; }
 
+    .reload-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin: 0 0 16px;
+      padding: 6px 14px;
+      font: inherit; font-size: 13px;
+      background: var(--card); color: var(--fg);
+      border: 1px solid var(--bd2); border-radius: 8px;
+      cursor: pointer;
+    }
+    .reload-btn:hover { background: var(--bd); border-color: var(--accent); }
+    .reload-btn:active { transform: translateY(1px); }
+    .reload-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
     .grid {
       max-width: 1400px; margin: 0 auto; padding: 12px 16px 40px;
       display: grid; gap: 12px;
@@ -75,8 +88,7 @@
       aspect-ratio: 16 / 9;
     }
     .cam-body img,
-    .cam-body video,
-    .cam-body canvas {
+    .cam-body video {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: contain;
@@ -123,6 +135,10 @@
       共 <span id="count"></span> 攝影機 ·
       <a href="../">← 返回 hub</a>
     </p>
+    <button class="reload-btn" id="reload" type="button" title="重新整理整頁">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.74 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+      重整
+    </button>
   </header>
 
   <div class="grid" id="grid"></div>
@@ -136,66 +152,62 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
   <script>
     // ============================================================
-    //  CAMERAS — 新增攝影機只需複製一筆,修改對應欄位即可
-    //  type: "image"  靜態快照(每 8 秒刷新)
-    //  type: "mjpeg"  MJPEG multipart stream(<img> 直連 + 週期重連)
-    //  type: "hls"    HLS 即時串流(hls.js 或 Safari 原生)
+    //  CAMERAS — 新增攝影機只需複製一筆，修改對應欄位即可
     // ============================================================
-    // 中山高(國道1號)湖口↔楊梅段,71K–83K,南北向各 3 支
     const CAMERAS = [
       {
-        id:   "CCTV-N1-N-73.950-M",
-        name: "國道1號 北向 73.95K",
-        loc:  "楊梅段",
-        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17390",
-        type: "mjpeg",
-        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-        from: "高公局",
+        id:   "CCTV-13-0010-045-001",
+        name: "楊梅交流道(S)",
+        loc:  "桃園市楊梅區",
+        src:  "https://cctv-ss01.thb.gov.tw/T1-45K+800",
+        type: "image",          // "image" | "hls"
+        url:  "https://tw.live/cam/?id=CCTV-13-0010-045-001",
+        from: "交通部公路局",
       },
       {
-        id:   "CCTV-N1-N-77.530-M",
-        name: "國道1號 北向 77.53K",
-        loc:  "楊梅段",
-        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17750",
-        type: "mjpeg",
-        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-        from: "高公局",
+        id:   "BOT291",
+        name: "衡陽路-中華路一段",
+        loc:  "台北市萬華區",
+        src:  "https://jtmctrafficcctv5.gov.taipei/NVR/384bc878-ed67-4cab-bad5-01d5dc891148/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=BOT291",
+        from: "臺北市交通管制工程處",
       },
       {
-        id:   "CCTV-N1-N-81.100-M",
-        name: "國道1號 北向 81.1K",
-        loc:  "湖口段",
-        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=18110",
-        type: "mjpeg",
-        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-        from: "高公局",
+        id:   "NWT0536",
+        name: "北宜路1段、中興路1段",
+        loc:  "新北市新店區",
+        src:  "https://cctvatis4.ntpc.gov.tw/hls/C000536/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=NWT0536",
+        from: "新北市交通局",
       },
       {
-        id:   "CCTV-N1-S-72.675-M",
-        name: "國道1號 南向 72.7K",
-        loc:  "湖口段",
-        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17260",
-        type: "mjpeg",
-        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-        from: "高公局",
+        id:   "NWT0512",
+        name: "三樹路、龍埔路",
+        loc:  "新北市三峽區",
+        src:  "https://cctvatis4.ntpc.gov.tw/hls/C000512/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=NWT0512",
+        from: "新北市交通局",
       },
       {
-        id:   "CCTV-N1-S-78.600-M",
-        name: "國道1號 南向 78.6K",
-        loc:  "校前路段",
-        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17860",
-        type: "mjpeg",
-        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-        from: "高公局",
+        id:   "NWT0287",
+        name: "中正路、中園街",
+        loc:  "新北市三峽區",
+        src:  "https://cctvatis4.ntpc.gov.tw/hls/C000287/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=NWT0287",
+        from: "新北市交通局",
       },
       {
-        id:   "CCTV-N1-S-82.900-M",
-        name: "國道1號 南向 82.9K",
-        loc:  "湖口交流道",
-        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=18290",
-        type: "mjpeg",
-        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-        from: "高公局",
+        id:   "NWT0240",
+        name: "台2、玉田路(近明光港)",
+        loc:  "新北市萬里區",
+        src:  "https://cctvatis6.ntpc.gov.tw/hls/C000240/live.m3u8",
+        type: "hls",
+        url:  "https://tw.live/cam/?id=NWT0240",
+        from: "新北市交通局",
       },
       // 之後新增往下加 ...
     ];
@@ -207,77 +219,6 @@
     // ===== render =====
     const grid = document.getElementById("grid");
     document.getElementById("count").textContent = CAMERAS.length;
-
-    // MJPEG 播放策略:
-    //   1. <img> 直連 MJPEG(瀏覽器原生支援,簡單可靠)
-    //   2. 每收到一次 frame(onload),排 20 秒後自動重新指 src,
-    //      預防中間 proxy 或 server timeout 凍結串流
-    //   3. 失敗時指數退避(0.5/1/2/4/8s),5 次後放棄
-    //   4. 黑屏期間 placeholder 顯示「重新連線中…」
-    function attachMJPEG(url, body, placeholder) {
-      const img = document.createElement("img");
-      img.alt = "mjpeg";
-      body.appendChild(img);
-
-      let stopped = false;
-      let attempts = 0;
-      const MAX_ATTEMPTS = 5;
-      let refreshTimer = null;
-      let reconnectTimer = null;
-
-      function showReconnecting(msg) {
-        if (placeholder) {
-          placeholder.textContent = msg;
-          placeholder.style.display = "";
-        }
-        img.style.opacity = "0";
-      }
-      function showLive() {
-        if (placeholder) placeholder.style.display = "none";
-        img.style.opacity = "1";
-      }
-      function srcWithCacheBuster() {
-        return url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
-      }
-
-      function reconnect() {
-        if (stopped) return;
-        attempts++;
-        if (attempts > MAX_ATTEMPTS) {
-          if (placeholder) placeholder.textContent = "無法連線";
-          return;
-        }
-        showReconnecting("重新連線中…");
-        img.src = srcWithCacheBuster();
-        const delay = Math.min(8000, 500 * Math.pow(2, attempts - 1));
-        reconnectTimer = setTimeout(reconnect, delay);
-      }
-
-      img.onload = () => {
-        attempts = 0;
-        showLive();
-        // 收到 frame 後 20 秒主動重連一次,避免被凍結
-        if (refreshTimer) clearTimeout(refreshTimer);
-        refreshTimer = setTimeout(() => {
-          if (stopped) return;
-          showReconnecting("重新整理…");
-          img.src = srcWithCacheBuster();
-        }, 20000);
-      };
-      img.onerror = () => {
-        if (stopped) return;
-        reconnect();
-      };
-
-      img.src = url;
-
-      return () => {
-        stopped = true;
-        if (refreshTimer) clearTimeout(refreshTimer);
-        if (reconnectTimer) clearTimeout(reconnectTimer);
-        img.src = "";
-      };
-    }
 
     CAMERAS.forEach(cam => {
       const div = document.createElement("div");
@@ -293,7 +234,7 @@
         </div>
         <div class="cam-foot">
           <span>${esc(cam.from)}</span>
-          <a class="cam-link" href="${esc(cam.url)}" target="_blank" rel="noopener">高公局 ↗</a>
+          <a class="cam-link" href="${esc(cam.url)}" target="_blank" rel="noopener">tw.live ↗</a>
         </div>`;
       grid.appendChild(div);
 
@@ -311,11 +252,6 @@
         body.appendChild(img);
         // 靜態快照自動刷新
         setInterval(() => { img.src = cam.src + "?t=" + Date.now(); }, 8000);
-      }
-
-      if (cam.type === "mjpeg") {
-        const placeholder = body.querySelector(".placeholder");
-        attachMJPEG(cam.src, body, placeholder);
       }
 
       if (cam.type === "hls") {
@@ -353,6 +289,12 @@
           body.querySelector(".placeholder").textContent = "瀏覽器不支援 HLS";
         }
       }
+    });
+
+    // ===== 重整鈕 =====
+    document.getElementById("reload").addEventListener("click", () => {
+      // 強制從伺服器重抓,不走 cache
+      location.reload();
     });
   </script>
 </body>
