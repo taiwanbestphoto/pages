@@ -75,7 +75,8 @@
       aspect-ratio: 16 / 9;
     }
     .cam-body img,
-    .cam-body video {
+    .cam-body video,
+    .cam-body canvas {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: contain;
@@ -136,65 +137,68 @@
   <script>
     // ============================================================
     //  CAMERAS — 新增攝影機只需複製一筆，修改對應欄位即可
+    //  type: "image"  靜態快照(每 8 秒刷新)
+    //  type: "mjpeg"  MJPEG multipart stream(用 canvas 持續解 frame,免 8 秒黑屏)
+    //  type: "hls"    HLS 即時串流(用 hls.js 或 Safari 原生)
     // ============================================================
     // 中山高(國道1號)湖口↔楊梅段,71K–83K,南北向各 3 支
-        const CAMERAS = [
-          {
-            id:   "CCTV-N1-N-73.950-M",
-            name: "國道1號 北向 73.95K",
-            loc:  "楊梅段",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17390",
-            type: "mjpeg",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-          },
-          {
-            id:   "CCTV-N1-N-77.530-M",
-            name: "國道1號 北向 77.53K",
-            loc:  "楊梅段",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17750",
-            type: "mjpeg",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-          },
-          {
-            id:   "CCTV-N1-N-81.100-M",
-            name: "國道1號 北向 81.1K",
-            loc:  "湖口段",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=18110",
-            type: "mjpeg",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-          },
-          {
-            id:   "CCTV-N1-S-72.675-M",
-            name: "國道1號 南向 72.7K",
-            loc:  "湖口段",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17260",
-            type: "mjpeg",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-          },
-          {
-            id:   "CCTV-N1-S-78.600-M",
-            name: "國道1號 南向 78.6K",
-            loc:  "校前路段",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17860",
-            type: "mjpeg",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-          },
-          {
-            id:   "CCTV-N1-S-82.900-M",
-            name: "國道1號 南向 82.9K",
-            loc:  "湖口交流道",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=18290",
-            type: "mjpeg",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-          },
-          // 之後新增往下加 ...
-        ];
+    const CAMERAS = [
+      {
+        id:   "CCTV-N1-N-73.950-M",
+        name: "國道1號 北向 73.95K",
+        loc:  "楊梅段",
+        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17390",
+        type: "mjpeg",
+        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+        from: "高公局",
+      },
+      {
+        id:   "CCTV-N1-N-77.530-M",
+        name: "國道1號 北向 77.53K",
+        loc:  "楊梅段",
+        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17750",
+        type: "mjpeg",
+        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+        from: "高公局",
+      },
+      {
+        id:   "CCTV-N1-N-81.100-M",
+        name: "國道1號 北向 81.1K",
+        loc:  "湖口段",
+        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=18110",
+        type: "mjpeg",
+        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+        from: "高公局",
+      },
+      {
+        id:   "CCTV-N1-S-72.675-M",
+        name: "國道1號 南向 72.7K",
+        loc:  "湖口段",
+        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17260",
+        type: "mjpeg",
+        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+        from: "高公局",
+      },
+      {
+        id:   "CCTV-N1-S-78.600-M",
+        name: "國道1號 南向 78.6K",
+        loc:  "校前路段",
+        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17860",
+        type: "mjpeg",
+        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+        from: "高公局",
+      },
+      {
+        id:   "CCTV-N1-S-82.900-M",
+        name: "國道1號 南向 82.9K",
+        loc:  "湖口交流道",
+        src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=18290",
+        type: "mjpeg",
+        url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+        from: "高公局",
+      },
+      // 之後新增往下加 ...
+    ];
 
     // ===== escape =====
     const esc = s => String(s).replace(/[&<>"']/g, c =>
@@ -203,6 +207,83 @@
     // ===== render =====
     const grid = document.getElementById("grid");
     document.getElementById("count").textContent = CAMERAS.length;
+
+    // 共用:在 buffer 中找一段 bytes
+    function indexOfBytes(haystack, needle, from) {
+      from = from || 0;
+      outer: for (let i = from; i <= haystack.length - needle.length; i++) {
+        for (let j = 0; j < needle.length; j++) {
+          if (haystack[i + j] !== needle[j]) continue outer;
+        }
+        return i;
+      }
+      return -1;
+    }
+
+    // MJPEG 持續解到 canvas
+    async function playMJPEG(url, canvas, placeholder) {
+      const ctx = canvas.getContext("2d");
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok || !r.body) throw new Error("HTTP " + r.status);
+      const ctype = r.headers.get("Content-Type") || "";
+      const bm = ctype.match(/boundary=(?:-?-)?([A-Za-z0-9_.-]+)/);
+      const boundary = bm ? bm[1] : "myboundary";
+      const BOUNDARY = new TextEncoder().encode("--" + boundary);
+      const HDR_END = new Uint8Array([0x0d, 0x0a, 0x0d, 0x0a]);
+
+      const reader = r.body.getReader();
+      let buf = new Uint8Array();
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const next = new Uint8Array(buf.length + value.length);
+        next.set(buf, 0); next.set(value, buf.length);
+        buf = next;
+
+        // 一輪內可能有多張 frame,持續解出來
+        while (true) {
+          const bIdx = indexOfBytes(buf, BOUNDARY);
+          if (bIdx < 0) {
+            // 沒看到 boundary,丟掉過舊 bytes 留尾巴
+            if (buf.length > BOUNDARY.length * 4) {
+              buf = buf.slice(buf.length - BOUNDARY.length * 2);
+            }
+            break;
+          }
+          const hdrStart = bIdx + BOUNDARY.length;
+          const hdrEnd = indexOfBytes(buf, HDR_END, hdrStart);
+          if (hdrEnd < 0) {
+            // header 還沒收完
+            buf = buf.slice(bIdx);
+            break;
+          }
+          const jpegStart = hdrEnd + HDR_END.length;
+          const nextB = indexOfBytes(buf, BOUNDARY, jpegStart);
+          if (nextB < 0) {
+            // 下一個 boundary 還沒到
+            buf = buf.slice(bIdx);
+            break;
+          }
+          const jpegEnd = nextB - 2; // 去掉 \r\n
+          if (jpegEnd > jpegStart) {
+            const jpegBytes = buf.slice(jpegStart, jpegEnd);
+            try {
+              const bmp = await createImageBitmap(new Blob([jpegBytes], { type: "image/jpeg" }));
+              if (canvas.width !== bmp.width || canvas.height !== bmp.height) {
+                canvas.width = bmp.width;
+                canvas.height = bmp.height;
+              }
+              ctx.drawImage(bmp, 0, 0);
+              bmp.close?.();
+              if (placeholder) { placeholder.remove(); placeholder = null; }
+            } catch (e) {
+              // 跳過這一張
+            }
+          }
+          buf = buf.slice(nextB);
+        }
+      }
+    }
 
     CAMERAS.forEach(cam => {
       const div = document.createElement("div");
@@ -218,41 +299,37 @@
         </div>
         <div class="cam-foot">
           <span>${esc(cam.from)}</span>
-          <a class="cam-link" href="${esc(cam.url)}" target="_blank" rel="noopener">tw.live ↗</a>
+          <a class="cam-link" href="${esc(cam.url)}" target="_blank" rel="noopener">高公局 ↗</a>
         </div>`;
       grid.appendChild(div);
 
       const body = div.querySelector(".cam-body");
 
       if (cam.type === "image") {
-              const img = document.createElement("img");
-              img.src = cam.src;
-              img.alt = cam.name;
-              img.loading = "lazy";
-              img.onload = () => body.querySelector(".placeholder")?.remove();
-              img.onerror = () => {
-                body.querySelector(".placeholder").textContent = "影像載入失敗";
-              };
-              body.appendChild(img);
-              // 靜態快照自動刷新
-              setInterval(() => { img.src = cam.src + "?t=" + Date.now(); }, 8000);
-            }
+        const img = document.createElement("img");
+        img.src = cam.src;
+        img.alt = cam.name;
+        img.loading = "lazy";
+        img.onload = () => body.querySelector(".placeholder")?.remove();
+        img.onerror = () => {
+          body.querySelector(".placeholder").textContent = "影像載入失敗";
+        };
+        body.appendChild(img);
+        // 靜態快照自動刷新
+        setInterval(() => { img.src = cam.src + "?t=" + Date.now(); }, 8000);
+      }
 
-            if (cam.type === "mjpeg") {
-              // MJPEG multipart stream,瀏覽器原生 <img> 持續接收
-              const img = document.createElement("img");
-              img.src = cam.src;
-              img.alt = cam.name;
-              img.loading = "eager";
-              img.onload = () => body.querySelector(".placeholder")?.remove();
-              img.onerror = () => {
-                body.querySelector(".placeholder").textContent = "影像載入失敗";
-              };
-              body.appendChild(img);
-            }
+      if (cam.type === "mjpeg") {
+        const canvas = document.createElement("canvas");
+        body.appendChild(canvas);
+        const placeholder = body.querySelector(".placeholder");
+        playMJPEG(cam.src, canvas, placeholder).catch(() => {
+          if (placeholder) placeholder.textContent = "影像載入失敗";
+        });
+      }
 
-            if (cam.type === "hls") {
-              const video = document.createElement("video");
+      if (cam.type === "hls") {
+        const video = document.createElement("video");
         video.muted = true;
         video.autoplay = true;
         video.playsInline = true;
