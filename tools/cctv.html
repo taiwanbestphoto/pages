@@ -136,10 +136,10 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
   <script>
     // ============================================================
-    //  CAMERAS — 新增攝影機只需複製一筆，修改對應欄位即可
+    //  CAMERAS — 新增攝影機只需複製一筆,修改對應欄位即可
     //  type: "image"  靜態快照(每 8 秒刷新)
-    //  type: "mjpeg"  MJPEG multipart stream(用 canvas 持續解 frame,免 8 秒黑屏)
-    //  type: "hls"    HLS 即時串流(用 hls.js 或 Safari 原生)
+    //  type: "mjpeg"  MJPEG multipart stream(<img> 直連 + 週期重連)
+    //  type: "hls"    HLS 即時串流(hls.js 或 Safari 原生)
     // ============================================================
     // 中山高(國道1號)湖口↔楊梅段,71K–83K,南北向各 3 支
     const CAMERAS = [
@@ -208,81 +208,75 @@
     const grid = document.getElementById("grid");
     document.getElementById("count").textContent = CAMERAS.length;
 
-    // 共用:在 buffer 中找一段 bytes
-    function indexOfBytes(haystack, needle, from) {
-      from = from || 0;
-      outer: for (let i = from; i <= haystack.length - needle.length; i++) {
-        for (let j = 0; j < needle.length; j++) {
-          if (haystack[i + j] !== needle[j]) continue outer;
+    // MJPEG 播放策略:
+    //   1. <img> 直連 MJPEG(瀏覽器原生支援,簡單可靠)
+    //   2. 每收到一次 frame(onload),排 20 秒後自動重新指 src,
+    //      預防中間 proxy 或 server timeout 凍結串流
+    //   3. 失敗時指數退避(0.5/1/2/4/8s),5 次後放棄
+    //   4. 黑屏期間 placeholder 顯示「重新連線中…」
+    function attachMJPEG(url, body, placeholder) {
+      const img = document.createElement("img");
+      img.alt = "mjpeg";
+      body.appendChild(img);
+
+      let stopped = false;
+      let attempts = 0;
+      const MAX_ATTEMPTS = 5;
+      let refreshTimer = null;
+      let reconnectTimer = null;
+
+      function showReconnecting(msg) {
+        if (placeholder) {
+          placeholder.textContent = msg;
+          placeholder.style.display = "";
         }
-        return i;
+        img.style.opacity = "0";
       }
-      return -1;
-    }
+      function showLive() {
+        if (placeholder) placeholder.style.display = "none";
+        img.style.opacity = "1";
+      }
+      function srcWithCacheBuster() {
+        return url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
+      }
 
-    // MJPEG 持續解到 canvas
-    async function playMJPEG(url, canvas, placeholder) {
-      const ctx = canvas.getContext("2d");
-      const r = await fetch(url, { cache: "no-store" });
-      if (!r.ok || !r.body) throw new Error("HTTP " + r.status);
-      const ctype = r.headers.get("Content-Type") || "";
-      const bm = ctype.match(/boundary=(?:-?-)?([A-Za-z0-9_.-]+)/);
-      const boundary = bm ? bm[1] : "myboundary";
-      const BOUNDARY = new TextEncoder().encode("--" + boundary);
-      const HDR_END = new Uint8Array([0x0d, 0x0a, 0x0d, 0x0a]);
-
-      const reader = r.body.getReader();
-      let buf = new Uint8Array();
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        const next = new Uint8Array(buf.length + value.length);
-        next.set(buf, 0); next.set(value, buf.length);
-        buf = next;
-
-        // 一輪內可能有多張 frame,持續解出來
-        while (true) {
-          const bIdx = indexOfBytes(buf, BOUNDARY);
-          if (bIdx < 0) {
-            // 沒看到 boundary,丟掉過舊 bytes 留尾巴
-            if (buf.length > BOUNDARY.length * 4) {
-              buf = buf.slice(buf.length - BOUNDARY.length * 2);
-            }
-            break;
-          }
-          const hdrStart = bIdx + BOUNDARY.length;
-          const hdrEnd = indexOfBytes(buf, HDR_END, hdrStart);
-          if (hdrEnd < 0) {
-            // header 還沒收完
-            buf = buf.slice(bIdx);
-            break;
-          }
-          const jpegStart = hdrEnd + HDR_END.length;
-          const nextB = indexOfBytes(buf, BOUNDARY, jpegStart);
-          if (nextB < 0) {
-            // 下一個 boundary 還沒到
-            buf = buf.slice(bIdx);
-            break;
-          }
-          const jpegEnd = nextB - 2; // 去掉 \r\n
-          if (jpegEnd > jpegStart) {
-            const jpegBytes = buf.slice(jpegStart, jpegEnd);
-            try {
-              const bmp = await createImageBitmap(new Blob([jpegBytes], { type: "image/jpeg" }));
-              if (canvas.width !== bmp.width || canvas.height !== bmp.height) {
-                canvas.width = bmp.width;
-                canvas.height = bmp.height;
-              }
-              ctx.drawImage(bmp, 0, 0);
-              bmp.close?.();
-              if (placeholder) { placeholder.remove(); placeholder = null; }
-            } catch (e) {
-              // 跳過這一張
-            }
-          }
-          buf = buf.slice(nextB);
+      function reconnect() {
+        if (stopped) return;
+        attempts++;
+        if (attempts > MAX_ATTEMPTS) {
+          if (placeholder) placeholder.textContent = "無法連線";
+          return;
         }
+        showReconnecting("重新連線中…");
+        img.src = srcWithCacheBuster();
+        const delay = Math.min(8000, 500 * Math.pow(2, attempts - 1));
+        reconnectTimer = setTimeout(reconnect, delay);
       }
+
+      img.onload = () => {
+        attempts = 0;
+        showLive();
+        // 收到 frame 後 20 秒主動重連一次,避免被凍結
+        if (refreshTimer) clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => {
+          if (stopped) return;
+          showReconnecting("重新整理…");
+          img.src = srcWithCacheBuster();
+        }, 20000);
+      };
+      img.onerror = () => {
+        if (stopped) return;
+        reconnect();
+      };
+
+      img.src = url;
+
+      return () => {
+        stopped = true;
+        if (refreshTimer) clearTimeout(refreshTimer);
+        if (reconnectTimer) clearTimeout(reconnectTimer);
+        img.src = "";
+      };
     }
 
     CAMERAS.forEach(cam => {
@@ -320,12 +314,8 @@
       }
 
       if (cam.type === "mjpeg") {
-        const canvas = document.createElement("canvas");
-        body.appendChild(canvas);
         const placeholder = body.querySelector(".placeholder");
-        playMJPEG(cam.src, canvas, placeholder).catch(() => {
-          if (placeholder) placeholder.textContent = "影像載入失敗";
-        });
+        attachMJPEG(cam.src, body, placeholder);
       }
 
       if (cam.type === "hls") {
