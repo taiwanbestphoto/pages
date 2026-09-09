@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>法拍試算：楊梅區裕成南路 358 號 2 樓（114 司執 121686）</title>
+<meta name="description" content="桃園地院 114 年度司執字第 121686 號，第1次拍賣，拍賣日期 2026/09/29。底價574 萬，3宗合併，含損益試算、進場策略、決策樹。">
+<style>
+  :root {
+    --bg: #f8fafc;
+    --fg: #0f172a;
+    --fg-muted: #475569;
+    --fg-faint: #94a3b8;
+    --card: #ffffff;
+    --bd: #e2e8f0;
+    --bd-strong: #cbd5e1;
+    --accent: #2563eb;
+    --accent-hov: #1d4ed8;
+    --ok: #059669;
+    --ok-bg: #d1fae5;
+    --warn: #d97706;
+    --warn-bg: #fef3c7;
+    --danger: #dc2626;
+    --danger-bg: #fee2e2;
+    --info: #0284c7;
+    --info-bg: #e0f2fe;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --fg: #f1f5f9;
+      --fg-muted: #94a3b8;
+      --fg-faint: #64748b;
+      --card: #1e293b;
+      --bd: #334155;
+      --bd-strong: #475569;
+      --accent: #60a5fa;
+      --accent-hov: #93c5fd;
+      --ok: #34d399;
+      --ok-bg: #064e3b;
+      --warn: #fbbf24;
+      --warn-bg: #78350f;
+      --danger: #f87171;
+      --danger-bg: #7f1d1d;
+      --info: #38bdf8;
+      --info-bg: #0c4a6e;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.65;
+    min-height: 100vh;
+    padding: 24px 20px 60px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .back {
+    display: inline-block;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 16px;
+    padding: 6px 12px;
+    border: 1px solid var(--bd);
+    border-radius: 6px;
+  }
+  .back:hover { background: var(--card); }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--fg);
+  }
+  .subtitle {
+    color: var(--fg-muted);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+  .alert {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid;
+  }
+  .alert-danger { background: var(--danger-bg); border-color: var(--danger); }
+  .alert-warn { background: var(--warn-bg); border-color: var(--warn); }
+  .alert-info { background: var(--info-bg); border-color: var(--info); }
+  .alert-ok { background: var(--ok-bg); border-color: var(--ok); }
+  .alert-title { font-weight: 700; margin-bottom: 4px; }
+  .alert-text { font-size: 14px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05);
+  }
+  .card h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--fg);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--bd);
+  }
+  th {
+    background: var(--bg);
+    font-weight: 600;
+    color: var(--fg-muted);
+    font-size: 13px;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.num { font-family: "SF Mono", Menlo, monospace; text-align: right; }
+  td.highlight { background: var(--info-bg); font-weight: 600; }
+  tr.total td {
+    font-weight: 700;
+    background: var(--bg);
+    border-top: 2px solid var(--bd-strong);
+  }
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .pill-red { background: var(--danger-bg); color: var(--danger); }
+  .pill-yellow { background: var(--warn-bg); color: var(--warn); }
+  .pill-green { background: var(--ok-bg); color: var(--ok); }
+  .pill-blue { background: var(--info-bg); color: var(--info); }
+  .pill-gray { background: var(--bg); color: var(--fg-muted); }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 12px 0;
+  }
+  .kpi {
+    background: var(--bg);
+    border: 1px solid var(--bd);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .kpi-label { font-size: 12px; color: var(--fg-muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--fg); }
+  .kpi-sub { font-size: 11px; color: var(--fg-faint); margin-top: 4px; }
+  .strategy {
+    border-left: 4px solid;
+    padding: 16px 18px;
+    margin: 12px 0;
+    background: var(--bg);
+    border-radius: 0 8px 8px 0;
+  }
+  .strategy-a { border-color: var(--ok); }
+  .strategy-b { border-color: var(--info); }
+  .strategy-c { border-color: var(--warn); }
+  .strategy h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .strategy-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--fg-muted);
+    margin: 8px 0;
+  }
+  .strategy ul { margin: 8px 0 0 20px; font-size: 14px; }
+  .strategy ul li { margin-bottom: 4px; }
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+    margin: 16px 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--bd);
+  }
+  .timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 2px solid var(--card);
+  }
+  .timeline-item.urgent::before { background: var(--danger); }
+  .timeline-date {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+  .timeline-item.urgent .timeline-date { color: var(--danger); }
+  .timeline-text { font-size: 14px; color: var(--fg-muted); }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    border-bottom: 2px solid var(--bd);
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+  .tab {
+    background: none;
+    border: none;
+    padding: 10px 18px;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--fg-muted);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .tab:hover { color: var(--fg); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .checklist {
+    list-style: none;
+    margin: 12px 0;
+  }
+  .checklist li {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--bd);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .checklist input[type="checkbox"] {
+    margin-top: 4px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+  .checklist label {
+    cursor: pointer;
+    flex: 1;
+    font-size: 14px;
+  }
+  .checklist input:checked + label {
+    text-decoration: line-through;
+    color: var(--fg-faint);
+  }
+  .source {
+    font-size: 12px;
+    color: var(--fg-faint);
+    margin-top: 4px;
+  }
+  .footer-note {
+    text-align: center;
+    color: var(--fg-faint);
+    font-size: 13px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--bd);
+  }
+  .roi-good { color: var(--ok); font-weight: 700; }
+  .roi-bad { color: var(--danger); font-weight: 700; }
+  .roi-neutral { color: var(--fg-muted); font-weight: 700; }
+  code {
+    font-family: "SF Mono", Menlo, monospace;
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 13px;
+  }
+  .meta-grid div {
+    background: var(--bg);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--bd);
+  }
+  .meta-grid strong { display: block; color: var(--fg-muted); font-size: 11px; font-weight: 500; margin-bottom: 2px; }
+  @media (max-width: 600px) {
+    body { padding: 16px 12px 40px; }
+    h1 { font-size: 22px; }
+    .card { padding: 16px 14px; }
+    table { font-size: 13px; }
+    th, td { padding: 8px 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="./">← 回首頁</a>
+  <h1>🏛️ 法拍試算：楊梅區裕成南路 358 號 2 樓</h1>
+  <div class="subtitle">
+    桃園地院 114 年度司執字第 121686 號（鳳股）· 第 1 拍 ·
+    <span class="pill pill-red">剩 20 天</span>
+  </div>
+
+  <div class="alert alert-danger">
+    <div class="alert-title">🔴 一拍底價 574 萬 > 真實市價 240-468 萬</div>
+    <div class="alert-text">
+      強烈建議<b>絕對不要一拍進場</b>。等待 2 拍或 3 拍，底價會降至 367-459 萬，才是合理進場點。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 案件基本資料</h2>
+    <div class="meta-grid">
+      <div><strong>法院</strong>桃園地院 鳳股</div>
+      <div><strong>案號</strong>114 司執 121686</div>
+      <div><strong>案由</strong>清償借款</div>
+      <div><strong>債權人</strong>聯邦銀行</div>
+      <div><strong>債務人</strong>張玉昇</div>
+      <div><strong>拍次</strong><span class="pill pill-blue">第 1 次</span></div>
+      <div><strong>拍賣日</strong><span class="pill pill-red">2026/9/29</span></div>
+      <div><strong>開標時間</strong>上午 11:00</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💰 拍賣標的（3 宗合併拍賣）</h2>
+    <div class="alert alert-warn" style="margin-top:0;">
+      <div class="alert-title">⚠️ 合併拍賣 = 不能單獨買 358 號</div>
+      <div class="alert-text">必須同時買土地 + 382 號 1 樓 + 358 號 2 樓，分別出價，<b>總價最高者得標</b>。</div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>標的</th><th>地址</th><th>面積 / 持分</th><th class="num">底價</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>土地</td>
+          <td>二重溪段 193-59 地號</td>
+          <td>5320 ㎡ × 10000 分之 23</td>
+          <td class="num">NT$ 230 萬</td>
+        </tr>
+        <tr>
+          <td>建物 1</td>
+          <td>楊梅區裕成南路 <b>382 號</b>（1 樓）</td>
+          <td>24.28 ㎡ × 10000 分之 33</td>
+          <td class="num">NT$ 49 萬</td>
+        </tr>
+        <tr class="highlight">
+          <td>建物 2</td>
+          <td>楊梅區裕成南路 <b>358 號 2 樓</b></td>
+          <td>61.59 ㎡ + 陽台 9.89 ㎡</td>
+          <td class="num">NT$ 295 萬</td>
+        </tr>
+        <tr class="total">
+          <td colspan="3">合計底價</td>
+          <td class="num">NT$ 574 萬</td>
+        </tr>
+        <tr>
+          <td colspan="3">保證金（20%）</td>
+          <td class="num"><b>NT$ 114.8 萬</b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="strategy">🎯 進場策略</button>
+    <button class="tab" data-tab="market">📊 市場行情</button>
+    <button class="tab" data-tab="cost">💸 損益試算</button>
+    <button class="tab" data-tab="risk">⚠️ 風險清單</button>
+    <button class="tab" data-tab="timeline">📅 20天倒數</button>
+    <button class="tab" data-tab="checklist">☑️ 投標Checklist</button>
+  </div>
+
+  <!-- TAB 1: 進場策略 -->
+  <div class="tab-panel active" id="strategy">
+    <div class="card">
+      <h2>🎯 3 種進場方案</h2>
+
+      <div class="strategy strategy-a">
+        <h3>✅ 方案 A：等三拍進場（最划算）</h3>
+        <div class="strategy-meta">
+          <span class="pill pill-green">推薦</span>
+          <span>預估成本 410 萬</span>
+          <span>合理空間 +50~60 萬</span>
+        </div>
+        <ul>
+          <li>9/29 一拍大概率<b>流標</b>（底價過高）</li>
+          <li>二拍底價 459 萬，三拍 367 萬</li>
+          <li>假設三拍得標：總成本約 <b>410 萬</b></li>
+          <li>自住價值（中間市價）<b>360-470 萬</b>，有微利</li>
+        </ul>
+      </div>
+
+      <div class="strategy strategy-b">
+        <h3>💬 方案 B：聯邦銀行協商還款（最便宜）</h3>
+        <div class="strategy-meta">
+          <span class="pill pill-blue">推薦先試</span>
+          <span>成本 300 萬+</span>
+          <span>需確認無其他債權人</span>
+        </div>
+        <ul>
+          <li>直接清償 300 萬給聯邦銀行</li>
+          <li>銀行撤回拍賣，房子保住</li>
+          <li><b>風險</b>：可能還有其他債權人，要先<b>調閱所有抵押權人</b></li>
+          <li>客服電話：<code>(02) 6618-0888</code> 分機 #債務協商</li>
+        </ul>
+      </div>
+
+      <div class="strategy strategy-c">
+        <h3>🤝 方案 C：找代標公司陪標</h3>
+        <div class="strategy-meta">
+          <span class="pill pill-yellow">有經驗可選</span>
+          <span>服務費 3-5%</span>
+          <span>成本增加 17-29 萬</span>
+        </div>
+        <ul>
+          <li>桃園當地代標公司行情：拍定價 3-5%</li>
+          <li>574 萬 × 4% = 約 23 萬服務費</li>
+          <li>適合沒投標經驗、怕踩坑的人</li>
+          <li><b>注意</b>：代標公司會勸你「提早進場賺價差」，務必堅持三拍以後</li>
+        </ul>
+      </div>
+
+      <div class="alert alert-danger">
+        <div class="alert-title">🚫 一拍直接進場 = 虧損保證</div>
+        <div class="alert-text">
+          一拍得標 574 萬 + 契稅 34 萬 + 規費 10 萬 + 隱藏成本 20 萬 = <b>638 萬總成本</b>。
+          樂觀市價 26.8 萬/坪 × 18 坪 = 482 萬 → <b class="roi-bad">立刻虧損 156 萬</b>。
+          除非你是純粹要「保住家人回得去」，否則千萬不要一拍進場。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: 市場行情 -->
+  <div class="tab-panel" id="market">
+    <div class="card">
+      <h2>📊 楊梅區裕成南路 實價登錄行情</h2>
+      <table>
+        <thead>
+          <tr><th>來源</th><th>位置 / 物件</th><th class="num">單價</th><th class="num">總價</th><th>備註</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>永慶房屋</td>
+            <td>琉璃莊園（裕成南路）</td>
+            <td class="num">26.8 萬/坪</td>
+            <td class="num">-</td>
+            <td>社區近 2 年平均</td>
+          </tr>
+          <tr>
+            <td>台慶不動產</td>
+            <td>裕成南路 365 號 5 樓</td>
+            <td class="num">13.4 萬/坪</td>
+            <td class="num">568 萬</td>
+            <td>114/09 成交，27.27 坪</td>
+          </tr>
+          <tr>
+            <td>5168 比價</td>
+            <td>楊梅區裕成路</td>
+            <td class="num">17.8-31.8 萬/坪</td>
+            <td class="num">-</td>
+            <td>依坪數/屋齡</td>
+          </tr>
+          <tr>
+            <td>樂屋網</td>
+            <td>裕成路（中古屋）</td>
+            <td class="num">~26 萬/坪</td>
+            <td class="num">-</td>
+            <td>二年內成交均價</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:20px; font-size:16px;">358 號 2 樓（18 坪）市價估算</h3>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">保守</div>
+          <div class="kpi-value">NT$ 241 萬</div>
+          <div class="kpi-sub">13.4 萬/坪</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">中間</div>
+          <div class="kpi-value">NT$ 360 萬</div>
+          <div class="kpi-sub">20 萬/坪</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">樂觀</div>
+          <div class="kpi-value">NT$ 468 萬</div>
+          <div class="kpi-sub">26 萬/坪</div>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <div class="alert-title">💡 一拍底價 574 萬 vs 樂觀市價 468 萬</div>
+        <div class="alert-text">拍賣溢價 23%，不合理的價差。等待降價才是常理。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: 損益試算 -->
+  <div class="tab-panel" id="cost">
+    <div class="card">
+      <h2>💸 三種拍次損益比較</h2>
+      <table>
+        <thead>
+          <tr><th>項目</th><th class="num">一拍</th><th class="num">二拍（×0.8）</th><th class="num">三拍（×0.64）</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>底價</td>
+            <td class="num">574 萬</td>
+            <td class="num">459 萬</td>
+            <td class="num">367 萬</td>
+          </tr>
+          <tr>
+            <td>契稅（6%）</td>
+            <td class="num">34.4 萬</td>
+            <td class="num">27.5 萬</td>
+            <td class="num">22.0 萬</td>
+          </tr>
+          <tr>
+            <td>代書+規費</td>
+            <td class="num">8 萬</td>
+            <td class="num">8 萬</td>
+            <td class="num">8 萬</td>
+          </tr>
+          <tr>
+            <td>隱藏成本</td>
+            <td class="num">20 萬</td>
+            <td class="num">15 萬</td>
+            <td class="num">10 萬</td>
+          </tr>
+          <tr class="total">
+            <td>總成本</td>
+            <td class="num">637 萬</td>
+            <td class="num">510 萬</td>
+            <td class="num">407 萬</td>
+          </tr>
+          <tr>
+            <td>市價中間值</td>
+            <td class="num">360 萬</td>
+            <td class="num">360 萬</td>
+            <td class="num">360 萬</td>
+          </tr>
+          <tr class="total">
+            <td>投資損益</td>
+            <td class="num roi-bad">-277 萬</td>
+            <td class="num roi-bad">-150 萬</td>
+            <td class="num roi-good">+47 萬</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-ok" style="margin-top:16px;">
+        <div class="alert-title">✅ 三拍進場是唯一損益為正的時機</div>
+        <div class="alert-text">
+          <ul style="margin-left:20px; margin-top:6px;">
+            <li>保守市價（241 萬）：三拍仍虧 166 萬</li>
+            <li>中間市價（360 萬）：三拍小賺 47 萬</li>
+            <li>樂觀市價（468 萬）：三拍大賺 155 萬</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>💸 自住情境的隱藏成本</h2>
+      <ul style="margin-left:20px;">
+        <li><b>點交期租金</b>：公告顯示「債務人及其家屬自行使用」，點交需 1-6 個月，期間要付租</li>
+        <li><b>車位可能不存在</b>：公告 B1-09 車位，建物登記沒記載，<b>拍定後不點交</b>，且不可撤銷</li>
+        <li><b>屋內動產</b>：債務人家屬物品非拍賣標的，要走遺留物處理程序</li>
+        <li><b>水電瓦斯管理費欠費</b>：可能積欠數萬到數十萬，拍定人自行負責</li>
+        <li><b>得標後 7 天繳清</b>：法拍屋不能貸款，需備齊現金（574 萬）</li>
+        <li><b>保證金 114.8 萬</b>：投標當場就要帶（現金或支票）</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB 4: 風險清單 -->
+  <div class="tab-panel" id="risk">
+    <div class="card">
+      <h2>⚠️ 公告原文風險項目</h2>
+      <table>
+        <thead>
+          <tr><th>風險等級</th><th>事項</th><th>影響</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-red">高</span></td>
+            <td>現由債務人及其家屬自行使用</td>
+            <td>得標後需點交，1-6 個月無法入住</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-red">高</span></td>
+            <td>3 宗合併拍賣，分別出價，總價最高者得標</td>
+            <td>不能單獨買 358 號，要嘛全包</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-red">高</span></td>
+            <td>編號 B1-09 車位，但建物登記沒記載</td>
+            <td>車位可能不存在，拍定後不點交</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-red">高</span></td>
+            <td>得標後不可因車位爭執或撤銷拍賣</td>
+            <td>法院已免責，買受人吞下去</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-yellow">中</span></td>
+            <td>土地使用分區為「山坡保育區丙種建築用地」</td>
+            <td>開發限制較多</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-yellow">中</span></td>
+            <td>無物之瑕疵擔保</td>
+            <td>拍定後不能因屋況瑕疵退場</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-yellow">中</span></td>
+            <td>原所有權人/使用人欠費由拍定人自行處理</td>
+            <td>水電、瓦斯、管理費、工程受益費</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-gray">低</span></td>
+            <td>拍賣不動產含增建</td>
+            <td>不能以面積增減請求增減價金</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-warn">
+        <div class="alert-title">🚧 必須親自去看的項目</div>
+        <div class="alert-text">
+          <ol style="margin-left:20px;">
+            <li>現場屋況（海砂屋/輻射屋/漏水/火災/非自然死亡）</li>
+            <li>管委會欠費金額</li>
+            <li>屋內物品是否有人占用</li>
+            <li>周邊實價行情（里長/鄰居訪查）</li>
+            <li>里長詢問是否有凶宅、糾紛</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: 20天倒數 -->
+  <div class="tab-panel" id="timeline">
+    <div class="card">
+      <h2>📅 20 天倒數時間表</h2>
+      <div class="alert alert-info">
+        <div class="alert-title">💡 最重要的建議：9/29 當天去觀察</div>
+        <div class="alert-text">
+          不需要投標也可以去法院看開標，記下流標金額、競爭人數，這是判斷後續拍次的關鍵資料。
+        </div>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item urgent">
+          <div class="timeline-date">📍 今天（9/9）— 立刻</div>
+          <div class="timeline-text">
+            ✅ 撥聯邦銀行客服 <code>(02) 6618-0888</code> 確認：
+            ① 是否有其他債權人
+            ② 債務人是否有意清償撤回
+            ③ 還款條件
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-date">📍 9/10 - 9/14（第 1 週）</div>
+          <div class="timeline-text">
+            • 實地走訪楊梅區裕成南路 358 號、382 號看屋況<br>
+            • 跟里長/鄰居訪查<br>
+            • 申請土地 + 建物登記謄本（地政事務所）
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-date">📍 9/15 - 9/21（第 2 週）</div>
+          <div class="timeline-text">
+            • 查所有抵押權人（可能不只聯邦）<br>
+            • 估算管委會欠費<br>
+            • 與代書/律師諮詢點交手續
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-date">📍 9/22 - 9/28（第 3 週）</div>
+          <div class="timeline-text">
+            • 決定最終策略（協商 vs 等三拍）<br>
+            • 準備保證金 114.8 萬（現金或支票）<br>
+            • 準備身分證、印章、委任狀（如委託他人）
+          </div>
+        </div>
+        <div class="timeline-item urgent">
+          <div class="timeline-date">🚨 9/29（拍賣當天）</div>
+          <div class="timeline-text">
+            <b>10:30 投標 · 11:00 開標</b><br>
+            桃園地院民事執行處投標室<br>
+            地址：桃園市桃園區正光路 888 號<br>
+            <b>預期：一拍流標</b>（底價過高，幾乎確定）
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-date">📍 流標後（10 月中）</div>
+          <div class="timeline-text">
+            • 查下一次拍賣時間（二拍）<br>
+            • 重新評估進場點（底價 459 萬）<br>
+            • 持續等三拍（367 萬）才是甜蜜點
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 6: Checklist -->
+  <div class="tab-panel" id="checklist">
+    <div class="card">
+      <h2>☑️ 投標前 Checklist</h2>
+      <p style="font-size:13px; color:var(--fg-muted); margin-bottom:12px;">
+        勾選完成的項目。資料存 localStorage，關閉瀏覽器也不會遺失。
+      </p>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c1"><label for="c1">撥聯邦銀行客服，確認債權人數與總債權金額</label></li>
+        <li><input type="checkbox" id="c2"><label for="c2">申請土地 + 建物登記謄本（地政事務所）</label></li>
+        <li><input type="checkbox" id="c3"><label for="c3">實地走訪楊梅區裕成南路 358 號、382 號</label></li>
+        <li><input type="checkbox" id="c4"><label for="c4">訪查里長、鄰居（屋況、凶宅、糾紛）</label></li>
+        <li><input type="checkbox" id="c5"><label for="c5">查詢周邊實價登錄行情</label></li>
+        <li><input type="checkbox" id="c6"><label for="c6">估算管委會、水電瓦斯欠費</label></li>
+        <li><input type="checkbox" id="c7"><label for="c7">諮詢代書/律師，確認點交手續</label></li>
+        <li><input type="checkbox" id="c8"><label for="c8">與家人討論最終策略（協商 / 三拍 / 代標）</label></li>
+        <li><input type="checkbox" id="c9"><label for="c9">準備保證金 114.8 萬（現金或支票）</label></li>
+        <li><input type="checkbox" id="c10"><label for="c10">準備身分證、印章、委任狀</label></li>
+        <li><input type="checkbox" id="c11"><label for="c11">若委託他人代標，準備特別代理委任狀</label></li>
+        <li><input type="checkbox" id="c12"><label for="c12">9/29 上午 10:30 抵達桃園地院投標室</label></li>
+        <li><input type="checkbox" id="c13"><label for="c13">無論是否投標，都去觀察開標情況</label></li>
+        <li><input type="checkbox" id="c14"><label for="c14">記下流標金額，計算下次拍賣底價</label></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    資料來源：臺灣桃園地方法院 114 年度司執字第 121686 號拍賣公告（115/8/24）<br>
+    建檔日期：2026/9/9 · 適用期間：至 2026/9/29 開標日止<br>
+    製作工具：Hermes Agent · 本頁僅供內部參考，不構成法律建議
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var target = btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById(target).classList.add('active');
+    });
+  });
+
+  // Checklist with localStorage
+  var STORAGE_KEY = 'fapao-114-121686-checklist-v1';
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+  document.querySelectorAll('.checklist input[type="checkbox"]').forEach(function(cb){
+    var id = cb.id;
+    if (saved[id]) cb.checked = true;
+    cb.addEventListener('change', function(){
+      saved[id] = cb.checked;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    });
+  });
+</script>
+</body>
+</html>
