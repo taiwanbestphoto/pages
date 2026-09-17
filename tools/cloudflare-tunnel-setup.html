@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cloudflare Tunnel 設定筆記 — 把本機服務對外</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --soft: #57534e;
+      --card: #1c1917; --bd: #292524; --bd2: #44403c;
+      --accent: #60a5fa; --accent2: #93c5fd;
+      --ok: #4ade80; --warn: #fbbf24; --err: #f87171;
+      --tag-bg: #292524; --tag-fg: #d6d3d1;
+      --code-bg: #0a0908;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI",
+            "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      max-width: 880px; margin: 0 auto;
+      padding: 32px 20px 8px;
+    }
+    h1 {
+      font-size: 24px; margin: 0 0 8px; font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .sub {
+      color: var(--muted); font-size: 13px; margin: 0 0 8px;
+    }
+    .meta {
+      color: var(--soft); font-size: 12px; margin: 0;
+    }
+    .meta a { color: var(--accent); text-decoration: none; }
+    .meta a:hover { text-decoration: underline; }
+
+    .container { max-width: 880px; margin: 0 auto; padding: 0 20px 60px; }
+
+    h2 {
+      font-size: 18px; margin: 36px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--bd);
+      letter-spacing: -0.01em;
+    }
+    h3 {
+      font-size: 15px; margin: 24px 0 8px;
+      color: var(--accent2);
+      font-weight: 700;
+    }
+    p { margin: 0 0 12px; }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      background: var(--tag-bg); color: var(--tag-fg);
+      border-radius: 4px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .tag.ok { background: #052e16; color: var(--ok); }
+    .tag.warn { background: #422006; color: var(--warn); }
+    .tag.err { background: #450a0a; color: var(--err); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--bd);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 12px 0;
+    }
+
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+      margin: 12px 0;
+    }
+    .steps > li {
+      counter-increment: step;
+      position: relative;
+      padding: 10px 0 10px 38px;
+      border-left: 2px solid var(--bd);
+      margin-left: 14px;
+    }
+    .steps > li::before {
+      content: counter(step);
+      position: absolute;
+      left: -14px;
+      top: 10px;
+      width: 26px; height: 26px;
+      background: var(--bg);
+      border: 2px solid var(--bd2);
+      border-radius: 50%;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .steps > li:last-child { border-left-color: transparent; }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 10px 0;
+      overflow-x: auto;
+      font: 13px/1.5 "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+      color: var(--fg);
+    }
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--bd);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font: 12px/1.4 "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+    }
+    pre code { border: 0; padding: 0; background: transparent; }
+
+    .key {
+      display: inline-block;
+      padding: 1px 6px;
+      background: var(--bd);
+      border: 1px solid var(--bd2);
+      border-radius: 4px;
+      font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+      font-size: 11px;
+      color: var(--fg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--bd);
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .warn-box, .ok-box, .err-box {
+      border-left: 3px solid;
+      padding: 12px 14px;
+      margin: 14px 0;
+      border-radius: 0 6px 6px 0;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .warn-box { border-color: var(--warn); }
+    .warn-box strong { color: var(--warn); }
+    .ok-box { border-color: var(--ok); }
+    .ok-box strong { color: var(--ok); }
+    .err-box { border-color: var(--err); }
+    .err-box strong { color: var(--err); }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    ul { padding-left: 22px; margin: 8px 0; }
+    li { margin: 4px 0; }
+
+    .footer {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+      color: var(--soft);
+      font-size: 12px;
+      text-align: center;
+      border-top: 1px solid var(--bd);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Cloudflare Tunnel 設定筆記</h1>
+  <p class="sub">把本機服務(localhost:8080)透過 Cloudflare 對外,免開 port、免公開 IP</p>
+  <p class="meta">最後更新 2026-09-17 · 真實踩坑紀錄 · 約 30 分鐘從零到上線</p>
+</header>
+
+<div class="container">
+
+<p>這篇是我把 <code>https://calc.sunnyq.idv.tw</code> 跑起來的全過程。從「.idv.tw 到底能不能用 Cloudflare」、「NS 怎麼改」、「Hinet DNS 後台藏在哪」、「tunnel config 怎麼寫」、「DNS record 的 Target 要填什麼」一路到最後通車。每一個我都親自撞牆過。</p>
+
+<h2>成果</h2>
+<div class="ok-box">
+  <strong>✅ 最終狀態</strong>
+  <ul>
+    <li>本機 Flask app 跑在 <code>localhost:8080</code></li>
+    <li>對外網址:<a href="https://calc.sunnyq.idv.tw" target="_blank">https://calc.sunnyq.idv.tw</a></li>
+    <li>Cloudflare 自動 HTTPS + CDN + DNS</li>
+    <li>免費,無公開 IP,家裡防火牆不用打洞</li>
+  </ul>
+</div>
+
+<h2>TL;DR — 30 分鐘流程</h2>
+<ol class="steps">
+  <li>確認 domain 在 Cloudflare 支援的 TLD 白名單(我用的是 <code>.idv.tw</code>,2024 後支援)</li>
+  <li>Cloudflare 後台 <strong>Add a site</strong> → 填 domain → 拿兩組 NS(像 <code>xxx.ns.cloudflare.com</code>)</li>
+  <li>到原註冊商(Hinet)後台把 NS 改到 Cloudflare 那兩組</li>
+  <li>等 1-24 小時讓 Cloudflare 驗證 NS(propagation)</li>
+  <li>裝 <code>cloudflared</code>,建 tunnel,寫 config,把 DNS 接到 tunnel</li>
+  <li>本機服務跑起來 + tunnel 跑起來 → 對外通了</li>
+</ol>
+
+<h2>Step 0 — Domain 跟 TLD 的選擇</h2>
+
+<p>Cloudflare 不是所有 TLD 都收。常見問題是「便宜的 TLD 都不收」。</p>
+
+<table>
+  <tr><th>TLD</th><th>Cloudflare</th><th>備註</th></tr>
+  <tr><td><code>.com / .net / .org</code></td><td>✅</td><td>穩,首年 $9.15 USD</td></tr>
+  <tr><td><code>.co.uk / .uk</code></td><td>✅</td><td>~$6 USD/年,英國/歐洲</td></tr>
+  <tr><td><code>.dev / .app / .io</code></td><td>✅</td><td>偏貴,適合科技</td></tr>
+  <tr><td><code>.tw / .com.tw / .org.tw</code></td><td>✅</td><td>NT$800/年,個人/公司皆可</td></tr>
+  <tr><td><code>.idv.tw</code></td><td>✅</td><td>NT$450/年(自然人限定),2024 後支援</td></tr>
+  <tr><td><code>.xyz / .tech / .studio</code></td><td>✅</td><td>首年超便宜,續費會漲</td></tr>
+</table>
+
+<div class="warn-box">
+  <strong>⚠️ 一個重要發現</strong>:我之前看網路上資料,以為 <code>.idv.tw</code> 不能接 Cloudflare(因為是自然人 TLD + TWNIC 政策)。但實測 2026 年已經可以了 — TWNIC 開放了自訂 NS,Cloudflare 也收。所以<strong>別輕信舊文件</strong>,先試再說。
+</div>
+
+<h2>Step 1 — Cloudflare Add a site</h2>
+
+<p>到 <a href="https://dash.cloudflare.com/" target="_blank">dash.cloudflare.com</a>,點 <strong>Add a site</strong>,輸入你的 domain(我用 <code>sunnyq.idv.tw</code>)。</p>
+
+<div class="err-box">
+  <strong>❌ 撞牆點 1:打錯網域名稱</strong>
+  <p>我原本打成 <code>sunnq.idv.tw</code>(6 字母,沒註冊),Cloudflare 一開始會讓你加,然後一直 pending — 因為那個網域根本不存在。請確認你打的是真正註冊的網域。</p>
+  <p>驗證方式:<code>nslookup sunnyq.idv.tw 8.8.8.8</code> 看有沒有回應。</p>
+</div>
+
+<p>成功會進入「選方案」頁面(免費方案就夠),然後 Cloudflare 給你兩組 NS:</p>
+
+<pre><code>amber.ns.cloudflare.com
+osmar.ns.cloudflare.com</code></pre>
+
+<p>記下這兩組,下一步要去你的註冊商那邊改。</p>
+
+<h2>Step 2 — 改 NS 到 Cloudflare</h2>
+
+<p>到原註冊商後台(我用 Hinet),找到「網域名稱管理」→ 編輯 NS。</p>
+
+<h3>Hinet 後台路徑</h3>
+<p>不容易找,藏在幾層後面:</p>
+<ol>
+  <li><a href="https://member.hinet.net/" target="_blank">member.hinet.net</a> → 登入</li>
+  <li>我的服務 → 網域名稱 → 找到你要編輯的網域</li>
+  <li>進到該網域的「狀態」頁</li>
+  <li>找「<strong>DNS 主機</strong>」或「<strong>NS 紀錄</strong>」的編輯入口</li>
+</ol>
+
+<div class="warn-box">
+  <strong>⚠️ Hinet 介面坑</strong>:Hinet 後台的 NS 編輯欄位看起來像要填 IP,但 <strong>NS 是主機名,不是 IP</strong>。要填的是 <code>amber.ns.cloudflare.com</code> 這種,不是 IP 位址。如果你看到欄位寫「IP Address」,可能你看錯欄位了。
+</div>
+
+<p>把 NS 改成:</p>
+
+<pre><code>原本:admns1.hinet.net + admns2.hinet.net
+改成:amber.ns.cloudflare.com + osmar.ns.cloudflare.com</code></pre>
+
+<p>存檔後,回到 Cloudflare Overview 頁,會看到「Waiting for your registrar to propagate your new nameservers」。</p>
+
+<h2>Step 3 — 等 Cloudflare 驗證 NS</h2>
+
+<p>這一步只能等。Cloudflare 會持續檢查,有時候 1 小時,有時候要 24 小時。</p>
+
+<div class="warn-box">
+  <strong>⚠️ pending 不要緊張</strong>:過程中 Cloudflare 會給一堆警告:
+  <ul>
+    <li>「Visitors cannot reach www.xxx」 — 因為你還沒加 DNS records</li>
+    <li>「Email cannot reach ...」 — 因為你沒設 MX</li>
+    <li>「is pending until you complete ...」 — NS 還沒生效</li>
+  </ul>
+  <p>這些都是「提示」,不是「錯誤」,等 NS 生效就會消失。</p>
+</div>
+
+<p>驗證 NS 是否生效:</p>
+
+<pre><code>nslookup -type=ns sunnyq.idv.tw 8.8.8.8</code></pre>
+
+<p>應該看到 Cloudflare 的 NS,不是 Hinet 的。</p>
+
+<h2>Step 4 — 裝 cloudflared</h2>
+
+<p>cloudflared 是 Cloudflare 的官方 tunnel daemon,Windows / macOS / Linux 都有。</p>
+
+<p>Windows 用 winget 裝最快:</p>
+
+<pre><code>winget install Cloudflare.cloudflared</code></pre>
+
+<p>裝完關掉再開新 PowerShell,驗證:</p>
+
+<pre><code>cloudflared --version</code></pre>
+
+<p>應該印出版本號。</p>
+
+<h2>Step 5 — 登入 Cloudflare</h2>
+
+<pre><code>cloudflared tunnel login</code></pre>
+
+<p>會自動開瀏覽器,選你的 Cloudflare account → 授權 → PowerShell 印 <code>You have successfully logged in.</code></p>
+
+<p>產出 <code>~/.cloudflared/cert.pem</code>。</p>
+
+<div class="warn-box">
+  <strong>⚠️ 如果已經有 cert.pem</strong>:會跳錯「existing certificate, login would overwrite」。這代表你之前跑過 login,直接用現有的就行,不用刪。
+</div>
+
+<h2>Step 6 — 建 tunnel</h2>
+
+<pre><code>cloudflared tunnel create calc-tunnel</code></pre>
+
+<p>輸出會給你:</p>
+
+<pre><code>Tunnel credentials written to C:\Users\joe\.cloudflared\&lt;UUID&gt;.json
+Created tunnel calc-tunnel with id &lt;UUID&gt;</code></pre>
+
+<p><strong>把 UUID 記下來</strong>,下一步會用到。</p>
+
+<h2>Step 7 — 把 DNS 接到 tunnel</h2>
+
+<pre><code>cloudflared tunnel route dns calc-tunnel calc.sunnyq.idv.tw</code></pre>
+
+<p>會在 Cloudflare DNS 自動加一筆 CNAME:</p>
+
+<pre><code>calc.sunnyq.idv.tw → &lt;UUID&gt;.cfargotunnel.com</code></pre>
+
+<div class="err-box">
+  <strong>❌ 撞牆點 2:訊息裡奇怪的「.sunnq.idv.tw」</strong>
+  <p>輸出可能會寫:</p>
+  <pre><code>Added CNAME calc.sunnyq.idv.tw.sunnq.idv.tw</code></pre>
+  <p>看起來很怪,但 Cloudflare 內部其實存的是正確的 <code>calc.sunnyq.idv.tw</code>。去 Dashboard 看實際 record 就會發現沒問題。</p>
+</div>
+
+<h2>Step 8 — 寫 config.yml</h2>
+
+<p>位置:<code>%USERPROFILE%\.cloudflared\config.yml</code></p>
+
+<pre><code>tunnel: 8db00f0d-dd1b-4c80-885b-a8099b5c68a6
+credentials-file: C:\Users\joe\.cloudflared\8db00f0d-dd1b-4c80-885b-a8099b5c68a6.json
+
+ingress:
+  - hostname: calc.sunnyq.idv.tw
+    service: http://localhost:8080
+  - service: http_status:404</code></pre>
+
+<p>把 <code>&lt;UUID&gt;</code> 換成真的 UUID。</p>
+
+<div class="err-box">
+  <strong>❌ 撞牆點 3:舊 config 引用不存在的 UUID</strong>
+  <p>如果你之前有建過 tunnel,可能 <code>config.yml</code> 已經存在,內容是別的 UUID + 不存在的 <code>.json</code>。會跑不起來。</p>
+  <p>確認 UUID 跟 <code>.json</code> 檔名對得起來:</p>
+  <pre><code>ls ~/.cloudflared/</code></pre>
+</div>
+
+<h2>Step 9 — 跑起來</h2>
+
+<p>需要兩個 process:</p>
+
+<p><strong>Process 1 — Flask app(本機服務)</strong></p>
+<pre><code>cd "C:\Users\joe\Documents\GitHub\calc-password-tool\server"
+python app.py</code></pre>
+
+<p><strong>Process 2 — cloudflared tunnel</strong></p>
+<pre><code>cloudflared tunnel run calc-tunnel</code></pre>
+
+<p>成功會印:</p>
+
+<pre><code>INF Connection established connIndex=0
+INF Connection established connIndex=1
+...</code></pre>
+
+<h2>Step 10 — 驗證</h2>
+
+<p>瀏覽器打開 <a href="https://calc.sunnyq.idv.tw" target="_blank">https://calc.sunnyq.idv.tw</a>。</p>
+
+<p>如果通了 — 恭喜 🎉</p>
+
+<div class="warn-box">
+  <strong>⚠️ 第一次可能看到的錯誤</strong>
+  <table>
+    <tr><th>錯誤</th><th>原因</th></tr>
+    <tr><td>1033</td><td>DNS CNAME 沒對應到對的 tunnel UUID</td></tr>
+    <tr><td>530</td><td>tunnel 沒在跑,或 DNS 還沒生效</td></tr>
+    <tr><td>502 / 504</td><td>tunnel 跑著但 Flask 沒跑</td></tr>
+    <tr><td>一直轉圈</td><td>SSL 憑證還在頒發(等 1-2 分鐘)</td></tr>
+  </table>
+</div>
+
+<h2>常見問題排除</h2>
+
+<h3>Q: Cloudflare Tunnel UUID 怎麼查?</h3>
+
+<pre><code>cloudflared tunnel info calc-tunnel</code></pre>
+
+<p>輸出第一行 <code>ID:</code> 後面就是 UUID。</p>
+
+<h3>Q: 怎麼確認 tunnel 在不在?</h3>
+
+<pre><code>cloudflared tunnel info calc-tunnel
+# 看有沒有 CONNECTOR ID 那行,有 = 在線
+# 看 EDGE 欄位有沒有台北/高雄 edge 名字(2xtpe01 之類)</code></pre>
+
+<p>如果 <code>does not have any active connection</code> 表示 tunnel 沒跑,要 <code>tunnel run</code>。</p>
+
+<h3>Q: Tunnel UUID 對了但還是不通?</h3>
+
+<ol>
+  <li>去 Cloudflare Dashboard → DNS → Records → 看 <code>calc</code> 那筆的 Target</li>
+  <li>確認 Target 是 <code>&lt;UUID&gt;.cfargotunnel.com</code>,不是字面 <code>&lt;uuid&gt;.cfargotunnel.com</code>(沒換掉)</li>
+  <li>確認 Proxy 是橘色「Proxied」</li>
+</ol>
+
+<h3>Q: NS 已改但 Cloudflare 還是 pending?</h3>
+
+<ol>
+  <li>用 <code>nslookup -type=ns &lt;your-domain&gt; 8.8.8.8</code> 確認 NS 真的指向 Cloudflare</li>
+  <li>如果還是 Hinet 的 NS,代表註冊商那邊沒真的存到</li>
+  <li>確認 Hinet 後台的「DNS 主機」欄位真的顯示 Cloudflare 主機名</li>
+</ol>
+
+<h3>Q: cert.pem 是什麼?可以刪嗎?</h3>
+
+<p><code>cert.pem</code> 是 <code>cloudflared tunnel login</code> 產的帳號憑證。<strong>不要刪</strong>,刪了 tunnel 就連不到 Cloudflare。</p>
+
+<h2>進階:跑成 Windows Service(開機自動起)</h2>
+
+<p>不想每次手動開 PowerShell,用 NSSM 把 tunnel 跟 Flask 註冊成 Windows service:</p>
+
+<pre><code># 下載 NSSM: https://nssm.cc/download
+
+# Flask
+nssm install CalcPasswordFlask "C:\Python311\python.exe" "C:\Users\joe\Documents\GitHub\calc-password-tool\server\app.py"
+nssm set CalcPasswordFlask AppDirectory "C:\Users\joe\Documents\GitHub\calc-password-tool\server"
+nssm start CalcPasswordFlask
+
+# Tunnel
+nssm install CalcTunnel "C:\Users\joe\cloudflared.exe" "tunnel run calc-tunnel"
+nssm start CalcTunnel</code></pre>
+
+<p>之後重開機,兩個 service 自動起,domain 一直在線。</p>
+
+<h2>Quick Tunnel(免 domain,隨機網址)</h2>
+
+<p>如果只是想趕快 demo、不想花錢買 domain,Cloudflare 有「quick tunnel」模式:</p>
+
+<pre><code>cloudflared tunnel --url http://localhost:8080</code></pre>
+
+<p>輸出給你一個 <code>https://random-words-1234.trycloudflare.com</code> 網址,<strong>馬上可用</strong>,不用 Cloudflare 帳號、不用網域、不用任何設定。</p>
+
+<div class="warn-box">
+  <strong>⚠️ Quick tunnel 的網址每次啟動會變</strong>。要固定就要買 domain + named tunnel。
+</div>
+
+<h2>整體架構圖</h2>
+
+<pre><code>[瀏覽器]
+   ↓ https://calc.sunnyq.idv.tw
+[Cloudflare Edge Network] ← CDN + WAF + SSL + DNS
+   ↓ (tunnel 加密連線,主動外連)
+[cloudflared] ← 你機器上的 daemon
+   ↓ http://localhost:8080
+[Flask app] ← 你的服務</code></pre>
+
+<p>重點:</p>
+<ul>
+  <li><strong>瀏覽器 → Cloudflare</strong>:走公開 HTTPS,Cloudflare 處理 SSL</li>
+  <li><strong>Cloudflare → cloudflared</strong>:Cloudflare 主動連到你機器的 cloudflared(出站),不是入站</li>
+  <li><strong>cloudflared → Flask</strong>:localhost HTTP,不對外</li>
+  <li>你家的防火牆<strong>不用開任何 port</strong>,cloudflared 自動 outbound 連到 Cloudflare</li>
+</ul>
+
+<h2>踩坑時序總結</h2>
+
+<table>
+  <tr><th>時間</th><th>問題</th><th>解法</th></tr>
+  <tr><td>10:00</td><td>懷疑 .idv.tw 能不能用</td><td>實測可以,2024 後支援</td></tr>
+  <tr><td>10:15</td><td>Cloudflare add-site 一直 pending</td><td>打成 sunnq(6字母,沒註冊),改成 sunnyq</td></tr>
+  <tr><td>10:30</td><td>Hinet NS 編輯介面藏很深</td><td>member.hinet.net → 網域 → DNS 主機</td></tr>
+  <tr><td>11:00</td><td>cert.pem 已存在不能 login</td><td>直接用現有的</td></tr>
+  <tr><td>11:15</td><td>config.yml 引用不存在的 UUID</td><td>改用 calc-tunnel 真實的 UUID</td></tr>
+  <tr><td>11:30</td><td>DNS record Target 寫成 &lt;uuid&gt; 字面</td><td>換成真實 UUID 8db00f0d-...</td></tr>
+  <tr><td>11:45</td><td>1033 錯誤</td><td>DNS Target 跟 tunnel UUID 對上就 OK</td></tr>
+  <tr><td>12:00</td><td>外網不通</td><td>瀏覽器 cache,Ctrl+F5 重整</td></tr>
+</table>
+
+<p>整體大概 30 分鐘可上線(其中 1-24 小時是 NS 驗證時間,只能等)。</p>
+
+<h2>參考連結</h2>
+<ul>
+  <li><a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/" target="_blank">Cloudflare Tunnel 官方文件</a></li>
+  <li><a href="https://github.com/cloudflare/cloudflared" target="_blank">cloudflared GitHub</a></li>
+  <li><a href="https://www.whois.com/whois/" target="_blank">WHOIS 查詢</a>(確認 domain 是不是已註冊)</li>
+  <li><a href="https://nssm.cc/" target="_blank">NSSM</a>(把 tunnel 包成 Windows service)</li>
+</ul>
+
+</div>
+
+<div class="footer">
+  <p>本頁放在 GitHub Pages · 路徑 <code>/tools/cloudflare-tunnel-setup.html</code> · 2026-09-17</p>
+</div>
+
+</body>
+</html>
