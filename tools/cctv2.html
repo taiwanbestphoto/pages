@@ -55,6 +55,34 @@
       .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
     }
 
+    /* 南北向左右分欄 */
+    .pair {
+      max-width: 1400px; margin: 0 auto;
+      padding: 12px 16px 40px;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    @media (min-width: 720px) {
+      .pair { flex-direction: row; align-items: flex-start; }
+      .col { flex: 1; min-width: 0; }
+      .col + .col { border-left: 1px solid var(--bd); padding-left: 18px; }
+    }
+    .col-title {
+      font-size: 12px; font-weight: 600;
+      color: var(--muted); letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 4px 2px 8px;
+    }
+    .col-grid {
+      display: grid; gap: 12px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 720px) {
+      .col-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    }
+    @media (min-width: 1100px) {
+      .col-grid { grid-template-columns: 1fr; gap: 12px; }
+    }
+
     .cam {
       background: var(--card); border: 1px solid var(--bd);
       border-radius: 10px; overflow: hidden;
@@ -141,7 +169,7 @@
     </button>
   </header>
 
-  <div class="grid" id="grid"></div>
+  <div class="pair" id="pair"></div>
 
   <footer>
     影像來源為各政府機關公開資料 ·
@@ -154,9 +182,91 @@
     // ============================================================
     //  CAMERAS — 新增攝影機只需複製一筆，修改對應欄位即可
     // ============================================================
-    // 國道1號 楊梅→桃園段,南向 51K–69K,主線 9 支 + 中壢服務區 1 支
+    // 國道1號 楊梅↔桃園段 49K–75K,左右欄各 7 隻(北向 + 南向)
         // 高公局鏡頭為 MJPEG stream,使用 image type(<img> + 8 秒 cache buster 刷新)
         const CAMERAS = [
+          // ── 左欄:北向(楊梅→桃園北行,里程由大到小) ──
+          {
+            id:   "CCTV-N1-N-74.500-M",
+            name: "國道1號 北向 74K+500",
+            loc:  "湖口交流道→高架楊梅端",
+            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17450",
+            type: "image",
+            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+            from: "高公局",
+            col:  "N",
+          },
+          {
+            id:   "CCTV-N1-N-71.900-M",
+            name: "國道1號 北向 71K+900",
+            loc:  "湖口交流道→高架楊梅端",
+            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17190",
+            type: "image",
+            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+            from: "高公局",
+            col:  "N",
+          },
+          {
+            id:   "CCTV-N1-N-65.000-I-平鎮系統",
+            name: "國道1號 北向 65K 平鎮系統",
+            loc:  "幼獅交流道→平鎮系統交流道",
+            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=16500",
+            type: "image",
+            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+            from: "高公局",
+            col:  "N",
+          },
+          {
+            id:   "CCTV-N1-N-64.600-M",
+            name: "國道1號 北向 64K+600",
+            loc:  "平鎮系統交流道→中壢交流道",
+            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=16460",
+            type: "image",
+            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+            from: "高公局",
+            col:  "N",
+          },
+          {
+            id:   "CCTV-N1-N-55-R-中壢服務區-涵洞口",
+            name: "國道1號 北向 55K 中壢服務區",
+            loc:  "中壢服務區→機場系統交流道",
+            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=15502",
+            type: "image",
+            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+            from: "高公局",
+            col:  "N",
+          },
+          {
+            id:   "CCTV-N1-N-49.000-M",
+            name: "國道1號 北向 49K+000",
+            loc:  "桃園交流道→林口交流道",
+            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=14900",
+            type: "image",
+            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+            from: "高公局",
+            col:  "N",
+          },
+          {
+            id:   "CCTV-N1-N-50.185-M",
+            name: "國道1號 北向 50K+185",
+            loc:  "機場系統交流道→桃園交流道",
+            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=15010",
+            type: "image",
+            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+            from: "高公局",
+            col:  "N",
+          },
+          // ── 右欄:南向(楊梅→桃園南行,里程由大到小) ──
+          {
+            id:   "CCTV-N1-S-72.675-M",
+            name: "國道1號 南向 72K+675",
+            loc:  "高架楊梅端→湖口交流道",
+            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17260",
+            type: "image",
+            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
+            from: "高公局",
+            col:  "S",
+          },
           {
             id:   "CCTV-N1-S-69.190-M",
             name: "國道1號 南向 69K+190",
@@ -165,15 +275,7 @@
             type: "image",
             url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
             from: "高公局",
-          },
-          {
-            id:   "CCTV-N1-S-67.395-M",
-            name: "國道1號 南向 67K+395",
-            loc:  "幼獅交流道→楊梅交流道",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=16731",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
+            col:  "S",
           },
           {
             id:   "CCTV-N1-S-65.920-M",
@@ -183,6 +285,7 @@
             type: "image",
             url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
             from: "高公局",
+            col:  "S",
           },
           {
             id:   "CCTV-N1-S-64.000-M",
@@ -192,15 +295,7 @@
             type: "image",
             url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
             from: "高公局",
-          },
-          {
-            id:   "CCTV-N1-S-62.205-M",
-            name: "國道1號 南向 62K+205",
-            loc:  "中壢轉接二→中壢交流道",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=16220",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
+            col:  "S",
           },
           {
             id:   "CCTV-N1-S-57.950-M",
@@ -210,15 +305,7 @@
             type: "image",
             url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
             from: "高公局",
-          },
-          {
-            id:   "CCTV-N1-S-55-R-中壢服務區-涵洞口",
-            name: "國道1號 南向 55K 中壢服務區",
-            loc:  "中壢服務區",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=15501",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
+            col:  "S",
           },
           {
             id:   "CCTV-N1-S-55.000-M",
@@ -228,15 +315,7 @@
             type: "image",
             url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
             from: "高公局",
-          },
-          {
-            id:   "CCTV-N1-S-52.800-M",
-            name: "國道1號 南向 52K+770",
-            loc:  "機場系統交流道→中壢服務區",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=15280",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
+            col:  "S",
           },
           {
             id:   "CCTV-N1-S-51.380-M",
@@ -246,6 +325,7 @@
             type: "image",
             url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
             from: "高公局",
+            col:  "S",
           },
           // 之後新增往下加 ...
         ];
@@ -255,10 +335,28 @@
       ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 
     // ===== render =====
-    const grid = document.getElementById("grid");
+    const pair = document.getElementById("pair");
     document.getElementById("count").textContent = CAMERAS.length;
 
-    CAMERAS.forEach(cam => {
+    // 建左右兩欄容器
+    function makeCol(title) {
+      const col = document.createElement("div");
+      col.className = "col";
+      const h = document.createElement("div");
+      h.className = "col-title";
+      h.textContent = title;
+      col.appendChild(h);
+      const g = document.createElement("div");
+      g.className = "col-grid";
+      col.appendChild(g);
+      return { col, grid: g };
+    }
+    const left  = makeCol("北向(楊梅→桃園)");
+    const right = makeCol("南向(楊梅→桃園)");
+    pair.appendChild(left.col);
+    pair.appendChild(right.col);
+
+    function buildCard(cam, container) {
       const div = document.createElement("div");
       div.className = "cam";
       div.innerHTML = `
@@ -274,7 +372,7 @@
           <span>${esc(cam.from)}</span>
           <a class="cam-link" href="${esc(cam.url)}" target="_blank" rel="noopener">tw.live ↗</a>
         </div>`;
-      grid.appendChild(div);
+      container.appendChild(div);
 
       const body = div.querySelector(".cam-body");
 
@@ -327,6 +425,10 @@
           body.querySelector(".placeholder").textContent = "瀏覽器不支援 HLS";
         }
       }
+    }
+
+    CAMERAS.forEach(cam => {
+      buildCard(cam, cam.col === "N" ? left.grid : right.grid);
     });
 
     // ===== 重整鈕 =====
