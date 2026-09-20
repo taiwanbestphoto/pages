@@ -23,12 +23,15 @@
 
     header {
       max-width: 1400px; margin: 0 auto;
-      padding: 28px 20px 0; text-align: center;
+      padding: 18px 20px 0;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px;
     }
-    h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; letter-spacing: -0.02em; }
-    .sub { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
-    .sub a { color: var(--accent2); text-decoration: none; }
-    .sub a:hover { text-decoration: underline; }
+    .back-link {
+      color: var(--muted); font-size: 12px;
+      text-decoration: none; padding: 3px 9px;
+    }
+    .back-link:hover { color: var(--accent2); text-decoration: underline; }
 
     .reload-btn {
       display: inline-flex; align-items: center; gap: 4px;
@@ -172,14 +175,11 @@
 </head>
 <body>
   <header>
-    <p class="sub">
-      共 <span id="count"></span> 攝影機 ·
-      <a href="../">← 返回 hub</a>
-    </p>
     <button class="reload-btn" id="reload" type="button" title="重新整理整頁">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.74 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
       重整
     </button>
+    <a href="../" class="back-link">← 返回 hub</a>
   </header>
 
   <div class="pair" id="pair"></div>
@@ -289,7 +289,6 @@
 
     // ===== render =====
     const pair = document.getElementById("pair");
-    document.getElementById("count").textContent = CAMERAS.length;
 
     // 建左右兩欄容器
     function makeCol(title) {
