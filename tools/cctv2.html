@@ -55,7 +55,7 @@
       .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
     }
 
-    /* 南北向左右分欄 */
+    /* 南北向左右分欄(2 欄 × 4 列 = 8 隻) */
     .pair {
       max-width: 1400px; margin: 0 auto;
       padding: 12px 16px 40px;
@@ -77,10 +77,11 @@
       grid-template-columns: 1fr;
     }
     @media (min-width: 720px) {
-      .col-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .col-grid { grid-template-columns: 1fr; gap: 14px; }
     }
+    /* 在更寬的螢幕:左欄 4 列單欄卡片,整體看起來兩欄四列 */
     @media (min-width: 1100px) {
-      .col-grid { grid-template-columns: 1fr; gap: 12px; }
+      .col-grid { grid-template-columns: 1fr; gap: 14px; }
     }
 
     .cam {
@@ -182,35 +183,15 @@
     // ============================================================
     //  CAMERAS — 新增攝影機只需複製一筆，修改對應欄位即可
     // ============================================================
-    // 國道1號 楊梅↔桃園段 49K–75K,左右欄各 7 隻(北向 + 南向)
+    // 國道1號 楊梅↔桃園段 49K–75K,左右欄各 4 隻(2 欄 × 4 列)
         // 高公局鏡頭為 MJPEG stream,使用 image type(<img> + 8 秒 cache buster 刷新)
         const CAMERAS = [
-          // ── 左欄:北向(楊梅→桃園北行,里程由大到小) ──
+          // ── 左欄:北上主線(楊梅→桃園北行,里程由大到小) ──
           {
             id:   "CCTV-N1-N-74.500-M",
             name: "國道1號 北向 74K+500",
             loc:  "湖口交流道→高架楊梅端",
             src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17450",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-            col:  "N",
-          },
-          {
-            id:   "CCTV-N1-N-71.900-M",
-            name: "國道1號 北向 71K+900",
-            loc:  "湖口交流道→高架楊梅端",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=17190",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-            col:  "N",
-          },
-          {
-            id:   "CCTV-N1-N-65.000-I-平鎮系統",
-            name: "國道1號 北向 65K 平鎮系統",
-            loc:  "幼獅交流道→平鎮系統交流道",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=16500",
             type: "image",
             url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
             from: "高公局",
@@ -227,10 +208,10 @@
             col:  "N",
           },
           {
-            id:   "CCTV-N1-N-55-R-中壢服務區-涵洞口",
-            name: "國道1號 北向 55K 中壢服務區",
-            loc:  "中壢服務區→機場系統交流道",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=15502",
+            id:   "CCTV-N1-N-56.980-M",
+            name: "國道1號 北向 56K+980",
+            loc:  "內壢交流道→中壢服務區",
+            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=15690",
             type: "image",
             url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
             from: "高公局",
@@ -246,17 +227,7 @@
             from: "高公局",
             col:  "N",
           },
-          {
-            id:   "CCTV-N1-N-50.185-M",
-            name: "國道1號 北向 50K+185",
-            loc:  "機場系統交流道→桃園交流道",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=15010",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-            col:  "N",
-          },
-          // ── 右欄:南向(楊梅→桃園南行,里程由大到小) ──
+          // ── 右欄:南下主線(楊梅→桃園南行,里程由大到小) ──
           {
             id:   "CCTV-N1-S-72.675-M",
             name: "國道1號 南向 72K+675",
@@ -268,40 +239,10 @@
             col:  "S",
           },
           {
-            id:   "CCTV-N1-S-69.190-M",
-            name: "國道1號 南向 69K+190",
-            loc:  "幼獅交流道→楊梅交流道",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=16910",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-            col:  "S",
-          },
-          {
-            id:   "CCTV-N1-S-65.920-M",
-            name: "國道1號 南向 65K+920",
-            loc:  "平鎮系統交流道→幼獅交流道",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=16590",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-            col:  "S",
-          },
-          {
             id:   "CCTV-N1-S-64.000-M",
             name: "國道1號 南向 64K+000",
             loc:  "中壢交流道→平鎮系統交流道",
             src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=16400",
-            type: "image",
-            url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
-            from: "高公局",
-            col:  "S",
-          },
-          {
-            id:   "CCTV-N1-S-57.950-M",
-            name: "國道1號 南向 57K+950",
-            loc:  "內壢交流道→中壢轉接一",
-            src:  "https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=15790",
             type: "image",
             url:  "https://www.freeway.gov.tw/RoadUserArea/CCTVLive",
             from: "高公局",
