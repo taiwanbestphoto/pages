@@ -21,10 +21,18 @@
       min-height: 100vh; -webkit-font-smoothing: antialiased;
     }
 
-    header {
+    .toolbar {
       max-width: 1400px; margin: 0 auto;
-      padding: 18px 20px 0;
-      text-align: center;
+      padding: 16px 16px 4px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .toolbar-line {
+      flex: 1; height: 1px;
+      background: var(--bd);
+    }
+    .toolbar .reload-btn {
+      margin: 0;
+      flex-shrink: 0;
     }
 
     .reload-btn {
@@ -168,12 +176,14 @@
   </style>
 </head>
 <body>
-  <header>
+  <div class="toolbar">
+    <div class="toolbar-line"></div>
     <button class="reload-btn" id="reload" type="button" title="重新整理整頁">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.74 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
       重整
     </button>
-  </header>
+    <div class="toolbar-line"></div>
+  </div>
 
   <div class="pair" id="pair"></div>
 
